@@ -43,32 +43,36 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
         $mform = $this->_form;
 
-        // Adding the "general" fieldset, where all the common settings are shown.
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
-        // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('name'), array('size' => '64'));
-
+        // Name.
+        $mform->addElement('text', 'name', get_string('name'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
             $mform->setType('name', PARAM_CLEANHTML);
         }
-
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
-        // Adding the standard "intro" and "introformat" fields.
-        if ($CFG->branch >= 29) {
-            $this->standard_intro_elements();
-        } else {
-            $this->add_intro_editor();
-        }
+        // Summary.
+        $this->standard_intro_elements();
 
         // Adding the rest of mod_scormremote settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
         $mform->addElement('header', 'packagehdr', get_string('packagehdr', 'scorm'));
         $mform->setExpanded('packagehdr', true);
+
+        // New local package upload.
+        $filemanageroptions = array();
+        $filemanageroptions['accepted_types'] = array('.zip', '.xml');
+        $filemanageroptions['maxbytes'] = 0;
+        $filemanageroptions['maxfiles'] = 1;
+        $filemanageroptions['subdirs'] = 0;
+
+        $mform->addElement('filemanager', 'packagefile', get_string('package', 'scorm'), null, $filemanageroptions);
+        $mform->addHelpButton('packagefile', 'package', 'scorm');
+        $mform->hideIf('packagefile', 'scormtype', 'noteq', SCORM_TYPE_LOCAL);
 
         // Add standard elements.
         $this->standard_coursemodule_elements();
