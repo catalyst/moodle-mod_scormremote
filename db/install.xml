@@ -19,7 +19,7 @@
         <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="mod_scormremote_clients" COMMENT="Storage for configured clients, clients at a system level.">
+    <TABLE NAME="scormremote_clients" COMMENT="Storage for configured clients, clients at a system level.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the client."/>

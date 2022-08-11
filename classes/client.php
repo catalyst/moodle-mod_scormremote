@@ -16,10 +16,6 @@
 
 namespace mod_scormremote;
 
-use stdClass;
-
-use function Aws\filter;
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -30,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client {
-    const TABLENAME = 'mod_scormremote_clients';
+    const TABLENAME = 'scormremote_clients';
 
     /** The ID of the client as set in the database. */
     public int $id;
