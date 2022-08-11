@@ -28,6 +28,9 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="unique_name_and_domain" UNIQUE="true" FIELDS="name, domain" COMMENT="There may only be unique combinations of name and domain."/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>
