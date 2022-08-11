@@ -55,7 +55,7 @@ class client {
      * Create a new client record in the database.
      *
      * @throws \moodle_exception When validation for name or domain fails.
-     * @return client|bool Return client, or false when given parameters are false.
+     * @return client
      */
     public static function create(string $clientname, string $clientdomain) {
         global $DB;
@@ -82,7 +82,8 @@ class client {
      * Find client records from database based upon clientid.
      *
      * @param int $clientid The database id from the client.
-     * @return client Returns client, or bool when no client was found.
+     * @throws \moodle_exception When client not found.
+     * @return client
      */
     public static function read(int $clientid) : client {
         global $DB;
@@ -105,7 +106,7 @@ class client {
      *
      * @throws \moodle_exception When validation for name or domain fails.
      * @throws \dml_exception A DML specific exception is thrown for any errors.
-     * @return boolean
+     * @return client
      */
     public function update() {
         global $DB;
@@ -118,7 +119,7 @@ class client {
         }
 
         $DB->update_record(self::TABLENAME, $this);
-        return true;
+        return $this;
     }
 
     /**
@@ -144,8 +145,6 @@ class client {
         global $DB;
         return $DB->delete_records(self::TABLENAME, ['id' => $clientid]);
     }
-
-
 
     /**
      * Validate a domain.
