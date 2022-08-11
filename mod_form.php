@@ -47,7 +47,7 @@ class mod_scormremote_mod_form extends moodleform_mod {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('scormremotename', 'mod_scormremote'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('name'), array('size' => '64'));
 
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
@@ -57,7 +57,6 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
         $mform->addRule('name', null, 'required', null, 'client');
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        $mform->addHelpButton('name', 'scormremotename', 'mod_scormremote');
 
         // Adding the standard "intro" and "introformat" fields.
         if ($CFG->branch >= 29) {
@@ -68,8 +67,8 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
         // Adding the rest of mod_scormremote settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
-        $mform->addElement('static', 'label1', 'scormremotesettings', get_string('scormremotesettings', 'mod_scormremote'));
-        $mform->addElement('header', 'scormremotefieldset', get_string('scormremotefieldset', 'mod_scormremote'));
+        $mform->addElement('header', 'packagehdr', get_string('packagehdr', 'scorm'));
+        $mform->setExpanded('packagehdr', true);
 
         // Add standard elements.
         $this->standard_coursemodule_elements();

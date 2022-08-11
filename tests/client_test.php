@@ -104,4 +104,48 @@ class mod_scormremote_client_testcase extends \advanced_testcase {
             ],
         ];
     }
+
+    /**
+     * Test function for testing the creation of a new client, it takes parameters passed from the specified data provider.
+     *
+     * @return void
+     */
+    public function test_crud_client_config() {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course();
+        $scormremote = $this->getDataGenerator()->create_module('scormremote', array('course' => $course->id));
+        $client = \mod_scormremote\client::create('ABC', 'http://example.com');
+        $maxseats = 10;
+
+        // Create.
+        $clientconfig = \mod_scormremote\client_config::create($client->id, $scormremote->id, $maxseats);
+        $this->assertEquals($client->id, $clientconfig->clientid);
+        $this->assertEquals($scormremote->id, $clientconfig->scormremoteid);
+
+        $configrecords = $DB->get_records(\mod_scormremote\client_config::TABLENAME);
+        $this->assertCount(1, $configrecords);
+        $key = array_key_first($configrecords);
+        $this->assertEquals($client->id, $configrecords[$key]->clientid);
+        $this->assertEquals($scormremote->id, $configrecords[$key]->scormremoteid);
+        $this->assertEquals($maxseats, $configrecords[$key]->maxseatcount);
+
+        // Read.
+        $configrecord = \mod_scormremote\client_config::read($key);
+        $this->assertEquals($client->id, $configrecord->clientid);
+        $this->assertEquals($scormremote->id, $configrecord->scormremoteid);
+        $this->assertEquals($maxseats, $configrecord->maxseatcount);
+
+        // Update through methods.
+        $configrecord->set_maxseatcount(99);
+        $configrecord = \mod_scormremote\client_config::read($configrecord->id);
+        $this->assertEquals(99, $configrecord->maxseatcount);
+
+        // Delete.
+        $this->assertTrue($configrecord->delete());
+        $configrecords = $DB->get_records(\mod_scormremote\client_config::TABLENAME);
+        $this->assertCount(0, $configrecords);
+    }
 }

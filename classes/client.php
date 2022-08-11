@@ -139,6 +139,15 @@ class client {
      */
     public static function delete_instance(int $clientid) {
         global $DB;
+
+        if (!isset($clientid) || $clientid <= 0 ) {
+            $a = new \stdClass();
+            $a->id = $clientid;
+            throw new \moodle_exception('error_clientnotfound', 'mod_scormremote', '', $a);
+        }
+
+        // Also delete all client configuration.
+        $DB->delete_records(client_config::TABLENAME, ['clientid' => $clientid]);
         return $DB->delete_records(self::TABLENAME, ['id' => $clientid]);
     }
 

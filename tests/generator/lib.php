@@ -15,23 +15,17 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin strings are defined here.
+ * Scormremote module data generator class.
  *
  * @package     mod_scormremote
- * @category    string
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class mod_scormremote_generator extends testing_module_generator {
 
-defined('MOODLE_INTERNAL') || die();
-
-$string['pluginname']       = 'SCORM Remote';
-$string['modulename']       = 'SCORM Remote';
-$string['modulenameplural'] = 'SCORM Remote\'s';
-$string['pluginadministration'] = 'SCORM Remote module administration';
-
-$string['error_clientconfignan'] = 'The given value for maxseatcount is not a integer.';
-$string['error_clientconfignotfound'] = 'The given client config id was not found (id: {$a->id}).';
-$string['error_clientnotfound'] = 'The given client id was not found (id: {$a->id}).';
-$string['error_clientnamenotvalid'] = 'The given value for client name propery isn\'t valid (name: {$a->name})';
-$string['error_clientdomainnotvalid'] = 'The given value for client domain propery isn\'t valid (domain: {$a->domain})';
+    public function create_instance($record = null, array $options = null) {
+        global $CFG;
+        require_once($CFG->dirroot . '/lib/resourcelib.php');
+        return parent::create_instance($record, (array)$options);
+    }
+}
