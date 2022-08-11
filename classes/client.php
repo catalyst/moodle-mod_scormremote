@@ -16,6 +16,8 @@
 
 namespace mod_scormremote;
 
+use stdClass;
+
 use function Aws\filter;
 
 defined('MOODLE_INTERNAL') || die();
@@ -52,19 +54,26 @@ class client {
     /**
      * Create a new client record in the database.
      *
+     * @throws \moodle_exception When validation for name or domain fails.
      * @return client|bool Return client, or false when given parameters are false.
      */
-    public static function create(string $clientname, string $clientdomain) : client {
+    public static function create(string $clientname, string $clientdomain) {
         global $DB;
 
-        if (!self::validate_name($clientname) || !self::validate_domain($clientdomain)) {
-            return false;
+        if (!self::validate_name($clientname)) {
+            $a = new \stdClass();
+            $a->name = $clientname;
+            throw new \moodle_exception('error_clientnamenotvalid', 'mod_scormremote', '', $a);
+        }
+
+        if (!self::validate_domain($clientdomain)) {
+            $a = new \stdClass();
+            $a->domain = $clientdomain;
+            throw new \moodle_exception('error_clientdomainnotvalid', 'mod_scormremote', '', $a);
         }
 
         $client = new self($clientname, $clientdomain);
-        $DB->insert_record($client->tablename, $client);
-        $client->id = $DB->insert_record('user_info_category', $data, true);
-
+        $client->id = $DB->insert_record(self::TABLENAME, $client, true);
 
         return $client;
     }
@@ -73,23 +82,70 @@ class client {
      * Find client records from database based upon clientid.
      *
      * @param int $clientid The database id from the client.
+     * @return client Returns client, or bool when no client was found.
      */
-    public static function read(int $clientid) {
+    public static function read(int $clientid) : client {
         global $DB;
 
         $record = $DB->get_record(self::TABLENAME, array('id' => $clientid));
         if (!$record) {
-            new \moodle_exception('error_clientnotfound', 'mod_scormremote');
+            $a = new \stdClass();
+            $a->id = $clientid;
+            throw new \moodle_exception('error_clientnotfound', 'mod_scormremote', '', $a);
         }
 
+        $client = new self($record->name, $record->domain);
+        $client->id = $record->id;
+
+        return $client;
     }
 
     /**
      * Update the a existing record in the database.
+     *
+     * @throws \moodle_exception When validation for name or domain fails.
+     * @throws \dml_exception A DML specific exception is thrown for any errors.
+     * @return boolean
      */
     public function update() {
-        // Do something.
+        global $DB;
+
+        if (!self::validate_name($this->name)) {
+            throw new \moodle_exception('error_clientnamenotvalid', 'mod_scormremote', '', $this);
+        }
+        if (!self::validate_domain($this->domain)) {
+            throw new \moodle_exception('error_clientdomainnotvalid', 'mod_scormremote', '', $this);
+        }
+
+        $DB->update_record(self::TABLENAME, $this);
+        return true;
     }
+
+    /**
+     * Delete this client. use delete_instance() for a static delete.
+     *
+     * @throws \moodle_exception When validation for name or domain fails.
+     * @throws \dml_exception A DML specific exception is thrown for any errors.
+     * @return bool
+     */
+    public function delete() {
+        return self::delete_instance($this->id);
+    }
+
+    /**
+     * Delete a client by id.
+     *
+     * @param int $clientid The id you wish to delete.
+     * @throws \moodle_exception When validation for name or domain fails.
+     * @throws \dml_exception A DML specific exception is thrown for any errors.
+     * @return bool
+     */
+    public static function delete_instance(int $clientid) {
+        global $DB;
+        return $DB->delete_records(self::TABLENAME, ['id' => $clientid]);
+    }
+
+
 
     /**
      * Validate a domain.
@@ -101,7 +157,10 @@ class client {
      * @return boolean
      */
     public static function validate_domain(string $domain) : bool {
-        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN)) {
+        if (!filter_var($domain, FILTER_VALIDATE_DOMAIN, [FILTER_FLAG_HOSTNAME])) {
+            return false;
+        }
+        if (!filter_var($domain, FILTER_VALIDATE_URL)) {
             return false;
         }
         if (strlen($domain) > 255) {
@@ -134,11 +193,10 @@ class client {
         }
 
         // Must have no preceding or trailing spaces.
-        if (substr($name, 0, 1) || substr($name, -1) == ' ') {
+        if (substr($name, 0, 1) == ' ' || substr($name, -1) == ' ') {
             return false;
         }
 
         return true;
     }
-
 }

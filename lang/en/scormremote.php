@@ -31,3 +31,5 @@ $string['modulenameplural'] = 'SCORM Remote\'s';
 $string['pluginadministration'] = 'SCORM Remote module administration';
 
 $string['error_clientnotfound'] = 'The given client id was not found (id: {$a->id}).';
+$string['error_clientnamenotvalid'] = 'The given value for client name propery isn\'t valid (name: {$a->name}';
+$string['error_clientdomainnotvalid'] = 'The given value for client domain propery isn\'t valid (domain: {$a->domain}';
