@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Capability definitions for the scormremote module.
  *
  * @package     mod_scormremote
  * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
@@ -25,8 +25,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_scormremote';
-$plugin->release = '0.1.0';
-$plugin->version = 2022080905;
-$plugin->requires = 2020061500;
-$plugin->maturity = MATURITY_ALPHA;
+$capabilities = [
+
+    'mod/scormremote:addinstance' => [
+        'riskbitmask' => RISK_XSS,
+
+        'captype' => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
+        ],
+        'clonepermissionsfrom' => 'moodle/course:manageactivities'
+    ],
+];

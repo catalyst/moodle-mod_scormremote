@@ -18,6 +18,7 @@
  * Display information about all the mod_scormremote modules in the requested course.
  *
  * @package     mod_scormremote
+ * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

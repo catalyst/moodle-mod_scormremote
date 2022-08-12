@@ -18,6 +18,7 @@
  * The main mod_scormremote configuration form.
  *
  * @package     mod_scormremote
+ * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,6 +31,7 @@ require_once($CFG->dirroot.'/course/moodleform_mod.php');
  * Module instance settings form.
  *
  * @package     mod_scormremote
+ * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -72,12 +74,91 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
         $mform->addElement('filemanager', 'packagefile', get_string('package', 'scorm'), null, $filemanageroptions);
         $mform->addHelpButton('packagefile', 'package', 'scorm');
-        $mform->hideIf('packagefile', 'scormtype', 'noteq', SCORM_TYPE_LOCAL);
 
         // Add standard elements.
         $this->standard_coursemodule_elements();
 
         // Add standard buttons.
         $this->add_action_buttons();
+    }
+
+    public function data_preprocessing(&$defaultvalues) {
+        global $COURSE;
+
+        if (isset($defaultvalues['popup']) && ($defaultvalues['popup'] == 1) && isset($defaultvalues['options'])) {
+            if (!empty($defaultvalues['options'])) {
+                $options = explode(',', $defaultvalues['options']);
+                foreach ($options as $option) {
+                    list($element, $value) = explode('=', $option);
+                    $element = trim($element);
+                    $defaultvalues[$element] = trim($value);
+                }
+            }
+        }
+
+        $scorms = get_all_instances_in_course('scormremote', $COURSE);
+        $coursescorm = current($scorms);
+
+        $draftitemid = file_get_submitted_draft_itemid('packagefile');
+        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_scormremote', 'package', 0,
+            array('subdirs' => 0, 'maxfiles' => 1));
+        $defaultvalues['packagefile'] = $draftitemid;
+
+        if (($COURSE->format == 'singleactivity') && ((count($scorms) == 0) || ($defaultvalues['instance'] == $coursescorm->id))) {
+            $defaultvalues['redirect'] = 'yes';
+            $defaultvalues['redirecturl'] = '../course/view.php?id='.$defaultvalues['course'];
+        } else {
+            $defaultvalues['redirect'] = 'no';
+            $defaultvalues['redirecturl'] = '../mod/scormremote/view.php?id='.$defaultvalues['coursemodule'];
+        }
+        if (isset($defaultvalues['instance'])) {
+            $defaultvalues['datadir'] = $defaultvalues['instance'];
+        }
+    }
+
+    public function validation($data, $files) {
+        global $CFG, $USER;
+        require_once($CFG->dirroot.'/mod/scorm/locallib.php');
+
+        $errors = parent::validation($data, $files);
+
+        if (empty($data['packagefile'])) {
+            $errors['packagefile'] = get_string('required');
+
+        } else {
+            $draftitemid = file_get_submitted_draft_itemid('packagefile');
+
+            file_prepare_draft_area($draftitemid, $this->context->id, 'mod_scormremote', 'packagefilecheck', null,
+                array('subdirs' => 0, 'maxfiles' => 1));
+
+            // Get file from users draft area.
+            $usercontext = context_user::instance($USER->id);
+            $fs = get_file_storage();
+            $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id', false);
+
+            if (count($files) < 1) {
+                $errors['packagefile'] = get_string('required');
+                return $errors;
+            }
+            $file = reset($files);
+
+            if (strtolower($file->get_filename()) == 'imsmanifest.xml') {
+                if (!$file->is_external_file()) {
+                    $errors['packagefile'] = get_string('aliasonly', 'mod_scorm');
+                } else {
+                    $repository = repository::get_repository_by_id($file->get_repository_id(), context_system::instance());
+                    if (!$repository->supports_relative_file()) {
+                        $errors['packagefile'] = get_string('repositorynotsupported', 'mod_scorm');
+                    }
+                }
+            } else if (strtolower(substr($file->get_filename(), -3)) == 'xml') {
+                $errors['packagefile'] = get_string('invalidmanifestname', 'mod_scorm');
+            } else {
+                // Validate this SCORM package.
+                $errors = array_merge($errors, scorm_validate_package($file));
+            }
+        }
+
+        return $errors;
     }
 }

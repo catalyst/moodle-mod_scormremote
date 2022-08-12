@@ -24,6 +24,7 @@ defined('MOODLE_INTERNAL') || die();
  * Class for scormremote client configurations. This holds the connection between client and course modules. Each configuration
  *
  * @package     mod_scormremote
+ * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

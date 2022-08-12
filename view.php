@@ -18,6 +18,7 @@
  * Prints an instance of mod_scormremote.
  *
  * @package     mod_scormremote
+ * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
