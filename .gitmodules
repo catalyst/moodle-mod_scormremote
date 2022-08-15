@@ -1,0 +1,4 @@
+[submodule "scorm-again"]
+	path = scorm-again
+	url = git@github.com:jcputney/scorm-again.git
+	branch = master
