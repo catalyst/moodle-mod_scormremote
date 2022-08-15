@@ -145,3 +145,79 @@ function scormremote_delete_instance($id) {
 
     return true;
 }
+
+
+/**
+ * Serves scorm content, introduction images and packages. Implements needed access control ;-)
+ *
+ * @package  mod_scormremote
+ * @category files
+ * @param stdClass $course course object
+ * @param stdClass $cm course module object
+ * @param stdClass $context context object
+ * @param string $filearea file area
+ * @param array $args extra arguments
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if file not found, does not return if found - just send the file
+ */
+function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    global $CFG, $DB;
+
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }
+
+    // require_login($course, true, $cm);
+
+    $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
+    $lifetime = null;
+
+    if ($filearea === 'content') {
+        $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
+        $relativepath = implode('/', $args);
+        $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
+        $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
+
+    } else if ($filearea === 'package') {
+        // Check if the global setting for disabling package downloads is enabled.
+        if (!$canmanageactivity) {
+            return false;
+        }
+        $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
+        $relativepath = implode('/', $args);
+        $fullpath = "/$context->id/mod_scormremote/package/0/$relativepath";
+        $lifetime = 0; // No caching here.
+
+    } else if ($filearea === 'imsmanifest') { // This isn't a real filearea, it's a url parameter for this type of package.
+        $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
+        $relativepath = implode('/', $args);
+
+        // Get imsmanifest file.
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($context->id, 'mod_scormremote', 'package', 0, '', false);
+        $file = reset($files);
+
+        // Check that the package file is an imsmanifest.xml file - if not then this method is not allowed.
+        $packagefilename = $file->get_filename();
+        if (strtolower($packagefilename) !== 'imsmanifest.xml') {
+            return false;
+        }
+
+        $file->send_relative_file($relativepath);
+    } else {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        if ($filearea === 'content') { // Return file not found straight away to improve performance.
+            send_header_404();
+            die;
+        }
+        return false;
+    }
+
+    // Finally send the file.
+    send_stored_file($file, $lifetime, 0, false, $options);
+}
