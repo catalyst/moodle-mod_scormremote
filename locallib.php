@@ -23,75 +23,133 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- /**
- * Extracts scrom package, sets up all variables.
- * Called whenever scorm changes
+/**
+ * This method stores the uploaded .zip or .xml SCORM package retrieved from the mod form.
  *
- * @param object $scormremote instance - fields are updated and changes saved into database
- * @param bool $full force full update if true
+ * @param object $scormremote instance - ields are updated and changes saved into database
  * @return void
  */
-function scormremote_parse($scormremote, $full) {
+function scormremote_store(&$scormremote) {
     global $DB;
-
-    if (!isset($scormremote->cmid)) {
-        $cm = get_coursemodule_from_instance('scormremote', $scormremote->id);
-        $scormremote->cmid = $cm->id;
+    if (!isset($scormremote->packagefile) || empty($scormremote->packagefile)) {
+        // Nothing to do.
+        return;
     }
 
-    $context = context_module::instance($scormremote->cmid);
-    if (!isset($scormremote->sha1hash)) {
-        $scormremote->sha1hash = null;
+    if (!isset($scormremote->id)) {
+        // Must have this for updating.
+        $scormremote->id = $scormremote->instance;
     }
-    $newhash = $scormremote->sha1hash;
 
     $fs = get_file_storage();
-    $packagefile = false;
+    $context = \context_module::instance($scormremote->coursemodule);
+    $component = 'mod_scormremote';
+    $filearea = 'package';
+
+
+    // Remove any old SCORM packages for this cm instance.
+    $fs->delete_area_files($context->id, $component, $filearea);
+
+    // Save from draft to real file.
+    $options = [
+        'subdirs' => 0,
+        'maxfiles' => 1
+    ];
+    file_save_draft_area_files($scormremote->packagefile, $context->id, $component, $filearea, 0, $options);
+
+    // Get the just saved files.
+    $allfiles = $fs->get_area_files($context->id, $component, $filearea); // Should be one file.
+    $file = reset($allfiles);
+
+    // Save the filename and hash to the cm instance.
+    $scormremote->reference = $file->get_filename();
+
+    $DB->update_record('scormremote', $scormremote);
+}
+
+
+ /**
+ * Extracts scrom package, sets up all variables.
+ * Called whenever scorm package changes.
+ *
+ * @param object $scormremote instance - fields are updated and changes saved into database
+ * @return void
+ */
+function scormremote_parse(&$scormremote) {
+    global $DB;
+
+    $fs = get_file_storage();
+    $context = context_module::instance($scormremote->coursemodule);
+    $component = 'mod_scormremote';
+    $filearea = 'content';
+    $newhash = null;
     $packagefileimsmanifest = false;
 
-    if ($packagefile = $fs->get_file($context->id, 'mod_scormremote', 'package', 0, '/', $scormremote->reference)) {
-        if ($packagefile->is_external_file()) { // Get zip file so we can check it is correct.
-            $packagefile->import_external_file_contents();
-        }
-        $newhash = $packagefile->get_contenthash();
-        if (strtolower($packagefile->get_filename()) == 'imsmanifest.xml') {
-            $packagefileimsmanifest = true;
-        }
+    $packagefile = $fs->get_file($context->id, $component, 'package', 0, '/', $scormremote->reference);
+
+    if (!$packagefile === false) {
+        // Can't do anything here.
+        return;
     }
 
-    if ($packagefile) {
-        if (!$packagefileimsmanifest) {
-            // Delete old files.
-            $fs->delete_area_files($context->id, 'mod_scormremote', 'content');
+    // Get zip file so we can check it is correct.
+    if ($packagefile->is_external_file()) {
+        $packagefile->import_external_file_contents();
+    }
+    if (strtolower($packagefile->get_filename()) == 'imsmanifest.xml') {
+        $packagefileimsmanifest = true;
+    }
+    $newhash = $packagefile->get_contenthash();
 
-            // Now extract files.
-            $packer = get_file_packer('application/zip');
-            $packagefile->extract_to_storage($packer, $context->id, 'mod_scormremote', 'content', 0, '/');
+    if ($newhash == $scormremote->sha1hash) {
+        // Not gonna do the same thing again.
+        return;
+    }
 
-            $fileinfo = [
-                'component' => 'mod_scormremote',
-                'filearea'  => 'content',
-                'itemid'    => 0,
-                'contextid' => $context->id,
-                'filepath'  => '/',
-            ];
+    // Delete old files.
+    $fs->delete_area_files($context->id, $component, $filearea);
 
-            // Add javascript to all .html at the root level.
-            $filerecords = $DB->get_records('files', $fileinfo, 'filename');
-            foreach($filerecords as $filerecord) {
-                if (pathinfo($filerecord->filename, PATHINFO_EXTENSION) != 'html') {
-                    continue;
-                }
+    if (!$packagefileimsmanifest) {
+        // Extract zip.
+        $packer = get_file_packer('application/zip');
+        $packagefile->extract_to_storage($packer, $context->id, $component, $filearea, 0, '/');
 
-                $fileinfo['filename'] = $filerecord->filename;
+        $fileinfo = [
+            'component' => $component,
+            'filearea'  => $filearea,
+            'itemid'    => 0,
+            'contextid' => $context->id,
+            'filepath'  => '/',
+        ];
 
-                $file = $fs->get_file($fileinfo['contextid'], $fileinfo['component'], $fileinfo['filearea'],
-                      $fileinfo['itemid'], $fileinfo['filepath'], $fileinfo['filename']);
+        // Get files at the root level.
+        $filerecords = $DB->get_records('files', $fileinfo, 'filename');
 
-                $newfilecontents = add_scormagain_html($file->get_content());
-                $file->delete();
-                $fs->create_file_from_string($fileinfo, $newfilecontents);
+        // We're going to add some javascript to these files.
+        foreach($filerecords as $filerecord) {
+            // Only to html files.
+            if (pathinfo($filerecord->filename, PATHINFO_EXTENSION) != 'html') {
+                continue;
             }
+
+            $fileinfo['filename'] = $filerecord->filename;
+
+            // Get the stored_file.
+            $file = $fs->get_file(
+                $fileinfo['contextid'],
+                $fileinfo['component'],
+                $fileinfo['filearea'],
+                $fileinfo['itemid'],
+                $fileinfo['filepath'],
+                $fileinfo['filename']
+            );
+
+            // This adds the javascript before closing body tag.
+            $newfilecontents = add_scormagain_html($file->get_content());
+
+            // Delete the old. Create the new.
+            $file->delete();
+            $fs->create_file_from_string($fileinfo, $newfilecontents);
         }
     }
 

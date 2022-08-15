@@ -56,34 +56,23 @@ function scormremote_add_instance($scormremote, $mform = null) {
 
     require_once($CFG->dirroot.'/mod/scormremote/locallib.php');
 
-    $cmid    = $scormremote->coursemodule;
-    $context = context_module::instance($cmid);
-
     $scormremote->timecreated = time();
     $scormremote->id = $DB->insert_record('scormremote', $scormremote);
 
     // Update course module record - from now on this instance properly exists and all function may be used.
-    $DB->set_field('course_modules', 'instance', $scormremote->id, array('id' => $cmid));
+    $DB->set_field('course_modules', 'instance', $scormremote->id, array('id' => $scormremote->coursemodule));
 
     // Store the package and verify.
     if (!empty($scormremote->packagefile)) {
-        $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'mod_scormremote', 'package');
-        file_save_draft_area_files($scormremote->packagefile, $context->id, 'mod_scormremote', 'package',
-            0, array('subdirs' => 0, 'maxfiles' => 1));
-        // Get filename of zip that was uploaded.
-        $files = $fs->get_area_files($context->id, 'mod_scormremote', 'package', 0, '', false);
-        $file = reset($files);
-        $filename = $file->get_filename();
-        if ($filename !== false) {
-            $scormremote->reference = $filename;
-        }
+        // It's a new instance so sha1 must be empty.
+        $scormremote->sha1hash = null;
+
+        // Store drafted file.
+        scormremote_store($scormremote);
+
+        // Parse the uploaded package.
+        scormremote_parse($scormremote);
     }
-
-    // Save reference.
-    $DB->update_record('scormremote', $scormremote);
-
-    scormremote_parse($scormremote, true);
 
     return $scormremote->id;
 }
@@ -94,37 +83,30 @@ function scormremote_add_instance($scormremote, $mform = null) {
  * Given an object containing all the necessary data (defined in mod_form.php),
  * this function will update an existing instance with new data.
  *
- * @param object $moduleinstance An object from the form in mod_form.php.
+ * @param object $scormremote An object from the form in mod_form.php.
  * @param mod_scormremote_mod_form $mform The form.
  * @return bool True if successful, false otherwise.
  */
 function scormremote_update_instance($scormremote, $mform = null) {
-    global $CFG, $DB;
+    global $DB, $CFG;
 
     require_once($CFG->dirroot.'/mod/scormremote/locallib.php');
 
-    $cmid            = $scormremote->coursemodule;
-    $scormremote->id = $scormremote->instance;
-
-    $context = context_module::instance($cmid);
+    // Store the package and verify.
     if (!empty($scormremote->packagefile)) {
-        $fs = get_file_storage();
-        $fs->delete_area_files($context->id, 'mod_scormremote', 'package');
-        file_save_draft_area_files($scormremote->packagefile, $context->id, 'mod_scormremote', 'package',
-            0, array('subdirs' => 0, 'maxfiles' => 1));
-        // Get filename of zip that was uploaded.
-        $files = $fs->get_area_files($context->id, 'mod_scormremote', 'package', 0, '', false);
-        $file = reset($files);
-        $filename = $file->get_filename();
-        if ($filename !== false) {
-            $scormremote->reference = $filename;
-        }
+        // This might be the same file.
+        $old = $DB->get_record('scormremote', ['id' => $scormremote->instance]);
+        $scormremote->sha1hash = $old->sha1hash;
+        unset($old);
+
+        // Store drafted file.
+        scormremote_store($scormremote);
+
+        // Parse the uploaded package.
+        scormremote_parse($scormremote);
     }
 
-    scormremote_parse($scormremote, true);
-
-    // Save reference.
-    return $DB->update_record('scormremote', $scormremote);
+    return true;
 }
 
 /**
