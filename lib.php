@@ -118,6 +118,15 @@ function scormremote_update_instance($scormremote, $mform = null) {
 function scormremote_delete_instance($id) {
     global $DB;
 
+    $cm = get_coursemodule_from_instance('scormremote', $id);
+    $context = \context_module::instance($cm->id);
+
+    // Delete all the files
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id, 'mod_scormremote', 'package');
+    $fs->delete_area_files($context->id, 'mod_scormremote', 'content');
+    unset($fs);
+
     $exists = $DB->get_record('scormremote', array('id' => $id));
     if (!$exists) {
         return false;
