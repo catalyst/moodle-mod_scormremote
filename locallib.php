@@ -58,7 +58,7 @@ function scormremote_store(&$scormremote) {
     file_save_draft_area_files($scormremote->packagefile, $context->id, $component, $filearea, 0, $options);
 
     // Get the just saved files.
-    $allfiles = $fs->get_area_files($context->id, $component, $filearea); // Should be one file.
+    $allfiles = $fs->get_area_files($context->id, $component, $filearea, 0, '', false); // Should be one file.
     $file = reset($allfiles);
 
     // Save the filename and hash to the cm instance.
@@ -66,7 +66,6 @@ function scormremote_store(&$scormremote) {
 
     $DB->update_record('scormremote', $scormremote);
 }
-
 
  /**
  * Extracts scrom package, sets up all variables.
@@ -87,7 +86,7 @@ function scormremote_parse(&$scormremote) {
 
     $packagefile = $fs->get_file($context->id, $component, 'package', 0, '/', $scormremote->reference);
 
-    if (!$packagefile === false) {
+    if ($packagefile === false) {
         // Can't do anything here.
         return;
     }
@@ -156,7 +155,6 @@ function scormremote_parse(&$scormremote) {
     $scormremote->sha1hash = $newhash;
     $DB->update_record('scormremote', $scormremote);
 }
-
 
 /**
  * Adds required javascript to a HTML string.
