@@ -1,10 +1,17 @@
 <?xml version="1.0"?>
 <libraries>
     <library>
-        <location>scorm-again/</location>
+        <location>scorm-again</location>
         <name>SCORM Again</name>
         <version>1.7.1</version>
         <license>MIT</license>
+        <licenseversion></licenseversion>
+    </library>
+    <library>
+        <location>scol-r</location>
+        <name>scol-r</name>
+        <version>2.0.0</version>
+        <license>ISC</license>
         <licenseversion></licenseversion>
     </library>
 </libraries>
