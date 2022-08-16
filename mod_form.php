@@ -118,7 +118,6 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
     public function validation($data, $files) {
         global $CFG, $USER;
-        require_once($CFG->dirroot.'/mod/scorm/locallib.php');
 
         $errors = parent::validation($data, $files);
 

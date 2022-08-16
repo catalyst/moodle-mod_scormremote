@@ -54,8 +54,6 @@ function scormremote_supports($feature) {
 function scormremote_add_instance($scormremote, $mform = null) {
     global $CFG, $DB;
 
-    require_once($CFG->dirroot.'/mod/scormremote/locallib.php');
-
     $scormremote->timecreated = time();
     $scormremote->id = $DB->insert_record('scormremote', $scormremote);
 
@@ -68,10 +66,10 @@ function scormremote_add_instance($scormremote, $mform = null) {
         $scormremote->sha1hash = null;
 
         // Store drafted file.
-        scormremote_store($scormremote);
+        \mod_scormremote\packagefile::scormremote_store($scormremote);
 
         // Parse the uploaded package.
-        scormremote_parse($scormremote);
+        \mod_scormremote\packagefile::scormremote_parse($scormremote);
     }
 
     return $scormremote->id;
@@ -90,8 +88,6 @@ function scormremote_add_instance($scormremote, $mform = null) {
 function scormremote_update_instance($scormremote, $mform = null) {
     global $DB, $CFG;
 
-    require_once($CFG->dirroot.'/mod/scormremote/locallib.php');
-
     // Store the package and verify.
     if (!empty($scormremote->packagefile)) {
         // This might be the same file.
@@ -100,10 +96,10 @@ function scormremote_update_instance($scormremote, $mform = null) {
         unset($old);
 
         // Store drafted file.
-        scormremote_store($scormremote);
+        \mod_scormremote\packagefile::scormremote_store($scormremote);
 
         // Parse the uploaded package.
-        scormremote_parse($scormremote);
+        \mod_scormremote\packagefile::scormremote_parse($scormremote);
     }
 
     return true;

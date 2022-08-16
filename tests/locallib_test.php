@@ -18,35 +18,33 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot . '/mod/scormremote/locallib.php');
-
 /**
- * Tests against the locallib.
+ * Tests against the packagefile class.
  *
  * @package     mod_scormremote
  * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_scormremote_locallib_testcase extends \advanced_testcase {
+class mod_scormremote_packagefile_testcase extends \advanced_testcase {
     /**
      * Test the method which expands the html document with the required strings.
      */
     public function test_extend_html_document() {
         $html = "<html><body></body></html>";
-        $return = add_scormagain_html($html);
+        $return = \mod_scormremote\packagefile::add_scormagain_html($html);
         $this->assertNotEquals(false, $html);
         $this->assertNotEquals(null, $html);
         $this->assertNotEquals($html, $return);
 
         // Multiple closing body.
         $html = "<html><body></body></body></html>";
-        $return = add_scormagain_html($html);
+        $return = \mod_scormremote\packagefile::add_scormagain_html($html);
         $this->assertFalse($return);
 
         // No closing body.
         $html = "<html><body></html>";
-        $return = add_scormagain_html($html);
+        $return = \mod_scormremote\packagefile::add_scormagain_html($html);
         $this->assertFalse($return);
     }
 }
