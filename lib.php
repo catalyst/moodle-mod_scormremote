@@ -166,16 +166,15 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
 
-    } else if ($filearea === 'package') {
+    } else if ($filearea === 'package' || $filearea === \mod_scormremote\wrapper::FILEAREA) {
         // Check if the global setting for disabling package downloads is enabled.
         if (!$canmanageactivity) {
             return false;
         }
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
-        $fullpath = "/$context->id/mod_scormremote/package/0/$relativepath";
+        $fullpath = "/$context->id/mod_scormremote/$filearea/$revision/$relativepath";
         $lifetime = 0; // No caching here.
-
     } else if ($filearea === 'imsmanifest') { // This isn't a real filearea, it's a url parameter for this type of package.
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
