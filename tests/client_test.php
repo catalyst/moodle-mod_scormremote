@@ -26,127 +26,65 @@ defined('MOODLE_INTERNAL') || die();
  */
 class mod_scormremote_client_testcase extends \advanced_testcase {
     /**
-     * Test function for testing the creation of a new client, it takes parameters passed from the specified data provider.
+     * Testing the validation of the client object.
      *
-     * @dataProvider crud_client_provider
+     * @dataProvider client_validation_provider
      * @param string $clientname
      * @param string $clientdomain
      * @param bool   $ok
      *
      * @return void
      */
-    public function test_crud_client(string $clientname, string $clientdomain, bool $ok) {
-        global $DB;
+    public function test_validation_of_client(string $clientname, string $clientdomain, bool $ok) {
         $this->resetAfterTest();
-        $this->setAdminUser();
-
+        $data = new stdClass();
+        $data->name = $clientname;
+        $data->domain = $clientdomain;
+        $client = new \mod_scormremote\client(0, $data);
+        $this->assertEquals($ok, $client->is_valid());
 
         if (!$ok) {
-            // Validate.
-            $validation = \mod_scormremote\client::validate_name($clientname);
-            $validation = $validation && \mod_scormremote\client::validate_domain($clientdomain);
-            $this->assertFalse($validation);
+            $this->expectException(\core\invalid_persistent_exception::class);
+            $client->create();
             return;
         }
 
-        // Validate.
-        $this->assertTrue(\mod_scormremote\client::validate_name($clientname));
-        $this->assertTrue(\mod_scormremote\client::validate_domain($clientdomain));
-
-        // Create.
-        $client = \mod_scormremote\client::create($clientname, $clientdomain);
-        $this->assertNotFalse($client);
-        $this->assertEquals($clientname, $client->name);
-        $this->assertEquals($clientdomain, $client->domain);
-
-        $clientrecords = $DB->get_records(\mod_scormremote\client::TABLENAME);
-        $this->assertCount(1, $clientrecords);
-        $key = array_key_first($clientrecords);
-        $this->assertEquals($key, $clientrecords[$key]->id);
-        $this->assertEquals($clientname, $clientrecords[$key]->name);
-        $this->assertEquals($clientdomain, $clientrecords[$key]->domain);
-
-        // Read.
-        $readclient = \mod_scormremote\client::read($key);
-        $this->assertEquals($key, $readclient->id);
-        $this->assertEquals($clientname, $readclient->name);
-        $this->assertEquals($clientdomain, $readclient->domain);
-
-        // Update.
-        $newclientname = "A new start";
-        $readclient->name = $newclientname;
-        $readclient->update();
-        $key = $readclient->id;
-        $readclient = \mod_scormremote\client::read($key);
-        $this->assertEquals($key, $readclient->id);
-        $this->assertEquals($newclientname, $readclient->name);
-        $this->assertEquals($clientdomain, $readclient->domain);
-
-        // Delete.
-        $this->assertTrue($readclient->delete());
+        // Create and refetch the client.
+        $client->create();
+        $client = new \mod_scormremote\client($client->get('id'));
+        $this->assertEquals($clientname, $client->get('name'));
+        $this->assertEquals($clientdomain, $client->get('domain'));
     }
 
-    public function crud_client_provider(): array {
+    public function client_validation_provider(): array {
         return [
-            'successful test' => [
-                'clientname'   => 'Catalyst IT Australia Pty. Ltd.',
-                'clientdomain' => 'https://catalyst-au.net',
-                'ok'           => true
-            ],
-            '.net-less domain test' => [
-                'clientname'   => 'Catalyst IT Australia Pty. Ltd.',
-                'clientdomain' => 'https://catalyst-au',
-                'ok'           => true
-            ],
-            'incorrrect domain test' => [
-                'clientname'   => 'Catalyst IT Australia Pty. Ltd.',
-                'clientdomain' => 'c@talyst-au.net',
+            'single char domain' => ['clientname' => 'Foo', 'clientdomain' => 'a',                       'ok' => true],
+            'single num domain'  => ['clientname' => 'Foo', 'clientdomain' => '0',                       'ok' => true],
+            'a.b domain'         => ['clientname' => 'Foo', 'clientdomain' => 'a.b',                     'ok' => true],
+            'localhost domain'   => ['clientname' => 'Foo', 'clientdomain' => 'localhost',               'ok' => true],
+            'google domain'      => ['clientname' => 'Foo', 'clientdomain' => 'google.com',              'ok' => true],
+            'muliple secions'    => ['clientname' => 'Foo', 'clientdomain' => 'news.google.co.uk',       'ok' => true],
+            'randomly generated' => ['clientname' => 'Foo', 'clientdomain' => 'xn--fsqu00a.xn--0zwm56d', 'ok' => true],
+            'space in middle'    => ['clientname' => 'Foo', 'clientdomain' => 'goo gle.com',             'ok' => false],
+            'section len 0'      => ['clientname' => 'Foo', 'clientdomain' => 'google..com',             'ok' => false],
+            'trailing space'     => ['clientname' => 'Foo', 'clientdomain' => 'google.com ',             'ok' => false],
+            'subdomain ending -' => ['clientname' => 'Foo', 'clientdomain' => 'google-.com',             'ok' => false],
+            'starting with .'    => ['clientname' => 'Foo', 'clientdomain' => '.google.com',             'ok' => false],
+            'javascript'         => ['clientname' => 'Foo', 'clientdomain' => '<script',                 'ok' => false],
+            'javascript 2'       => ['clientname' => 'Foo', 'clientdomain' => 'alert(',                  'ok' => false],
+            'domain .'           => ['clientname' => 'Foo', 'clientdomain' => '.',                       'ok' => false],
+            'domain ..'          => ['clientname' => 'Foo', 'clientdomain' => '..',                      'ok' => false],
+            'space'              => ['clientname' => 'Foo', 'clientdomain' => ' ',                       'ok' => false],
+            'dash'               => ['clientname' => 'Foo', 'clientdomain' => '-',                       'ok' => false],
+            'empty'              => ['clientname' => 'Foo', 'clientdomain' => '',                        'ok' => false],
+            'short client name'  => ['clientname' => 'f',   'clientdomain' => 'google.com',              'ok' => false],
+            'empty client name'  => ['clientname' => '',    'clientdomain' => 'google.com',              'ok' => false],
+            'long client name'   => [
+                'clientname'   =>
+                    'the length is 101 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                'clientdomain' => 'google.com',
                 'ok'           => false
             ],
         ];
-    }
-
-    /**
-     * Test function for testing the creation of a new client, it takes parameters passed from the specified data provider.
-     *
-     * @return void
-     */
-    public function test_crud_client_config() {
-        global $DB;
-        $this->resetAfterTest();
-        $this->setAdminUser();
-
-        $course = $this->getDataGenerator()->create_course();
-        $scormremote = $this->getDataGenerator()->create_module('scormremote', array('course' => $course->id));
-        $client = \mod_scormremote\client::create('ABC', 'http://example.com');
-        $maxseats = 10;
-
-        // Create.
-        $clientconfig = \mod_scormremote\client_config::create($client->id, $scormremote->id, $maxseats);
-        $this->assertEquals($client->id, $clientconfig->clientid);
-        $this->assertEquals($scormremote->id, $clientconfig->scormremoteid);
-
-        $configrecords = $DB->get_records(\mod_scormremote\client_config::TABLENAME);
-        $this->assertCount(1, $configrecords);
-        $key = array_key_first($configrecords);
-        $this->assertEquals($client->id, $configrecords[$key]->clientid);
-        $this->assertEquals($scormremote->id, $configrecords[$key]->scormremoteid);
-        $this->assertEquals($maxseats, $configrecords[$key]->maxseatcount);
-
-        // Read.
-        $configrecord = \mod_scormremote\client_config::read($key);
-        $this->assertEquals($client->id, $configrecord->clientid);
-        $this->assertEquals($scormremote->id, $configrecord->scormremoteid);
-        $this->assertEquals($maxseats, $configrecord->maxseatcount);
-
-        // Update through methods.
-        $configrecord->set_maxseatcount(99);
-        $configrecord = \mod_scormremote\client_config::read($configrecord->id);
-        $this->assertEquals(99, $configrecord->maxseatcount);
-
-        // Delete.
-        $this->assertTrue($configrecord->delete());
-        $configrecords = $DB->get_records(\mod_scormremote\client_config::TABLENAME);
-        $this->assertCount(0, $configrecords);
     }
 }

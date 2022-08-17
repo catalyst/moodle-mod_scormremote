@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-use stdClass;
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -28,134 +26,74 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class client_config {
-    const TABLENAME = 'scormremote_client_configs';
-
-    /** The client id to which this configuration is linked. */
-    public int $clientid;
-    /** The scormremote module instance id linked to this config. */
-    public int $scormremoteid;
-    /** The number of seats open for allocation for this config. */
-    public int $maxseatcount;
+class client_config extends \core\persistent {
+    /** Database table. */
+    const TABLE = 'scormremote_client_configs';
 
     /**
-     * The constructor of this class. This is private since we want to force use of create() or read().
+     * Return the definition of the properties of this model.
      *
-     * @param integer $clientid
-     * @param integer $scormremoteid
-     * @param integer $maxseatcount
+     * @return array
      */
-    private function __construct(int $clientid, int $scormremoteid, int $maxseatcount = 0) {
-        $this->scormremoteid = $scormremoteid;
-        $this->clientid = $clientid;
-        $this->maxseatcount = $maxseatcount;
+    protected static function define_properties() {
+        return array(
+            'clientid' => array(
+                'description' => 'The client id to which this configuration is linked.',
+                'type' => PARAM_INT
+            ),
+            'scormremoteid' => array(
+                'description' => 'The scormremote module instance id linked to this config.',
+                'type' => PARAM_INT
+            ),
+            'maxseatcount' => array(
+                'default' => 0,
+                'description' => 'The number of seats open for allocation for this config.',
+                'type' => PARAM_INT
+            ),
+        );
     }
 
     /**
-     * Create a instance of this class.
+     * Validate a clientid.
      *
-     * @param integer $clientid The client id to which this is linked.
-     * @param integer $scormremoteid The scormremoteid to which this is linked.
-     * @param integer $maxseatcount The number maximum number of seats allowed.
-     * @throws \dml_exception A DML specific exception is thrown for any errors.
-     * @throws \moodle_exception When variable maxseatcount is not integer.
-     * @return client_config
+     * @param int $value
+     * @return true|\lang_string
      */
-    public static function create(int $clientid, int $scormremoteid, int $maxseatcount = 0) : self {
-        global $DB;
-
-        // Validate client and scorm.
-        $DB->get_record(client::TABLENAME, ['id' => $clientid], 'id', MUST_EXIST);
-        $DB->get_record('scormremote', ['id' => $scormremoteid], 'id', MUST_EXIST);
-
-        if (!filter_var($maxseatcount, FILTER_VALIDATE_INT)) {
-            throw new \moodle_exception('error_clientconfignan', 'mod_scormremote');
+    protected function validate_clientid($value) {
+        if (!client::record_exists($value)) {
+            return new \lang_string('error_clientconfigclientnotfound', 'mod_scormremote', $value);
         }
 
-        $config = new self($clientid, $scormremoteid, $maxseatcount);
-
-        $DB->insert_record(self::TABLENAME, $config);
-
-        return $config;
+        return true;
     }
 
     /**
-     * Find the client config record from the database based upon it's client config id.
+     * Validate a scormremoteid.
      *
-     * @param ins $clientconfigid
-     * @throws \moodle_exception When the config cannot be found.
-     * @return client_config
+     * @param int $value
+     * @return true|\lang_string
      */
-    public static function read(int $clientconfigid) : self {
+    protected function validate_scormremoteid($value) {
         global $DB;
-
-        $record = $DB->get_record(self::TABLENAME, ['id' => $clientconfigid]);
-        if (!$record) {
-            $a = new \stdClass();
-            $a->id = $clientconfigid;
-            throw new \moodle_exception('error_clientconfignotfound', 'mod_scormremote', '', $a);
+        if (!$DB->get_record('scormremote', array('id' => $value), 'id')){
+            return new \lang_string('error_clientconfigscormremotenotfound', 'mod_scormremote', $value);
         }
 
-        $config = new self((int)$record->clientid, (int)$record->scormremoteid, (int)$record->maxseatcount);
-        $config->id = $clientconfigid;
-
-        return $config;
+        return true;
     }
 
     /**
-     * Delete this client config. use delete_instance() for a static delete.
+     * Validate a maxseatcount.
      *
-     * @throws \moodle_exception When validation for name or domain fails.
-     * @throws \dml_exception A DML specific exception is thrown for any errors.
-     * @return bool
+     * @param int $value
+     * @return true|\lang_string
      */
-    public function delete() {
-        return self::delete_instance($this->id);
-    }
-
-    /**
-     * Update the a existing record in the database.
-     *
-     * This is private since developers should use other methods to update properies.
-     *
-     * @throws \moodle_exception When validation for name or domain fails.
-     * @throws \dml_exception A DML specific exception is thrown for any errors.
-     * @return client_config
-     */
-    private function update() {
-        global $DB;
-        $DB->update_record(self::TABLENAME, $this);
-        return $this;
-    }
-
-
-    /**
-     * Delete a client config by id.
-     *
-     * @param int $clientconfigid The id you wish to delete.
-     * @throws \moodle_exception When validation for id fails.
-     * @throws \dml_exception A DML specific exception is thrown for any errors.
-     * @return bool
-     */
-    public static function delete_instance(int $clientconfigid) {
-        global $DB;
-        if (!isset($clientconfigid) || $clientconfigid <= 0 ) {
-            $a = new \stdClass();
-            $a->id = $clientconfigid;
-            throw new \moodle_exception('error_clientconfignotfound', 'mod_scormremote', '', $a);
+    protected function validate_maxseatcount($value) {
+        if ($value < 0) {
+            return new \lang_string('error_clientconfigmaxseatcounttolow', 'mod_scormremote');
         }
-        return $DB->delete_records(self::TABLENAME, ['id' => $clientconfigid]);
-    }
 
-    /**
-     * Update the number of seats.
-     *
-     * @throws \moodle_exception When validation for name or domain fails.
-     * @return bool
-     */
-    public function set_maxseatcount(int $count) {
-        $this->maxseatcount = $count;
-        $this->update();
+        // TODO: Must check that what is going to be set is lower than the already allocated searts.
         return true;
     }
 }

@@ -30,9 +30,14 @@ $string['pluginname']       = 'SCORM Remote';
 $string['modulename']       = 'SCORM Remote';
 $string['modulenameplural'] = 'SCORM Remote\'s';
 $string['pluginadministration'] = 'SCORM Remote module administration';
-
+$string['domain'] = 'Domain';
+$string['domain_help'] = 'A domain name is the text that a user types into a browser window to reach a particular website. For instance, the domain name for Google is \'google.com\'.';
 $string['error_clientconfignan'] = 'The given value for maxseatcount is not a integer.';
 $string['error_clientconfignotfound'] = 'The given client config id was not found (id: {$a->id}).';
+$string['error_clientconfigclientnotfound'] = 'Couldn\'t find client linked (id: {$a}).';
+$string['error_clientconfigscormremotenotfound'] = 'Couldn\'t find scormremote instance (id: {$a}).';
+$string['error_clientconfigmaxseatcounttolow'] = 'Value must be greater than or equal to 0.';
 $string['error_clientnotfound'] = 'The given client id was not found (id: {$a->id}).';
-$string['error_clientnamenotvalid'] = 'The given value for client name propery isn\'t valid (name: {$a->name})';
-$string['error_clientdomainnotvalid'] = 'The given value for client domain propery isn\'t valid (domain: {$a->domain})';
+$string['error_clientnamelength'] = 'Client name must be between 2 and 100 characters, given name contains {$a}.';
+$string['error_clientnamenotvalid'] = 'The given value for client name isn\'t valid (name: {$a->name})';
+$string['error_clientdomainnotvalid'] = 'The given value is not a valid domain (example: google.com).';
