@@ -35,11 +35,11 @@ $s = optional_param('s', 0, PARAM_INT);
 if ($id) {
     $cm = get_coursemodule_from_id('scormremote', $id, 0, false, MUST_EXIST);
     $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $moduleinstance = $DB->get_record('scormremote', array('id' => $cm->instance), '*', MUST_EXIST);
+    $scormremote = $DB->get_record('scormremote', array('id' => $cm->instance), '*', MUST_EXIST);
 } else {
-    $moduleinstance = $DB->get_record('scormremote', array('id' => $s), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
-    $cm = get_coursemodule_from_instance('scormremote', $moduleinstance->id, $course->id, false, MUST_EXIST);
+    $scormremote = $DB->get_record('scormremote', array('id' => $s), '*', MUST_EXIST);
+    $course = $DB->get_record('course', array('id' => $scormremote->course), '*', MUST_EXIST);
+    $cm = get_coursemodule_from_instance('scormremote', $scormremote->id, $course->id, false, MUST_EXIST);
 }
 
 require_login($course, true, $cm);
@@ -47,10 +47,13 @@ require_login($course, true, $cm);
 $modulecontext = context_module::instance($cm->id);
 
 $PAGE->set_url('/mod/scormremote/view.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($moduleinstance->name));
+$PAGE->set_title(format_string($scormremote->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
+echo $OUTPUT->heading(format_string($scormremote->name));
 
+$url = moodle_url::make_pluginfile_url($modulecontext->id, 'mod_scormremote', 'content', 0, '/', 'index_lms.html', false);
+echo html_writer::link($url, get_string('enter', 'scorm'), ['class' => 'btn btn-primary', 'target' => '_blank']);
 echo $OUTPUT->footer();
