@@ -84,6 +84,15 @@ class client extends \core\persistent {
             return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote');
         }
 
+        if ( $records = self::get_records(['domain' => $value])) {
+            foreach($records as $record) {
+                if ($this->get('id') == $record->get('id')) {
+                    continue;
+                }
+                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote');
+            }
+        }
+
         return true;
     }
 }

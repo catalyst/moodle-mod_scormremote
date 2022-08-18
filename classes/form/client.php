@@ -38,12 +38,12 @@ class client extends \core\form\persistent {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('text', 'name', get_string('name'), 'maxlength="100"');
+        $mform->addElement('text', 'name', get_string('manage_clientname', 'mod_scormremote'), 'maxlength="100"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'server');
         $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'server');
 
-        $mform->addElement('text', 'domain', get_string('domain', 'mod_scormremote'), 'maxlength="100"');
+        $mform->addElement('text', 'domain', get_string('manage_clientdomain', 'mod_scormremote'), 'maxlength="100"');
         $mform->setType('domain', PARAM_TEXT);
         $mform->addRule('domain', get_string('required'), 'required', null, 'server');
         $mform->addRule('domain', get_string('maximumchars', '', 253), 'maxlength', 253, 'server');
