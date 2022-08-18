@@ -54,6 +54,9 @@ $PAGE->set_context($modulecontext);
 echo $OUTPUT->header();
 echo $OUTPUT->heading(format_string($scormremote->name));
 
+$currenttab = 'info';
+require($CFG->dirroot . '/mod/scormremote/tabs.php');
+
 $url = moodle_url::make_pluginfile_url($modulecontext->id, 'mod_scormremote', 'content', 0, '/', 'index_lms.html', false);
 echo html_writer::link($url, get_string('enter', 'scorm'), ['class' => 'btn btn-primary', 'target' => '_blank']);
 echo $OUTPUT->footer();
