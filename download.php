@@ -45,7 +45,7 @@ $context     = context_module::instance($cm->id);
 
 // Authentication and authorization.
 require_login($course, false, $cm);
-require_capability('moodle/course:manageactivities', $context);
+require_capability('mod/scormremote:downloadwrapper', $context);
 $PAGE->set_url(new moodle_url($BASEURL, ['cmid' => $cmid, 'clientid' => $clientid]));
 
 // Create client config.

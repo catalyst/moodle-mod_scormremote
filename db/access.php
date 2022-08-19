@@ -29,13 +29,69 @@ $capabilities = [
 
     'mod/scormremote:addinstance' => [
         'riskbitmask' => RISK_XSS,
-
-        'captype' => 'write',
+        'captype'      => 'write',
         'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => [
+        'archetypes'   => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
         ],
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
+    ],
+    'mod/scormremote:manageclient' => [
+        'riskbitmap'   => RISK_CONFIG,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:deleteclient' => [
+        'riskbitmap'   => RISK_DATALOSS,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:viewclient' => [
+        'captype'      => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:manageclientconfig' => [
+        'riskbitmap'   => RISK_MANAGETRUST,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:deleteclientconfig' => [
+        'riskbitmap'   => RISK_DATALOSS,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:viewclientconfig' => [
+        'captype'      => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:downloadwrapper' => [
+        'captype'      => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
     ],
 ];

@@ -44,10 +44,19 @@ $delete   = optional_param('delete', '', PARAM_ALPHANUM); // Confirmation hash.
 
 // No guest autologin.
 require_login(0, false);
-
 $PAGE->set_url(new moodle_url($BASEURL, ['id' => $id, 'editingon' => $editing]));
 admin_externalpage_setup('scormremoteclients');
 $PAGE->set_title("{$SITE->shortname}: " . get_string('manage_clients', 'mod_scormremote'));
+
+// Authorize.
+$context = context_system::instance();
+if ($editing) {
+    require_capability('mod/scormremote:manageclient', $context);
+} else if ($deleting) {
+    require_capability('mod/scormremote:deleteclient', $context);
+} else {
+    require_capability('mod/scormremote:viewclient', $context);
+}
 
 // Instantiate a client object if we received an ID.
 $client = null;

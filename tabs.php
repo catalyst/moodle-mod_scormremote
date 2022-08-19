@@ -42,7 +42,7 @@ $activated = array();
 
 $row[] = new tabobject('info', "$CFG->wwwroot/mod/scormremote/view.php?id=$cm->id", get_string('info'));
 
-if (has_capability('mod/scorm:viewreport', $contextmodule)) {
+if (has_capability('mod/scormremote:viewclientconfig', $contextmodule)) {
     $row[] = new tabobject('clientconfig', "$CFG->wwwroot/mod/scormremote/clientconfig.php?cmid=$cm->id", get_string('clientconfig', 'mod_scormremote'));
 }
 

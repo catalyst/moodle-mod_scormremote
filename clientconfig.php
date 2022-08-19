@@ -40,14 +40,25 @@ $editing  = optional_param('editingon', false, PARAM_BOOL);
 $deleting = optional_param('deleting', false, PARAM_BOOL);
 $delete   = optional_param('delete', '', PARAM_ALPHANUM); // Confirmation hash.
 
+// Instances.
 $cm     = get_coursemodule_from_id('scormremote', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $scormremote   = $DB->get_record('scormremote', array('id' => $cm->instance), '*', MUST_EXIST);
 $contextmodule = context_module::instance($cm->id);
 
+// Authenticate.
 require_login($course, false, $cm);
-$PAGE->set_url(new moodle_url($BASEURL, ['cmid' => $cmid]));
 
+// Authorize.
+if ($editing) {
+    require_capability('mod/scormremote:manageclientconfig', $contextmodule);
+} else if ($deleting) {
+    require_capability('mod/scormremote:deleteclientconfig', $contextmodule);
+} else {
+    require_capability('mod/scormremote:viewclientconfig', $contextmodule);
+}
+
+$PAGE->set_url(new moodle_url($BASEURL, ['cmid' => $cmid]));
 $PAGE->set_title("$course->shortname: ".format_string($scormremote->name));
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('clientconfig', 'mod_scormremote'), new moodle_url($BASEURL, ['cmid' => $cmid]));
