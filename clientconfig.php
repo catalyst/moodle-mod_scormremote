@@ -125,11 +125,17 @@ if (!$editing && !$deleting) {
         $deleteurl =  new moodle_url($BASEURL, ['cmid' => $cmid, 'id' => $config->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
 
+        // Download link for wrapper.
+        $download = html_writer::link(
+            new moodle_url('/mod/scormremote/download.php', ['cmid' => $cmid, 'clientid' => $client->get('id')]),
+            get_string('download')
+        );
+
         $table->data[] = [
             "{$client->get('name')} ({$client->get('domain')})",
             $config->get('maxseatcount'),
-            '?',
-            'to be created',
+            'unknown',
+            $download,
             $editaction . $deleteaction,
         ];
     }

@@ -18,6 +18,7 @@ namespace mod_scormremote;
 
 use core_files\archive_writer;
 use DOMDocument;
+use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -52,6 +53,7 @@ class wrapper {
      *
      * @param object $scormremote instance
      * @param int $clientid
+     * @return \stored_file
      */
     public static function create(&$scormremote, $clientid) {
         global $CFG;
@@ -73,19 +75,25 @@ class wrapper {
         }
         $zipwriter->finish();
 
+        // Create a filename.
+        $client = new client($clientid);
+        $filenamehead = preg_replace("/[^A-Za-z0-9 ]/", '', $scormremote->name);
+        $filenametail = preg_replace("/[^A-Za-z0-9 ]/", '', $client->get('name'));
+        $filename = "{$filenamehead} - {$filenametail}.zip"; // Remove all non-alphanumeric and add .zip.
+
         $fileinfo = [
             'component' => 'mod_scormremote',
             'filearea'  => self::FILEAREA,
             'itemid'    => $clientid,
             'contextid' => $context->id,
             'filepath'  => '/',
-            'filename'  => 'wrapped.zip',
+            'filename'  => $filename,
         ];
 
         // Delete the old store the new archive in the filesystem.
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'mod_scormremote', self::FILEAREA, $clientid);
-        $fs->create_file_from_pathname($fileinfo, $zipwriter->get_path_to_zip());
+        return $fs->create_file_from_pathname($fileinfo, $zipwriter->get_path_to_zip());
     }
 
     /**
