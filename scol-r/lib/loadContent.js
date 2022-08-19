@@ -98,7 +98,7 @@ function loadContent() {
             "scorm&learner_id=" +
             learnerId +
             "&lms_origin=" +
-            encodeURIComponent(location.origin) +
+            encodeURIComponent(location.hostname) + // Customisation: Need hostname name here.
             "&data_from_lms=" +
             ADAPTER.getDataFromLMS();
     var iframe = document.createElement("iframe");

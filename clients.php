@@ -65,7 +65,10 @@ if ($editing) {
     ];
     $form = new client_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
 
-    if (($data = $form->get_data())) {
+    if ($form->is_cancelled()) {
+        // Form cancelled.
+        redirect(new moodle_url($BASEURL));
+    } elseif (($data = $form->get_data())) {
         try {
             if (empty($data->id)) {
                 // Create a new record.

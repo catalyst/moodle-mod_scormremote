@@ -47,12 +47,13 @@ class client_config extends \core\form\persistent {
         $mform->setDefault('maxseatcount', 0);
 
 
-        // Get only clients that do not have a config for this scormremote instance.
-        $clients = \mod_scormremote\client::get_records_not_configured_for_scormremote($this->_customdata['scormremoteid']);
+        // If we're updating only allow the current domain, no switching allowed.
         if ($this->get_persistent()->get('id')) {
-            // Do append with the current one if we're updating.
             $client = new \mod_scormremote\client($this->get_persistent()->get('clientid'));
-            $clients[] = $client;
+            $clients = [$client];
+        } else {
+            // Get only clients that do not have a config for this scormremote instance.
+            $clients = \mod_scormremote\client::get_records_not_configured_for_scormremote($this->_customdata['scormremoteid']);
         }
 
         $options = [];

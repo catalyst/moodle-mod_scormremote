@@ -69,7 +69,11 @@ if ($editing) {
     ];
     $form = new client_config_form(new moodle_url($BASEURL, ['id' => $ccid, 'cmid' => $cmid, 'editingon' => 1]), $customdata);
 
-    if ($data = $form->get_data()) {
+    if ($form->is_cancelled()) {
+        // Form cancelled.
+        redirect(new moodle_url($BASEURL, ['cmid' => $cmid]));
+    } else if ($data = $form->get_data()) {
+        // Form submitted.
         try {
             if (empty($data->id)) {
                 // Create a new record.

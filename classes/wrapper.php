@@ -17,8 +17,6 @@
 namespace mod_scormremote;
 
 use core_files\archive_writer;
-use DOMDocument;
-use stored_file;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -127,7 +125,7 @@ class wrapper {
         global $CFG;
 
         $url = "{$CFG->wwwroot}/pluginfile.php/{$contextid}/mod_scormremote/content/{$clientid}/index_lms.html";
-        $index = new DOMDocument();
+        $index = new \DOMDocument();
         $index->loadHTMLFile(__DIR__. '/../scol-r/index.html');
 
         $body = $index->getElementsByTagName('body')[0];
@@ -142,7 +140,7 @@ class wrapper {
      * @return string
      */
     public static function get_client_imsmanifest() {
-        $manifest = new DOMDocument();
+        $manifest = new \DOMDocument();
         $manifest->load(__DIR__. '/../scol-r/imsmanifest.xml');
         return  $manifest->saveXML();
     }
