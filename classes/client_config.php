@@ -54,6 +54,32 @@ class client_config extends \core\persistent {
     }
 
     /**
+     * Get all record by domain and scormremoteid.
+     *
+     * @param string $domain
+     * @param int $scormremoteid
+     * @return client_config
+     */
+    public static function get_records_by_domain_and_scormremoteid($domain, $scormremoteid) {
+        global $DB;
+
+        $sql = 'SELECT cc.*
+                  FROM {' . static::TABLE . '} AS cc
+                 WHERE scormremoteid = :scormremoteid
+                   AND EXISTS (
+                           SELECT 1
+                             FROM {' . client::TABLE . '}
+                            WHERE id = cc.clientid
+                              AND domain = :domain
+                       )';
+
+        $recordset = $DB->get_recordset_sql($sql, ['domain' => $domain, 'scormremoteid' => $scormremoteid]);
+        foreach ($recordset as $record) {
+            return new static(0, $record);
+        }
+    }
+
+    /**
      * Validate a clientid.
      *
      * @param int $value

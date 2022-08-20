@@ -155,7 +155,28 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // require_login($course, true, $cm);
+    // Authenticate.
+    if (!isset($_GET['lms_origin'])) {
+        // Moodle might have refered, try to get it from referer.
+        $referer = parse_url($_SERVER['HTTP_REFERER']);
+        $query = array();
+        parse_str($referer['query'], $query);
+        if (!isset($query['lms_origin'])) {
+            // It's NOT coming remotely so login.
+            require_login($course, true, $cm);
+        } else {
+            // We found the client domain, set it to GET so we can use it in recursive call.
+            $_GET['lms_origin'] = $query['lms_origin'];
+            return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
+        }
+    } else {
+        // And authorise.
+        $clienthostname = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
+        $clientconfig = \mod_scormremote\client_config::get_records_by_domain_and_scormremoteid($clienthostname, $cm->instance);
+        if (!$clientconfig->get('id')) {
+            die(403);
+        }
+    }
 
     $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
     $lifetime = null;
