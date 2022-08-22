@@ -225,6 +225,31 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
+    // Inject javascript into html on serve.
+    if (pathinfo($file->get_filename(), PATHINFO_EXTENSION) == 'html') {
+        // Prepare file record object
+        $fileinfo = [
+            'contextid' => $file->get_contextid(),
+            'component' => $file->get_component(),
+            'filearea' => 'tmp',
+            'itemid' => $file->get_itemid(),
+            'filepath' => $file->get_filepath(),
+            'filename' => $file->get_filename(),
+        ];
+
+        // Delete the old tmp file.
+        $tmp = $fs->get_file($fileinfo['contextid'], $fileinfo['component'], $fileinfo['filearea'],
+        $fileinfo['itemid'], $fileinfo['filepath'], $fileinfo['filename']);
+        if ($tmp !== false) {
+            $tmp->delete();
+        }
+        unset($tmp);
+
+        // Create file containing appended html.
+        $newfilecontents = \mod_scormremote\packagefile::add_scormagain_html($file->get_content());
+        $file = $fs->create_file_from_string($fileinfo, $newfilecontents);
+    }
+
     // Finally send the file.
     send_stored_file($file, $lifetime, 0, false, $options);
 }
