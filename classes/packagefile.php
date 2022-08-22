@@ -116,44 +116,6 @@ class packagefile {
             // Extract zip.
             $packer = get_file_packer('application/zip');
             $packagefile->extract_to_storage($packer, $context->id, $component, $filearea, 0, '/');
-
-            $fileinfo = [
-                'component' => $component,
-                'filearea'  => $filearea,
-                'itemid'    => 0,
-                'contextid' => $context->id,
-                'filepath'  => '/',
-            ];
-
-            // Get files at the root level.
-            $filerecords = $DB->get_records('files', $fileinfo, 'filename');
-
-            // We're going to add some javascript to these files.
-            foreach($filerecords as $filerecord) {
-                // Only to html files.
-                if (pathinfo($filerecord->filename, PATHINFO_EXTENSION) != 'html') {
-                    continue;
-                }
-
-                $fileinfo['filename'] = $filerecord->filename;
-
-                // Get the stored_file.
-                $file = $fs->get_file(
-                    $fileinfo['contextid'],
-                    $fileinfo['component'],
-                    $fileinfo['filearea'],
-                    $fileinfo['itemid'],
-                    $fileinfo['filepath'],
-                    $fileinfo['filename']
-                );
-
-                // This adds the javascript before closing body tag.
-                $newfilecontents = self::add_scormagain_html($file->get_content());
-
-                // Delete the old. Create the new.
-                $file->delete();
-                $fs->create_file_from_string($fileinfo, $newfilecontents);
-            }
         }
 
         $scormremote->sha1hash = $newhash;
@@ -190,5 +152,4 @@ class packagefile {
 
         return substr_replace($html, $external.$script, $pos, 0);
     }
-
 }
