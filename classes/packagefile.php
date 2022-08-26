@@ -121,35 +121,4 @@ class packagefile {
         $scormremote->sha1hash = $newhash;
         $DB->update_record('scormremote', $scormremote);
     }
-
-    /**
-     * Adds required javascript to a HTML string.
-     *
-     * @param string $html
-     * @return mixed Returns the content as a string or returns false when it can't append properly.
-     */
-    public static function add_scormagain_html($html) {
-        global $CFG;
-
-        // Find the closing body tag.
-        $pos = strpos($html, '</body>');
-
-        // No closing body tag.
-        if ($pos === false) {
-            return false;
-        }
-
-        // Is there more then one body tag?
-        if (strpos($html, '</body>', $pos + 1) !== false) {
-            return false;
-        }
-
-        // Create external scormagain javascript element.
-        $external = \html_writer::script('', $CFG->wwwroot.'/mod/scormremote/scorm-again/dist/scorm12.min.js');
-
-        // Create javascript tag containing the API calls.
-        $script = \html_writer::script("var settings = {};window.API = new Scorm12API(settings);window.parent = window;");
-
-        return substr_replace($html, $external.$script, $pos, 0);
-    }
 }
