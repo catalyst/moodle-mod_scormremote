@@ -155,28 +155,28 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // Authenticate.
-    if (!isset($_GET['lms_origin'])) {
-        // Moodle might have refered, try to get it from referer.
-        $referer = parse_url($_SERVER['HTTP_REFERER']);
-        $query = array();
-        parse_str($referer['query'], $query);
-        if (!isset($query['lms_origin'])) {
-            // It's NOT coming remotely so login.
-            require_login($course, true, $cm);
-        } else {
-            // We found the client domain, set it to GET so we can use it in recursive call.
-            $_GET['lms_origin'] = $query['lms_origin'];
-            return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
-        }
-    } else {
-        // And authorise.
-        $clienthostname = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
-        $clientconfig = \mod_scormremote\client_config::get_records_by_domain_and_scormremoteid($clienthostname, $cm->instance);
-        if (!$clientconfig->get('id')) {
-            die(403);
-        }
-    }
+    // // Authenticate.
+    // if (!isset($_GET['lms_origin'])) {
+    //     // Moodle might have refered, try to get it from referer.
+    //     $referer = parse_url($_SERVER['HTTP_REFERER']);
+    //     $query = array();
+    //     parse_str($referer['query'], $query);
+    //     if (!isset($query['lms_origin'])) {
+    //         // It's NOT coming remotely so login.
+    //         require_login($course, true, $cm);
+    //     } else {
+    //         // We found the client domain, set it to GET so we can use it in recursive call.
+    //         $_GET['lms_origin'] = $query['lms_origin'];
+    //         return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
+    //     }
+    // } else {
+    //     // And authorise.
+    //     $clienthostname = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
+    //     $clientconfig = \mod_scormremote\client_config::get_records_by_domain_and_scormremoteid($clienthostname, $cm->instance);
+    //     if (!$clientconfig->get('id')) {
+    //         die(403);
+    //     }
+    // }
 
     $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
     $lifetime = null;
@@ -187,6 +187,31 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
 
+    } else if ($filearea === 'scolr') {
+        echo <<<EOD
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Layer 3</title>
+    <meta charset="UTF-8" />
+    <script type="text/javascript" src="https://eca.localhost/mod/scormremote/scorm-again/dist/scorm12.js"></script>
+    <script type="text/javascript" src="https://eca.localhost/mod/scormremote/amd/src/layer3.js"></script>
+    <style>
+    html,body,iframe {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        border 0;
+    }
+    </style>
+</head>
+<body onload="init();" data-source="https://eca.localhost/pluginfile.php/27/mod_scormremote/content/0/Course01/Lesson01/sco01.htm">
+    <div id="wrapper></div>
+</body>
+</html>
+EOD;
+        die;
     } else if ($filearea === 'package' || $filearea === \mod_scormremote\wrapper::FILEAREA) {
         // Check if the global setting for disabling package downloads is enabled.
         if (!$canmanageactivity) {
