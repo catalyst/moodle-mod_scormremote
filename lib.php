@@ -187,7 +187,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
 
-    } else if ($filearea === 'scolr') {
+    } else if ($filearea === 'remote') {
         echo <<<EOD
 <!DOCTYPE html>
 <html>

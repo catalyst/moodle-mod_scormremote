@@ -35,12 +35,7 @@ class wrapper {
     /** The files that should be included in the wrapper. */
     const FILES = [
         // Path in zip.               // Relative path.
-        'lib/HTMLGenerator.js'     => __DIR__. '/../scol-r/lib/HTMLGenerator.js',
-        'lib/index.js'             => __DIR__. '/../scol-r/lib/index.js',
-        'lib/loadContent.js'       => __DIR__. '/../scol-r/lib/loadContent.js',
-        'lib/ManifestGenerator.js' => __DIR__. '/../scol-r/lib/ManifestGenerator.js',
-        'lib/MessageHandler.js'    => __DIR__. '/../scol-r/lib/MessageHandler.js',
-        'lib/SCORMAdapter.js'      => __DIR__. '/../scol-r/lib/SCORMAdapter.js',
+
         // Files missing in this list are:
         //  1. index.html: need to change data-source.
         //  2. imsmanifest.xml: need to change some metadata.
@@ -124,7 +119,7 @@ class wrapper {
     public static function get_client_index($contextid, $clientid) {
         global $CFG;
 
-        $url = "{$CFG->wwwroot}/pluginfile.php/{$contextid}/mod_scormremote/content/{$clientid}/index_lms.html";
+        $url = "{$CFG->wwwroot}/pluginfile.php/{$contextid}/mod_scormremote/remote/{$clientid}/index.html";
         $index = new \DOMDocument();
         $index->loadHTMLFile(__DIR__. '/../scol-r/index.html');
 
