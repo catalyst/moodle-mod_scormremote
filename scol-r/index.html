@@ -1,14 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SCO local endpoint</title>
+    <title>Layer 2</title>
     <meta charset="UTF-8" />
-    <script>
-      var exports = {};
-    </script>
-    <script type="text/javascript" src="lib/SCORMAdapter.js"></script>
-    <script type="text/javascript" src="lib/MessageHandler.js"></script>
-    <script type="text/javascript" src="lib/loadContent.js"></script>
+    <script type="text/javascript" src="https://eca.localhost/mod/scormremote/amd/src/layer2.js"></script>
     <style type="text/css">
       html,
       body {
@@ -90,30 +85,9 @@
     </style>
   </head>
   <!-- Set the body's data-source attribute to the SCO's remote endpoint. -->
-  <body onload="loadContent();" data-source="">
+  <body onload="init();" data-source="">
     <div id="wrapper">
-      <div class="header">
-        <div class="container">
-          <h1 id="title">Your content is loading...</h1>
-          <p id="subtitle">
-            Please wait, or if your content doesn't appear, try closing and
-            opening this window again.
-          </p>
-        </div>
-      </div>
-      <div class="messages container">
-        <h2 id="title-error-messages">
-          If the initialization fails, error messages will appear below:
-        </h2>
-      </div>
-      <div class="footer">
-        <div class="container" id="footer-content">
-          This content is loaded via
-          <a href="https://github.com/Didask/scol-r" target="_blank">SCOL-R</a>,
-          a cross-domain SCORM connector created by
-          <a href="https://www.didask.com" target="_blank">Didask</a>.
-        </div>
-      </div>
+      <h1 id="title">Your content is loading...</h1>
     </div>
     <div id="runtime-error"></div>
   </body>

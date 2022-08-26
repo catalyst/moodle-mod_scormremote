@@ -21,9 +21,6 @@
 	<resources>
 		<resource identifier="r1" type="webcontent" adlcp:scormtype="sco" href="index.html">
 			<file href="index.html"/>
-			<file href="lib/SCORMAdapter.js"/>
-			<file href="lib/MessageHandler.js"/>
-			<file href="lib/loadContent.js"/>
 		</resource>
 	</resources>
 </manifest>
