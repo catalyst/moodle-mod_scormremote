@@ -60,6 +60,7 @@ $string['error_clientnamelength'] = 'Client name must be between 2 and 100 chara
 $string['error_clientnamenotvalid'] = 'The given value for client name isn\'t valid (name: {$a->name})';
 $string['error_clientdomainnotvalid'] = 'The given value is not a valid domain (example: google.com).';
 $string['error_clientdomainnotunique'] = 'A client already exists with this domain. Must be unique.';
+$string['error_imsmanifestmissing'] = 'The imsmanifest.xml is missing from the filesystem. Reupload the package might help.';
 $string['scormremote:manageclient'] = 'Manage SCORM remote clients';
 $string['scormremote:deleteclient'] = 'Delete SCORM remote clients';
 $string['scormremote:viewclient'] = 'View SCORM remote clients';

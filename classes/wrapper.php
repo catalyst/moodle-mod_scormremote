@@ -32,15 +32,6 @@ class wrapper {
         /** The filearea in which wrappers are stored. */
     const FILEAREA = 'wrappers';
 
-    /** The files that should be included in the wrapper. */
-    const FILES = [
-        // Path in zip.               // Relative path.
-
-        // Files missing in this list are:
-        //  1. index.html: need to change data-source.
-        //  2. imsmanifest.xml: need to change some metadata.
-    ];
-
     /**
      * Create a .zip archive which is what should be distributed towards clients.
      *
@@ -49,44 +40,65 @@ class wrapper {
      * @return \stored_file
      */
     public static function create(&$scormremote, $clientid) {
-        global $CFG;
+        global $OUTPUT;
 
-        // Get the cm for context.
-        if (!isset($scormremote->coursemodule)) {
-            $cm = get_coursemodule_from_instance('scormremote', $scormremote->id);
-            $scormremote->coursemodule = $cm->id;
-            unset($cm);
-        }
-        $context = \context_module::instance($scormremote->coursemodule);
-
-        // Create the archive.
-        $zipwriter = archive_writer::get_file_writer(time().'-wrapped.zip', archive_writer::ZIP_WRITER);
-        $zipwriter->add_file_from_string('index.html', self::get_client_index($context->id, $clientid));
-        $zipwriter->add_file_from_string('imsmanifest.xml', self::get_client_imsmanifest());
-        foreach (self::FILES as $pathtofileinzip => $filetoadd) {
-            $zipwriter->add_file_from_filepath($pathtofileinzip, $filetoadd);
-        }
-        $zipwriter->finish();
-
-        // Create a filename.
+        // Local variables.
+        $context = \mod_scormremote\utils::get_context($scormremote);
+        $manifest = simplexml_load_string(\mod_scormremote\utils::get_scormremote_imsmanifest($scormremote));
+        $zip = archive_writer::get_file_writer(time().'-wrapped.zip', archive_writer::ZIP_WRITER);
         $client = new client($clientid);
-        $filenamehead = preg_replace("/[^A-Za-z0-9 ]/", '', $scormremote->name);
-        $filenametail = preg_replace("/[^A-Za-z0-9 ]/", '', $client->get('name'));
-        $filename = "{$filenamehead} - {$filenametail}.zip"; // Remove all non-alphanumeric and add .zip.
-
+        $fs = get_file_storage();
         $fileinfo = [
             'component' => 'mod_scormremote',
             'filearea'  => self::FILEAREA,
             'itemid'    => $clientid,
             'contextid' => $context->id,
             'filepath'  => '/',
-            'filename'  => $filename,
         ];
+
+        // From this instance's manifest, we replacing all files by index files. Each resource (SCO) will have it's own index file
+        // names sco_1.html, sco_2.html, sco_3.html. This html is generated from the secondlayer.mustache and contains the
+        // datasource which points towards the third layer, but contains the filepath for the original file.
+        $count = 0; // $key => value, doesn't appear to work.
+        foreach ($manifest->resources->resource as $resource) {
+            // Remove all the files from each resource.
+            while(count($resource->file) > 0) {
+                unset($resource->file[0]);
+            }
+
+            // All resources must point towards their own layer 2 containing a link to the data source.
+            $datasource = \moodle_url::make_pluginfile_url(
+                    $fileinfo['contextid'],
+                    $fileinfo['component'],
+                    'remote',                     // THIS is pointing towards the third layer.
+                    $fileinfo['itemid'],
+                    $fileinfo['filepath'],
+                    $resource->attributes()->href // The original file path.
+            );
+            $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', ['datasource' => $datasource]);
+            $resourcefilename = "sco_$count.html";
+
+            // Add the created file from template to the archive.
+            $zip->add_file_from_string($resourcefilename, $resourcefile);
+
+            $file = $resource->addChild('file');
+            $file->addAttribute('href', $resourcefilename);
+            $resource->attributes()->href = $resourcefilename;
+            $count++;
+        }
+
+        // Add the manifest and finish.
+        $zip->add_file_from_string('imsmanifest.xml', $manifest->asXML());
+        $zip->finish();
+
+        $filenamehead = preg_replace("/[^A-Za-z0-9 ]/", '', $scormremote->name);
+        $filenametail = preg_replace("/[^A-Za-z0-9 ]/", '', $client->get('name'));
+        $fileinfo['filename'] = "{$filenamehead} - {$filenametail}.zip"; // Remove all non-alphanumeric and add .zip.
 
         // Delete the old store the new archive in the filesystem.
         $fs = get_file_storage();
         $fs->delete_area_files($context->id, 'mod_scormremote', self::FILEAREA, $clientid);
-        return $fs->create_file_from_pathname($fileinfo, $zipwriter->get_path_to_zip());
+        return $fs->create_file_from_pathname($fileinfo, $zip->get_path_to_zip());
     }
 
     /**
@@ -127,16 +139,5 @@ class wrapper {
         $body->setAttribute('data-source', $url);
 
         return  $index->saveHTML();
-    }
-
-    /**
-     * Returns client specific string value for imsmanifest.xml
-     *
-     * @return string
-     */
-    public static function get_client_imsmanifest() {
-        $manifest = new \DOMDocument();
-        $manifest->load(__DIR__. '/../scol-r/imsmanifest.xml');
-        return  $manifest->saveXML();
     }
 }

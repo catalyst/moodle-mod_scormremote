@@ -1,0 +1,75 @@
+{{!
+    This file is part of Moodle - https://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_scormremote/secondlayer
+
+    This is a template which will be contained multiple times in a wrapper. The wrapper must contain at least one index and can
+    contain multiple.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * datasource - a url which target the href for a specific SCO.
+
+    Example context (json):
+    {
+        "datasource": "https://example.com/pluginfile.php/24/mod_scormremote/remote/2/index.html",
+    }
+}}
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Layer 2</title>
+  <meta charset="UTF-8" />
+  <script type="text/javascript" src="https://eca.localhost/mod/scormremote/amd/src/layer2.js"></script>
+  <style type="text/css">
+    html,
+    body,
+    iframe {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+
+    #wrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    iframe+#wrapper {
+      display: none;
+    }
+  </style>
+</head>
+<!-- Set the body's data-source attribute to the SCO's remote endpoint. -->
+
+<body onload="init();" data-source="{{datasource}}">
+  <div id="wrapper">
+    <h1>Your content is loading...</h1>
+  </div>
+  <div id="runtime-error"></div>
+</body>
+
+</html>

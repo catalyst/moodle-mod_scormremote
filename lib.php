@@ -149,7 +149,7 @@ function scormremote_delete_instance($id) {
  * @return bool false if file not found, does not return if found - just send the file
  */
 function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG, $DB;
+    global $CFG, $DB, $OUTPUT;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -188,29 +188,17 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
 
     } else if ($filearea === 'remote') {
-        echo <<<EOD
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Layer 3</title>
-    <meta charset="UTF-8" />
-    <script type="text/javascript" src="https://eca.localhost/mod/scormremote/scorm-again/dist/scorm12.js"></script>
-    <script type="text/javascript" src="https://eca.localhost/mod/scormremote/amd/src/layer3.js"></script>
-    <style>
-    html,body,iframe {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        border 0;
-    }
-    </style>
-</head>
-<body onload="init();" data-source="https://eca.localhost/pluginfile.php/27/mod_scormremote/content/0/Course01/Lesson01/sco01.htm">
-    <div id="wrapper></div>
-</body>
-</html>
-EOD;
+        // From the manifest we get the data-source taget by identifier.
+        $datasource = \moodle_url::make_pluginfile_url(
+            $context->id,
+            'mod_scormremote',
+            'content',
+            null,
+            '/',
+            implode('/', $args) // The original file path.
+        );
+
+        echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', ['datasource' => $datasource]);
         die;
     } else if ($filearea === 'package' || $filearea === \mod_scormremote\wrapper::FILEAREA) {
         // Check if the global setting for disabling package downloads is enabled.
