@@ -120,24 +120,4 @@ class wrapper {
         $fs = get_file_storage();
         return $fs->delete_area_files($context->id, 'mod_scormremote', self::FILEAREA, $clientid);
     }
-
-    /**
-     * Returns client specific string value for index.html.
-     *
-     * @param int $contextid
-     * @param int $clientid
-     * @return string
-     */
-    public static function get_client_index($contextid, $clientid) {
-        global $CFG;
-
-        $url = "{$CFG->wwwroot}/pluginfile.php/{$contextid}/mod_scormremote/remote/{$clientid}/index.html";
-        $index = new \DOMDocument();
-        $index->loadHTMLFile(__DIR__. '/../scol-r/index.html');
-
-        $body = $index->getElementsByTagName('body')[0];
-        $body->setAttribute('data-source', $url);
-
-        return  $index->saveHTML();
-    }
 }
