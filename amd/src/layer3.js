@@ -140,6 +140,7 @@ function onLMSSetValue(name, value) {
 
 
 function postMessageToParent(functionName, arguments = []) {
+    message('send a message to parent calling function "' + functionName + '"');
     window.parent.postMessage(
         {function: functionName, arguments},
         ORIGIN
