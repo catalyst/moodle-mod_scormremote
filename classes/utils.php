@@ -52,4 +52,20 @@ class utils {
 
         return $file->get_content();
     }
+
+    /**
+     * Function to get course module context given a scormremote context. It will set $scoremote->coursemodule to the course module
+     * id.
+     *
+     * @param object $scormremote instance
+     * @return \context_module
+     */
+    public static function get_context(&$scormremote) {
+        if (!isset($scormremote->coursemodule)) {
+            $cm = get_coursemodule_from_instance('scormremote', $scormremote->id);
+            $scormremote->coursemodule = $cm->id;
+            unset($cm);
+        }
+        return \context_module::instance($scormremote->coursemodule);
+    }
 }
