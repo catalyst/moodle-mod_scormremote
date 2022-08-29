@@ -201,7 +201,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $templatedata = [
             'datasource'       => $datasource,
             'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer3.js',
-            'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/dist/scorm12.min.js',
+            'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/scorm12.min.js',
         ];
 
         echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata);
