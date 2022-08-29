@@ -19,9 +19,12 @@ const ORIGIN = "https://eca.localhost";
 
 function init() {
     initMessageReciever();
+    const parameters = document.location.search;
+    const datasource  = document.body.dataset.source + parameters;
+
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", EMBEDDED_WINDOW_ID);
-    iframe.setAttribute("src", document.body.dataset.source);
+    iframe.setAttribute("src", datasource);
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("height", "100%");
     iframe.setAttribute("width", "100%");
