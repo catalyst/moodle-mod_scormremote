@@ -78,7 +78,7 @@ class wrapper {
 
             $templatedata = [
                 'datasource'       => $datasource,
-                'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer3.js',
+                'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer2.js',
             ];
             $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', $templatedata);
             $resourcefilename = "sco_$count.html";
