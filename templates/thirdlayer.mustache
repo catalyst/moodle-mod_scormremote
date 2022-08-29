@@ -28,10 +28,14 @@
 
     Context variables required for this template:
     * datasource - a url which target the href for a specific SCO content.
+    * jssource - a url which target the src for a the javascript.
+    * scormagainsource - a url which target the src for the scorm again api.
 
     Example context (json):
     {
         "datasource": "https://example.com/pluginfile.php/24/mod_scormremote/content/2/index.html",
+        "jssource": "https://example.com/mod/scormremote/amd/src/layer3.js",
+        "scormagainsource": "https://example.com/mod/scormremote/scorm-again/dist/scorm12.min.js"",
     }
 }}
 <!DOCTYPE html>
@@ -40,8 +44,8 @@
 <head>
   <title>Layer 3</title>
   <meta charset="UTF-8" />
-  <script type="text/javascript" src="https://eca.localhost/mod/scormremote/scorm-again/dist/scorm12.js"></script>
-  <script type="text/javascript" src="https://eca.localhost/mod/scormremote/amd/src/layer3.js"></script>
+  <script type="text/javascript" src="{{scormagainsource}}"></script>
+  <script type="text/javascript" src="{{jssource}}"></script>
   <style type="text/css">
     html,
     body,

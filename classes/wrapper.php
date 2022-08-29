@@ -40,7 +40,7 @@ class wrapper {
      * @return \stored_file
      */
     public static function create(&$scormremote, $clientid) {
-        global $OUTPUT;
+        global $CFG, $OUTPUT;
 
         // Local variables.
         $context = \mod_scormremote\utils::get_context($scormremote);
@@ -68,14 +68,19 @@ class wrapper {
 
             // All resources must point towards their own layer 2 containing a link to the data source.
             $datasource = \moodle_url::make_pluginfile_url(
-                    $fileinfo['contextid'],
-                    $fileinfo['component'],
-                    'remote',                     // THIS is pointing towards the third layer.
-                    $fileinfo['itemid'],
-                    $fileinfo['filepath'],
-                    $resource->attributes()->href // The original file path.
+                $fileinfo['contextid'],
+                $fileinfo['component'],
+                'remote',                     // THIS is pointing towards the third layer.
+                $fileinfo['itemid'],
+                $fileinfo['filepath'],
+                $resource->attributes()->href // The original file path.
             );
-            $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', ['datasource' => $datasource]);
+
+            $templatedata = [
+                'datasource'       => $datasource,
+                'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer3.js',
+            ];
+            $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', $templatedata);
             $resourcefilename = "sco_$count.html";
 
             // Add the created file from template to the archive.

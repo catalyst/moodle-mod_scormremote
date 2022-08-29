@@ -198,7 +198,13 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             implode('/', $args) // The original file path.
         );
 
-        echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', ['datasource' => $datasource]);
+        $templatedata = [
+            'datasource'       => $datasource,
+            'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer3.js',
+            'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/dist/scorm12.min.js',
+        ];
+
+        echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata);
         die;
     } else if ($filearea === 'package' || $filearea === \mod_scormremote\wrapper::FILEAREA) {
         // Check if the global setting for disabling package downloads is enabled.

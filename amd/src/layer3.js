@@ -20,7 +20,7 @@ const output = window.console;
 
 // TODO: Move constants to their own file.
 const EMBEDDED_WINDOW_ID = 'embedded-fourth-layer';
-const ORIGIN = "https://scormdiscovery.localhost";
+const ORIGIN = "*"; //TODO: issue 27
 
 
 /**
@@ -32,8 +32,8 @@ function init() {
 
     // Setup the API.
     window.API = new Scorm12API(settings);
-    window.API.on("LMSCommit", postMessageToParent('LMSCommit'));
-    window.API.on("LMSFinish", postMessageToParent('LMSFinish'));
+    window.API.on("LMSCommit", postMessageToParent('LMSCommit', []));
+    window.API.on("LMSFinish", postMessageToParent('LMSFinish', []));
     window.API.on("LMSSetValue", onLMSSetValue);
 
     // Ask for the data model to be sent.
@@ -57,12 +57,6 @@ function init() {
  function initMessageReciever() {
     window.addEventListener('message', (e) => {
         const ALLOWED_METHODS = ['ErrorHandler', 'LMSSetDataModel', 'message'];
-
-        // Don't run anything if message is not coming from expected host.
-        if (e.origin !== ORIGIN) {
-            message('Recieved message from unknown origin "' + e.origin + '", (expected: "' + ORIGIN + '")');
-            return;
-        }
 
         const functionName = e.data['function'];
         const functionArgs = e.data['arguments'];

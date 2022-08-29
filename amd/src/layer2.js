@@ -11,20 +11,22 @@ var initialized = false;
 var apiHandle = null;
 var embeddedWindow = null;
 var CMI = null;
+var ORIGIN = null;
 
-// TODO: Move constants to their own file.
 const EMBEDDED_WINDOW_ID = 'embedded-third-layer';
-const ORIGIN = "https://eca.localhost";
-
 
 function init() {
-    initMessageReciever();
-    const parameters = document.location.search;
-    const datasource  = document.body.dataset.source + parameters;
+    const datasource = new URL(document.body.dataset.source)
+    datasource.search = document.location.search;
+    ORIGIN = datasource.origin;
 
+    // Add event listener.
+    initMessageReciever();
+
+    // Add third layer iframe.
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", EMBEDDED_WINDOW_ID);
-    iframe.setAttribute("src", datasource);
+    iframe.setAttribute("src", datasource.href);
     iframe.setAttribute("frameborder", "0");
     iframe.setAttribute("height", "100%");
     iframe.setAttribute("width", "100%");
