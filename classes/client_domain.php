@@ -111,7 +111,7 @@ class client_domain extends \core\persistent {
      */
     protected function validate_domain(string $value) {
         if (!\core\ip_utils::is_domain_name($value)) {
-            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote');
+            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote', $value);
         }
 
         if ( $records = self::get_records(['domain' => $value])) {
@@ -119,7 +119,7 @@ class client_domain extends \core\persistent {
                 if ($this->get('id') == $record->get('id')) {
                     continue;
                 }
-                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote');
+                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote', $value);
             }
         }
 

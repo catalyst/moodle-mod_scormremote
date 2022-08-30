@@ -112,8 +112,8 @@ if ($editing) {
                 $client->update();
             }
 
-            // Now let's add the domains.
-            foreach ($domains as $domain) {
+            // Now let's add the unique domains.
+            foreach (array_unique($domains) as $domain) {
                 $data = (object) array('clientid' => $client->get('id'), 'domain' => $domain);
                 $domain = new client_domain(0, $data);
                 $domain->create();

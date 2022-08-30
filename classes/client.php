@@ -119,7 +119,7 @@ class client extends \core\persistent {
             && preg_match("/^.{1,253}$/", $value)                    // Is restricted to a maximum length of 253.
             && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $value)) // Lengths of each label is < 64.
         ) {
-            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote');
+            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote', $value);
         }
 
         if ( $records = self::get_records(['domain' => $value])) {
@@ -127,7 +127,7 @@ class client extends \core\persistent {
                 if ($this->get('id') == $record->get('id')) {
                     continue;
                 }
-                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote');
+                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote', $value);
             }
         }
 

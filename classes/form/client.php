@@ -17,6 +17,7 @@
 
 namespace mod_scormremote\form;
 
+use mod_scormremote\client_domain;
 use mod_scormremote\utils;
 
 defined('MOODLE_INTERNAL') || die();
@@ -71,16 +72,21 @@ class client extends \core\form\persistent {
     protected function extra_validation($data, $files, array &$errors) {
         $newerrors = array();
         $domains = utils::textarea_to_string_array($data->domains);
+        $clientid = $this->get_persistent()->get('id');
 
         foreach ($domains as $domain) {
             if (!\core\ip_utils::is_domain_name($domain)) {
-                $newerrors['domains'] = get_string('error_clientdomainnotvalid', 'mod_scormremote');
-                return $newerrors; // TODO: Incorperate the domain.
+                $newerrors['domains'] = get_string('error_clientdomainnotvalid', 'mod_scormremote', $domain);
+                return $newerrors;
             }
 
-            // TODO: is domain in use by other client?
+            // Check if the domain is in use by a different client.
+            $exists = client_domain::get_record(['domain' => $domain]);
+            if ($exists && $exists->get('clientid') != $clientid) {
+                $newerrors['domains'] = get_string('error_clientdomainnotunique', 'mod_scormremote', $domain);
+                return $newerrors;
+            }
         }
-
 
         return $newerrors;
     }
