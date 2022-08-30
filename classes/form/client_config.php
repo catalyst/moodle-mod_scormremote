@@ -58,7 +58,7 @@ class client_config extends \core\form\persistent {
 
         $options = [];
         foreach ($clients as $client) {
-            $options[$client->get('id')] = $client->get('name') . ' (' . $client->get('domain') . ')';
+            $options[$client->get('id')] = $client->get('name');
         }
 
         $mform->addElement('select', 'clientid', get_string('client', 'mod_scormremote'), $options);

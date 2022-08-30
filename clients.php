@@ -32,7 +32,9 @@ require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 use \mod_scormremote\client;
+use \mod_scormremote\client_domain;
 use \mod_scormremote\form\client as client_form;
+use \mod_scormremote\utils;
 
 $BASEURL = '/mod/scormremote/clients.php';
 
@@ -72,25 +74,57 @@ if ($editing) {
         'persistent' => $client,
         'userid' => $USER->id
     ];
+
+    // For customdata we need to supple a PHP_EOL seperated string for domains.
+    if (!$client) {
+        $customdata['domains'] = '';
+    } else {
+        $domains = client_domain::get_domain_for_client((int)$client->get('id'));
+        if (count($domains) == 0) {
+            $customdata['domains'] = '';
+        }
+        $customdata['domains'] = implode(PHP_EOL, $domains);
+    }
+
     $form = new client_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
 
     if ($form->is_cancelled()) {
         // Form cancelled.
         redirect(new moodle_url($BASEURL));
     } elseif (($data = $form->get_data())) {
+        // Start transaction for creating/updating client and domains.
+        $transaction = $DB->start_delegated_transaction();
+
         try {
+            $domains = utils::textarea_to_string_array($data->domains);
+            unset($data->domains); // We need to remove domain before creating the client.
+
             if (empty($data->id)) {
                 // Create a new record.
                 $client = new client(0, $data);
                 $client->create();
             } else {
                 // Update a record.
+                // First delete all prior entered entries.
+                client_domain::delete_by_client($client->get('id'));
+
                 $client->from_record($data);
                 $client->update();
             }
+
+            // Now let's add the domains.
+            foreach ($domains as $domain) {
+                $data = (object) array('clientid' => $client->get('id'), 'domain' => $domain);
+                $domain = new client_domain(0, $data);
+                $domain->create();
+            }
+
+            // Only if everything succeeds we commit.
+            $transaction->allow_commit();
             \core\notification::success(get_string('changessaved'));
         } catch (Exception $e) {
             \core\notification::error($e->getMessage());
+            $transaction->rollback($e);
         }
 
         // We are done, so let's redirect to base.
@@ -99,7 +133,7 @@ if ($editing) {
 }
 
 // Handling delete.
-if ($deleting && $id && $client && $delete === md5($client->get('domain'))) {
+if ($deleting && $id && $client && $delete === md5($client->get('name'))) {
     try {
         $client->delete();
         \core\notification::success(get_string('manage_clientdeletesuccess', 'mod_scormremote'));
@@ -131,9 +165,10 @@ if (!$editing && !$deleting) {
         $editaction = html_writer::link($editurl, $editicon);
         $deleteurl =  new moodle_url($BASEURL, ['id' => $client->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
+        $domains = client_domain::get_domain_for_client($client->get('id'));
         $table->data[] = [
             $client->get('name'),
-            $client->get('domain'),
+            implode(', ', $domains),
             $editaction . $deleteaction,
         ];
     }
@@ -157,9 +192,9 @@ if($editing && $id == null && $client == null) {
     // Deleting.
     // This is showing a confimation box, no header here.
     $deletemsg = get_string('manage_clientdeletemessage', 'mod_scormremote');
-    $message = "{$deletemsg}</br></br>{$client->get('name')} ({$client->get('domain')})";
+    $message = "{$deletemsg}</br></br>{$client->get('name')}";
 
-    $confirmurl = new moodle_url($BASEURL, ['id' => $id, 'deleting' => 1, 'delete' => md5($client->get('domain'))]);
+    $confirmurl = new moodle_url($BASEURL, ['id' => $id, 'deleting' => 1, 'delete' => md5($client->get('name'))]);
     $confirmbtn = new single_button($confirmurl, get_string('delete'), 'post');
     echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($BASEURL));
 

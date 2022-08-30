@@ -147,7 +147,7 @@ if (!$editing && !$deleting) {
         );
 
         $table->data[] = [
-            "{$client->get('name')} ({$client->get('domain')})",
+            $client->get('name'),
             $config->get('maxseatcount'),
             'unknown',
             $download,

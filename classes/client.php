@@ -49,6 +49,15 @@ class client extends \core\persistent {
     }
 
     /**
+     * Get the domains for this client.
+     *
+     * @return client_domain[]
+     */
+    public function get_domains() {
+        return client_domain::get_records(['clientid' => $this->get('id')]);
+    }
+
+    /**
      * Get all records where no configuration isset given scormremote instance id.
      *
      * @param int $scormremoteid

@@ -68,4 +68,30 @@ class utils {
         }
         return \context_module::instance($scormremote->coursemodule);
     }
+
+    /**
+     * Retrieve a string[] from textarea input which is seperated by new lines.
+     *
+     * @param string $value
+     * @return string[]
+     */
+    public static function textarea_to_string_array($value) {
+        $lines = array();
+
+        if (empty($value)) {
+            return $lines;
+        }
+
+        $linesraw = explode(PHP_EOL, trim($value));
+
+        foreach ($linesraw as $lineraw) {
+            $line = trim($lineraw); // Get rid of \r.
+            if (empty($line)) {
+                continue;
+            }
+            $lines[] = $line;
+        }
+
+        return $lines;
+    }
 }

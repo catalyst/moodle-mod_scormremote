@@ -17,6 +17,8 @@
 
 namespace mod_scormremote\form;
 
+use mod_scormremote\utils;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -32,28 +34,54 @@ class client extends \core\form\persistent {
     /** @var string persistent class name. */
     protected static $persistentclass = 'mod_scormremote\\client';
 
+    /** @var array Fields to remove from the persistent validation. */
+    protected static $foreignfields = array('domains');
+
     /**
      * Define the form - called by parent constructor
      */
     public function definition() {
         $mform = $this->_form;
+        $updating = !!$this->get_persistent()->get('id');
 
         $mform->addElement('text', 'name', get_string('manage_clientname', 'mod_scormremote'), 'maxlength="100"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'server');
         $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'server');
 
-        $mform->addElement('text', 'domain', get_string('manage_clientdomain', 'mod_scormremote'), 'maxlength="100"');
-        $mform->setType('domain', PARAM_TEXT);
-        $mform->addRule('domain', get_string('required'), 'required', null, 'server');
-        $mform->addRule('domain', get_string('maximumchars', '', 253), 'maxlength', 253, 'server');
-        $mform->addHelpButton('domain', 'domain', 'mod_scormremote');
+        $mform->addElement('textarea', 'domains', get_string("manage_clientdomain", "mod_scormremote"), 'wrap="virtual" rows="5" cols="50"');
+        $mform->addHelpButton('domains', 'domain', 'mod_scormremote');
+        $mform->setDefault('domains', $this->_customdata['domains']);
 
         $savetext = get_string('savechanges');
-
-        if (!$this->get_persistent()->get('id')) {
+        if (!$updating) {
             $savetext = get_string('add');
         }
         $this->add_action_buttons(true, $savetext);
+    }
+
+    /**
+     * Extra validation.
+     *
+     * @param  stdClass $data Data to validate.
+     * @param  array $files Array of files.
+     * @param  array $errors Currently reported errors.
+     * @return array of additional errors, or overridden errors.
+     */
+    protected function extra_validation($data, $files, array &$errors) {
+        $newerrors = array();
+        $domains = utils::textarea_to_string_array($data->domains);
+
+        foreach ($domains as $domain) {
+            if (!\core\ip_utils::is_domain_name($domain)) {
+                $newerrors['domains'] = get_string('error_clientdomainnotvalid', 'mod_scormremote');
+                return $newerrors; // TODO: Incorperate the domain.
+            }
+
+            // TODO: is domain in use by other client?
+        }
+
+
+        return $newerrors;
     }
 }
