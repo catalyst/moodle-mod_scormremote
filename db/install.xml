@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/scormremote/db" VERSION="20220830" COMMENT="XMLDB file for Moodle mod_scormremote"
+<XMLDB PATH="mod/scormremote/db" VERSION="20220831" COMMENT="XMLDB file for Moodle mod_scormremote"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -25,7 +25,6 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the client."/>
-        <FIELD NAME="domain" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The domain of the client."/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -33,9 +32,6 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
-      <INDEXES>
-        <INDEX NAME="unique_domain" UNIQUE="true" FIELDS="domain" COMMENT="There may only be one domain"/>
-      </INDEXES>
     </TABLE>
     <TABLE NAME="scormremote_client_configs" COMMENT="This holds the connection between client and course modules, it also contains how many seats are configured.">
       <FIELDS>

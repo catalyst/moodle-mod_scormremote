@@ -72,5 +72,26 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022083001, 'scormremote');
     }
 
+    if ($oldversion < 2022083100) {
+
+        // Define index unique_domain (unique), and field domain to be dropped form scormremote_clients.
+        $table = new xmldb_table('scormremote_clients');
+        $index = new xmldb_index('unique_domain', XMLDB_INDEX_UNIQUE, ['domain']);
+        $field = new xmldb_field('domain');
+
+        // Conditionally launch drop index unique_domain.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
+        }
+
+        // Conditionally launch drop field domain.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2022083100, 'scormremote');
+    }
+
     return true;
 }
