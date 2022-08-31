@@ -14,6 +14,47 @@ var CMI = null;
 var ORIGIN = null;
 
 const EMBEDDED_WINDOW_ID = 'embedded-third-layer';
+const ALLOWED_TO_LMSGETVALUE = [
+    'cmi.core._children',
+    'cmi.core.student_id',
+    'cmi.core.student_name',
+    'cmi.core.lesson_location',
+    'cmi.core.credit',
+    'cmi.core.lesson_status',
+    'cmi.core.entry',
+    'cmi.core.score_children',
+    'cmi.core.score.raw',
+    'cmi.core.score.max',
+    'cmi.core.score.min',
+    'cmi.core.total_time',
+    'cmi.core.lesson_mode',
+    'cmi.suspend_data',
+    'cmi.launch_data',
+    'cmi.comments',
+    'cmi.comments_from_lms',
+    'cmi.objectives._children',
+    'cmi.objectives._count',
+    'cmi.objectives.*.id',
+    'cmi.objectives.*.score._children ',
+    'cmi.objectives.*.score.raw',
+    'cmi.objectives.*.score.max',
+    'cmi.objectives.*.score.min',
+    'cmi.objectives.*.status',
+    'cmi.student_data._children',
+    'cmi.student_data.mastery_score',
+    'cmi.student_data.max_time_allowed',
+    'cmi.student_data.time_limit_action',
+    'cmi.student_preference._children',
+    'cmi.student_preference.audio',
+    'cmi.student_preference.language',
+    'cmi.student_preference.speed',
+    'cmi.student_preference.text',
+    'cmi.interactions._children',
+    'cmi.interactions._count',
+    'cmi.interactions.*.objectives._count',
+    'cmi.interactions.*.time',
+    'cmi.interactions.*.correct_responses._count',
+];
 
 function init() {
     const datasource = new URL(document.body.dataset.source)
@@ -108,7 +149,7 @@ function LMSGetValue(name) {
         var err = ErrorHandler(); // get why LMSInitialize() returned false
         message("LMSGetValue failed - Could not initialize communication with the LMS - error code: " + err.code);
     }
-    else {
+    else if (LMSGetValueAllowed(name)) {
         result = api.LMSGetValue(name);
 
         var error = ErrorHandler();
@@ -489,4 +530,16 @@ function postLMSDataModel() {
         { function: 'LMSSetDataModel', arguments: [datamodel] },
         ORIGIN
     );
+}
+
+/**
+ * Method returns a boolean value if getting varaible through LMSGetValue is allowed.
+ *
+ * @param {str} name data model defined category or element.
+ * @return {bool}
+ */
+function LMSGetValueAllowed(name) {
+    // The name might contain a number, which is used as a index.
+    // We'll a group of numbers with a *.
+    return ALLOWED_TO_LMSGETVALUE.includes(name.replace('/\d+/g', '*'));
 }
