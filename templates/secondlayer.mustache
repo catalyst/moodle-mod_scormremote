@@ -42,7 +42,15 @@
 <head>
   <title>Layer 2</title>
   <meta charset="UTF-8" />
-  <script type="text/javascript" src="{{jssource}}"></script>
+  <script>
+    // This forces the JS file to be always loaded using a cache busting param.
+    // The value changes every 5 minutes so we do get short term caching.
+    var url = '{{jssource}}?cacherev=' + Math.floor(Date.now() / 1000 / 60 / 5);
+    var d = document, tag = d.createElement('script'), s = d.getElementsByTagName('script')[0];
+    tag.type = 'text/javascript';
+    tag.src = url;
+    s.parentNode.insertBefore(tag,s);
+  </script>
   <style type="text/css">
     html,
     body,
