@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/scormremote/db" VERSION="20220831" COMMENT="XMLDB file for Moodle mod_scormremote"
+<XMLDB PATH="mod/scormremote/db" VERSION="20220901" COMMENT="XMLDB file for Moodle mod_scormremote"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >

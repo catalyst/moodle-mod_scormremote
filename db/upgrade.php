@@ -35,7 +35,7 @@ function xmldb_scormremote_upgrade($oldversion) {
 
     $dbman = $DB->get_manager();
 
-    if ($oldversion < 2022083001) {
+    if ($oldversion < 2022090100) {
         // Define table scormremote_client_domains to be created.
         $table = new xmldb_table('scormremote_client_domains');
 
@@ -69,10 +69,10 @@ function xmldb_scormremote_upgrade($oldversion) {
         $DB->execute($sql);
 
         // Scormremote savepoint reached.
-        upgrade_mod_savepoint(true, 2022083001, 'scormremote');
+        upgrade_mod_savepoint(true, 2022090100, 'scormremote');
     }
 
-    if ($oldversion < 2022083100) {
+    if ($oldversion < 2022090101) {
 
         // Define index unique_domain (unique), and field domain to be dropped form scormremote_clients.
         $table = new xmldb_table('scormremote_clients');
@@ -90,7 +90,7 @@ function xmldb_scormremote_upgrade($oldversion) {
         }
 
         // Scormremote savepoint reached.
-        upgrade_mod_savepoint(true, 2022083100, 'scormremote');
+        upgrade_mod_savepoint(true, 2022090101, 'scormremote');
     }
 
     return true;
