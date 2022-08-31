@@ -1,8 +1,8 @@
 const settings = {
     // Determines whether the API schedules an autocommit to the LMS after setting a value. |
-    autocommit:            false,
+    autocommit:            true,
     // Number of seconds to wait before autocommiting. Timer is restarted if another value is set. |
-    autocommitSeconds:     60,
+    autocommitSeconds:     5,
     logLevel:              2, // 1 => DEBUG,
                               // 2 => INFO,
                               // 3 => WARN,
@@ -32,9 +32,24 @@ function init() {
 
     // Setup the API.
     window.API = new Scorm12API(settings);
-    window.API.on("LMSCommit", postMessageToParent('LMSCommit', []));
-    window.API.on("LMSFinish", postMessageToParent('LMSFinish', []));
-    window.API.on("LMSSetValue", onLMSSetValue);
+    window.API.on("LMSCommit", () => {
+        if (!initialized) {
+            return;
+        }
+        postMessageToParent('LMSCommit')
+    });
+    window.API.on("LMSFinish", () => {
+        if (!initialized) {
+            return;
+        }
+        postMessageToParent('LMSFinish')
+    });
+    window.API.on("LMSSetValue", (CMIElement, value) => {
+        if (!initialized) {
+            return;
+        }
+        onLMSSetValue(CMIElement, value);
+    });
 
     // Ask for the data model to be sent.
     postMessageToParent('postLMSDataModel', []);
@@ -109,7 +124,7 @@ function init() {
  */
 function LMSSetDataModel(cmi) {
     window.API.loadFromJSON(cmi);
-
+    initialized = true;
     loadContent();
 }
 
