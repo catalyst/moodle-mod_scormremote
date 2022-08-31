@@ -407,7 +407,7 @@ function initMessageReciever() {
  */
 function LMSGetDataModel() {
     if ( CMI == null ) {
-        const result = LMSGetValue('cmi._children');
+        const result = 'core,suspend_data,launch_data,comments,comments_from_lms,objectives,student_data,student_preference,interactions';
         CMI = LMSGetChildren('cmi', result.split(','));
     }
     return CMI;
