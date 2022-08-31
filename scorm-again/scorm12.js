@@ -4907,7 +4907,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var scorm12 = {
   CMIString256: '^.{0,255}$',
-  CMIString4096: '^.{0,4096}$',
+  CMIString4096: '^.{0,64000}$',
   CMITime: '^(?:[01]\\d|2[0123]):(?:[012345]\\d):(?:[012345]\\d)$',
   // eslint-disable-line
   CMITimespan: '^([0-9]{2,}):([0-9]{2}):([0-9]{2})(\.[0-9]{1,2})?$',
