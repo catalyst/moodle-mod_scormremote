@@ -35,7 +35,7 @@ class packagefile {
      * @param object $scormremote instance - ields are updated and changes saved into database
      * @return void
      */
-    public static function scormremote_store(&$scormremote) {
+    public static function store(&$scormremote) {
         global $DB;
         if (!isset($scormremote->packagefile) || empty($scormremote->packagefile)) {
             // Nothing to do.
@@ -80,7 +80,7 @@ class packagefile {
      * @param object $scormremote instance - fields are updated and changes saved into database
      * @return void
      */
-    public static function scormremote_parse(&$scormremote) {
+    public static function parse(&$scormremote) {
         global $DB;
 
         $fs = get_file_storage();

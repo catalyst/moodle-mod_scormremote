@@ -66,10 +66,10 @@ function scormremote_add_instance($scormremote, $mform = null) {
         $scormremote->sha1hash = null;
 
         // Store drafted file.
-        \mod_scormremote\packagefile::scormremote_store($scormremote);
+        \mod_scormremote\packagefile::store($scormremote);
 
         // Parse the uploaded package.
-        \mod_scormremote\packagefile::scormremote_parse($scormremote);
+        \mod_scormremote\packagefile::parse($scormremote);
     }
 
     return $scormremote->id;
@@ -96,10 +96,10 @@ function scormremote_update_instance($scormremote, $mform = null) {
         unset($old);
 
         // Store drafted file.
-        \mod_scormremote\packagefile::scormremote_store($scormremote);
+        \mod_scormremote\packagefile::store($scormremote);
 
         // Parse the uploaded package.
-        \mod_scormremote\packagefile::scormremote_parse($scormremote);
+        \mod_scormremote\packagefile::parse($scormremote);
     }
 
     return true;
