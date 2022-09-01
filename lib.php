@@ -206,7 +206,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
         echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata);
         die;
-    } else if ($filearea === 'package' || $filearea === \mod_scormremote\wrapper::FILEAREA) {
+    } else if ($filearea === 'package') {
         // Check if the global setting for disabling package downloads is enabled.
         if (!$canmanageactivity) {
             return false;

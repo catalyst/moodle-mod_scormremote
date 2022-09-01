@@ -74,7 +74,7 @@ if ($data = $form->get_data()) {
         $filename .= '.zip';
     }
 
-    \mod_scormremote\wrapper::download($scormremote, $filename);
+    \mod_scormremote\packagefile::download_wrapper($scormremote, $filename);
 }
 
 // Start of output.
