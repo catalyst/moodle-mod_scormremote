@@ -42,8 +42,8 @@ $activated = array();
 
 $row[] = new tabobject('info', "$CFG->wwwroot/mod/scormremote/view.php?id=$cm->id", get_string('info'));
 
-if (has_capability('mod/scormremote:viewclientconfig', $contextmodule)) {
-    $row[] = new tabobject('clientconfig', "$CFG->wwwroot/mod/scormremote/clientconfig.php?cmid=$cm->id", get_string('clientconfig', 'mod_scormremote'));
+if (has_capability('mod/scormremote:downloadwrapper', $contextmodule)) {
+    $row[] = new tabobject('wrapper', "$CFG->wwwroot/mod/scormremote/wrapper.php?cmid=$cm->id", get_string('wrapper', 'mod_scormremote'));
 }
 
 // This makes it so if only one tab, don't show tabs.
