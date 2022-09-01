@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/scormremote/db" VERSION="20220901" COMMENT="XMLDB file for Moodle mod_scormremote"
+<XMLDB PATH="mod/scormremote/db" VERSION="20220902" COMMENT="XMLDB file for Moodle mod_scormremote"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -61,6 +61,22 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="scormremote_subscriptions" COMMENT="The couples clients to tiers and can contains additional information.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="tierid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreign_subscription_to_clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="scormremote_clients" REFFIELDS="id"/>
+        <KEY NAME="foreign_subscription_to_tierid" TYPE="foreign" FIELDS="tierid" REFTABLE="scormremote_tiers" REFFIELDS="id"/>
+        <KEY NAME="unique_subscription_client_to_tier" TYPE="unique" FIELDS="clientid, tierid"/>
       </KEYS>
     </TABLE>
   </TABLES>

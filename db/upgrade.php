@@ -136,5 +136,33 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022090103, 'scormremote');
     }
 
+    if ($oldversion < 2022090200) {
+
+        // Define table scormremote_subscriptions to be created.
+        $table = new xmldb_table('scormremote_subscriptions');
+
+        // Adding fields to table scormremote_subscriptions.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('clientid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('tierid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table scormremote_subscriptions.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('foreign_subscription_to_clientid', XMLDB_KEY_FOREIGN, ['clientid'], 'scormremote_clients', ['id']);
+        $table->add_key('foreign_subscription_to_tierid', XMLDB_KEY_FOREIGN, ['tierid'], 'scormremote_tiers', ['id']);
+        $table->add_key('unique_subscription_client_to_tier', XMLDB_KEY_UNIQUE, ['clientid', 'tierid']);
+
+        // Conditionally launch create table for scormremote_subscriptions.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2022090200, 'scormremote');
+    }
+
     return true;
 }
