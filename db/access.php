@@ -94,4 +94,28 @@ $capabilities = [
             'editingteacher' => CAP_ALLOW,
         ],
     ],
+    'mod/scormremote:managetier' => [
+        'riskbitmap'   => RISK_CONFIG,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:deletetier' => [
+        'riskbitmap'   => RISK_DATALOSS,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+    'mod/scormremote:viewtier' => [
+        'captype'      => 'read',
+        'contextlevel' => CONTEXT_COURSE,
+        'archetypes'   => [
+            'manager' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+        ],
+    ],
 ];
