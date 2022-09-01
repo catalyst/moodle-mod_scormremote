@@ -33,22 +33,6 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="scormremote_client_configs" COMMENT="This holds the connection between client and course modules, it also contains how many seats are configured.">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="scormremoteid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The scormremote module instance id linked to this config"/>
-        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The client id to which this configuration is linked."/>
-        <FIELD NAME="maxseatcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The number of seats open for allocation for this config."/>
-        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_client" TYPE="foreign" FIELDS="clientid" REFTABLE="scormremote_client_configs" REFFIELDS="id"/>
-        <KEY NAME="fk_scormremote" TYPE="foreign" FIELDS="scormremoteid" REFTABLE="scormremote" REFFIELDS="id"/>
-      </KEYS>
-    </TABLE>
     <TABLE NAME="scormremote_client_domains" COMMENT="This is where client domains are stored.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>

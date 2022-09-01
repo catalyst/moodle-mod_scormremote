@@ -54,35 +54,6 @@ class client extends \core\persistent {
     }
 
     /**
-     * Get all records where no configuration isset given scormremote instance id.
-     *
-     * @param int $scormremoteid
-     * @return client[]
-     */
-    public static function get_records_not_configured_for_scormremote($scormremoteid) {
-        global $DB;
-
-        $sql = 'SELECT c.*
-                  FROM {' . static::TABLE . '} AS c
-                 WHERE NOT EXISTS (
-                           SELECT 1
-                             FROM {' . client_config::TABLE . '}
-                            WHERE clientid = c.id
-                              AND scormremoteid = :scormremoteid
-                       )';
-
-        $clients = [];
-
-        $recordset = $DB->get_recordset_sql($sql, ['scormremoteid' => $scormremoteid]);
-        foreach ($recordset as $record) {
-            $clients[] = new static(0, $record);
-        }
-        $recordset->close();
-
-        return $clients;
-    }
-
-    /**
      * Validate a client name.
      *
      * A client name must follow these conditions:

@@ -93,5 +93,22 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022090101, 'scormremote');
     }
 
+    if ($oldversion < 2022090102) {
+        // Define key fk_scormremote (foreign) to be dropped form scormremote_client_configs.
+        $table = new xmldb_table('scormremote_client_configs');
+        $key1 = new xmldb_key('fk_scormremote', XMLDB_KEY_FOREIGN, ['scormremoteid'], 'scormremote', ['id']);
+        $key2 = new xmldb_key('fk_client', XMLDB_KEY_FOREIGN, ['clientid'], 'scormremote_client_configs', ['id']);
+
+        // Conditionally launch drop table for scormremote_client_configs.
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_key($table, $key1);
+            $dbman->drop_key($table, $key2);
+            $dbman->drop_table($table);
+        }
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2022090102, 'scormremote');
+    }
+
     return true;
 }
