@@ -47,6 +47,7 @@ $string['manage_clientadd'] = 'Add a new client';
 $string['manage_clientdeletemessage'] = 'Are you absolutely sure you want to completely delete this client and all the data it contains?';
 $string['manage_clientname'] = 'Client name';
 $string['manage_clientdomain'] = 'Client domain';
+$string['manage_tiers'] = 'Manage tiers';
 $string['filename'] = 'Filename';
 $string['filenameother'] = 'Other filename';
 $string['filenameother_help'] = 'Will only be used when "Other" is selected above. Must be a valid filename. If the filename doesn\'t end with ".zip" the system adds it for you.';

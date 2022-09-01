@@ -11,8 +11,14 @@ $clientslink = new admin_externalpage(
     get_string('manage_clients', 'mod_scormremote'),
     new moodle_url('/mod/scormremote/clients.php')
 );
+$tierslink = new admin_externalpage(
+    'scormremotetiers',
+    get_string('manage_tiers', 'mod_scormremote'),
+    new moodle_url('/mod/scormremote/tiers.php')
+);
 $ADMIN->add('modsettings', $category);
 $ADMIN->add('modscormremotecat', $general);
 $ADMIN->add('modscormremotecat', $clientslink);
+$ADMIN->add('modscormremotecat', $tierslink);
 
 $settings = null;
