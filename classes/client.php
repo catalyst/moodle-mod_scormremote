@@ -45,6 +45,16 @@ class client extends \core\persistent {
     }
 
     /**
+     * Do something right before the object is deleted from the database.
+     *
+     * @return void
+     */
+    protected function before_delete() {
+        client_domain::delete_by_client($this->get('id'));
+        subscription::delete_by_client($this->get('id'));
+    }
+
+    /**
      * Get the domains for this client.
      *
      * @return client_domain[]

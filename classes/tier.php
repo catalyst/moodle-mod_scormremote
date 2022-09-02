@@ -53,6 +53,16 @@ class tier extends \core\persistent {
     }
 
     /**
+     * Do something right before the object is deleted from the database.
+     *
+     * @return void
+     */
+    protected function before_delete() {
+        course_tier::delete_by_tier($this->get('id'));
+        subscription::delete_by_tier($this->get('id'));
+    }
+
+    /**
      * Get the tiers to which a client has a subscription.
      *
      * @param int $clientid
