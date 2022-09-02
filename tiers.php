@@ -29,6 +29,7 @@
  */
 
 use mod_scormremote\client;
+use mod_scormremote\course_tier;
 use mod_scormremote\tier;
 use mod_scormremote\form\tier as tier_form;
 use mod_scormremote\subscription;
@@ -74,14 +75,31 @@ if ($editing) {
         'persistent' => $tier,
         'userid' => $USER->id,
         'clients' => [],
+        'courses' => [],
     ];
 
-    // Setup subscribers if editing.
+    // Setup courses and subscribers if editing.
     if ($tier) {
         $clients = client::get_records_by_tierid((int)$tier->get('id'));
         $customdata['clients'] = array_map(function($client) {
             return (int) $client->get('id');
         }, $clients);
+
+        // Get the courses.
+        global $DB;
+        $sql = "SELECT c.id
+                  FROM {course} c
+                 WHERE EXISTS (
+                           SELECT 1
+                             FROM {scormremote_course_tiers} ct
+                            WHERE c.id = ct.courseid
+                              AND ct.tierid = :tierid
+                       )
+              ORDER BY C.shortname ASC";
+        $courses = $DB->get_records_sql($sql, ['tierid' => $tier->get('id')]);
+        $customdata['courses'] = array_map( function($course) {
+            return (int) $course->id;
+        }, $courses);
     }
     $form = new tier_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
 
@@ -94,7 +112,8 @@ if ($editing) {
 
         try {
             $clients = $data->clients;
-            unset($data->clients);
+            $courses = $data->courses;
+            unset($data->clients, $data->courses);
 
             if (empty($data->id)) {
                 // Create a new record.
@@ -104,6 +123,7 @@ if ($editing) {
                 // Update a record.
                 // Delete all prior entered entries.
                 subscription::delete_by_tier($tier->get('id'));
+                course_tier::delete_by_tier($tier->get('id'));
 
                 $tier->from_record($data);
                 $tier->update();
@@ -114,6 +134,13 @@ if ($editing) {
                 $data = (object) array('clientid' => $client, 'tierid' => $tier->get('id'));
                 $sub = new subscription(0, $data);
                 $sub->create();
+            }
+
+            // Add the courses.
+            foreach (array_unique($courses) as $course) {
+                $data = (object) array('courseid' => $course, 'tierid' => $tier->get('id'));
+                $ctier = new course_tier(0, $data);
+                $ctier->create();
             }
 
             // Only if everything succeeds we commit.
