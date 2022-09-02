@@ -53,7 +53,7 @@ $PAGE->set_title("{$SITE->shortname}: " . get_string('manage_tiers', 'mod_scormr
 // Authorize.
 $context = context_system::instance();
 if ($editing) {
-    require_capability('mod/scormremote:managetier', $context);
+    require_all_capabilities(['mod/scormremote:manageclient', 'mod/scormremote:managetier'], $context);
 } else if ($deleting) {
     require_capability('mod/scormremote:deletetier', $context);
 } else {

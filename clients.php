@@ -55,7 +55,7 @@ $PAGE->set_title("{$SITE->shortname}: " . get_string('manage_clients', 'mod_scor
 // Authorize.
 $context = context_system::instance();
 if ($editing) {
-    require_capability('mod/scormremote:manageclient', $context);
+    require_all_capabilities(['mod/scormremote:manageclient', 'mod/scormremote:managetier'], $context);
 } else if ($deleting) {
     require_capability('mod/scormremote:deleteclient', $context);
 } else {
@@ -128,8 +128,8 @@ if ($editing) {
             // Add the subscriptions.
             foreach (array_unique($tiers) as $tier) {
                 $data = (object) array('clientid' => $client->get('id'), 'tierid' => $tier);
-                $tier = new subscription(0, $data);
-                $tier->create();
+                $sub = new subscription(0, $data);
+                $sub->create();
             }
 
             // Only if everything succeeds we commit.
