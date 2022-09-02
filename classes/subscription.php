@@ -60,6 +60,17 @@ class subscription extends \core\persistent {
     }
 
     /**
+     * Delete all entries where tierid equals to given tier id.
+     *
+     * @param int $tierid The tier id.
+     * @return null
+     */
+    public static function delete_by_tier($tierid) {
+        global $DB;
+        return $DB->delete_records(self::TABLE, array('tierid' => $tierid));
+    }
+
+    /**
      * Validate a clientid.
      *
      * @param int $value

@@ -54,6 +54,37 @@ class client extends \core\persistent {
     }
 
     /**
+     * Get the client which is subscriped to given tier with tierid.
+     *
+     * @param int $tierid
+     * @return client[]
+     */
+    public static function get_records_by_tierid(int $tierid) {
+        global $DB;
+
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE EXISTS (
+                           SELECT 1
+                             FROM {scormremote_subscriptions} sub
+                            WHERE client.id = sub.clientid
+                              AND sub.tierid = :tierid
+                       )
+              ORDER BY client.name";
+
+        $persistents = [];
+
+        $recordset = $DB->get_recordset_sql($sql, ['tierid' => $tierid]);
+        foreach ($recordset as $record) {
+            $persistents[] = new static(0, $record);
+        }
+        $recordset->close();
+
+        return $persistents;
+    }
+
+
+    /**
      * Validate a client name.
      *
      * A client name must follow these conditions:

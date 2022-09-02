@@ -28,6 +28,7 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_scormremote\client;
 use mod_scormremote\tier;
 use mod_scormremote\form\tier as tier_form;
 use mod_scormremote\subscription;
@@ -72,7 +73,16 @@ if ($editing) {
     $customdata = [
         'persistent' => $tier,
         'userid' => $USER->id,
+        'clients' => [],
     ];
+
+    // Setup subscribers if editing.
+    if ($tier) {
+        $clients = client::get_records_by_tierid((int)$tier->get('id'));
+        $customdata['clients'] = array_map(function($client) {
+            return (int) $client->get('id');
+        }, $clients);
+    }
     $form = new tier_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
 
     if ($form->is_cancelled()) {
@@ -80,18 +90,38 @@ if ($editing) {
         redirect(new moodle_url($BASEURL));
     } elseif (($data = $form->get_data())) {
         // Handle form submission.
+        $transaction = $DB->start_delegated_transaction();
+
         try {
+            $clients = $data->clients;
+            unset($data->clients);
+
             if (empty($data->id)) {
                 // Create a new record.
                 $tier = new tier(0, $data);
                 $tier->create();
             } else {
                 // Update a record.
+                // Delete all prior entered entries.
+                subscription::delete_by_tier($tier->get('id'));
+
                 $tier->from_record($data);
                 $tier->update();
             }
+
+            // Add the subscriptions.
+            foreach (array_unique($clients) as $client) {
+                $data = (object) array('clientid' => $client, 'tierid' => $tier->get('id'));
+                $sub = new subscription(0, $data);
+                $sub->create();
+            }
+
+            // Only if everything succeeds we commit.
+            $transaction->allow_commit();
+            \core\notification::success(get_string('changessaved'));
         } catch (Exception $e) {
             \core\notification::error($e->getMessage());
+            $transaction->rollback($e);
         }
 
         // We are done, so let's redirect to base.
