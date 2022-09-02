@@ -37,6 +37,7 @@ use mod_scormremote\subscription;
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
+global $DB;
 $BASEURL = '/mod/scormremote/tiers.php';
 
 // Check if we go an ID.
@@ -86,7 +87,6 @@ if ($editing) {
         }, $clients);
 
         // Get the courses.
-        global $DB;
         $sql = "SELECT c.id
                   FROM {course} c
                  WHERE EXISTS (
@@ -177,7 +177,7 @@ if (!$editing && !$deleting) {
         get_string('manage_tiername', 'mod_scormremote'),
         get_string('manage_tierseats', 'mod_scormremote'),
         get_string('manage_tierdescription', 'mod_scormremote'),
-        get_string('subscribers', 'mod_scormremote'),
+        'S / C / M *',
         get_string('actions'),
     ];
 
@@ -185,17 +185,32 @@ if (!$editing && !$deleting) {
     $editicon = $OUTPUT->pix_icon('i/settings', get_string('edit'));
     $deleteicon = $OUTPUT->pix_icon('i/delete', get_string('delete'));
 
+    $sql = "SELECT COUNT(sr.*)
+              FROM mdl_scormremote sr
+              JOIN mdl_course c
+                ON sr.course = c.id
+              JOIN mdl_scormremote_course_tiers ct
+                ON c.id = ct.courseid
+               AND ct.tierid = :tierid";
+
     foreach ($tiers as $tier) {
         $editurl = new moodle_url($BASEURL, ['id' => $tier->get('id'), 'editingon' => 1]);
         $editaction = html_writer::link($editurl, $editicon);
         $deleteurl =  new moodle_url($BASEURL, ['id' => $tier->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
 
+        // Subscribers, Courses and Module counters.
+        $scm = [
+            subscription::count_records(['tierid' => $tier->get('id')]),
+            course_tier::count_records(['tierid' => $tier->get('id')]),
+            $DB->count_records_sql($sql, ['tierid' => $tier->get('id')]),
+        ];
+
         $table->data[] = [
             $tier->get('name'),
             $tier->get('seats'),
             $tier->get('description'),
-            subscription::count_records(['tierid' => $tier->get('id')]),
+            implode(' / ', $scm),
             $editaction . $deleteaction,
         ];
     }
@@ -224,9 +239,11 @@ if ($editing && $tier == null) {
     echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($BASEURL));
 } else {
     // Reading,
+    $createnewurl = new moodle_url($BASEURL, ['editingon' => 1]);
+
     echo $OUTPUT->heading(get_string('manage_tiers', 'mod_scormremote'), 2);
     echo html_writer::table($table);
-    $createnewurl = new moodle_url($BASEURL, ['editingon' => 1]);
+    echo html_writer::tag('p', get_string('manage_tierscmexplaination', 'mod_scormremote'));
     echo $OUTPUT->single_button($createnewurl, get_string('manage_tieradd', 'mod_scormremote'));
 }
 

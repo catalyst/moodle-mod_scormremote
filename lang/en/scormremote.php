@@ -55,6 +55,7 @@ $string['manage_tierdeletesuccess'] = 'Tier deleted successfully.';
 $string['manage_tierdescription'] = 'Description';
 $string['manage_tiername'] = 'Name';
 $string['manage_tierseats'] = 'Seats';
+$string['manage_tierscmexplaination'] = '* S / C / M stand for subscribers, course and modules.';
 $string['filename'] = 'Filename';
 $string['filenameother'] = 'Other filename';
 $string['filenameother_help'] = 'Will only be used when "Other" is selected above. Must be a valid filename. If the filename doesn\'t end with ".zip" the system adds it for you.';
