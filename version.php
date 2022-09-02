@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_scormremote';
-$plugin->release = 2022090200;
-$plugin->version = 2022090200; // Keep in lockstep with version.
+$plugin->release = 2022090201;
+$plugin->version = 2022090201; // Keep in lockstep with version.
 $plugin->requires = 2020061500;
 $plugin->maturity = MATURITY_ALPHA;

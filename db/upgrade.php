@@ -164,5 +164,32 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022090200, 'scormremote');
     }
 
+    if ($oldversion < 2022090201) {
+        // Define table scormremote_course_tiers to be created.
+        $table = new xmldb_table('scormremote_course_tiers');
+
+        // Adding fields to table scormremote_course_tiers.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('tierid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('usermodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+        // Adding keys to table scormremote_course_tiers.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('foreign_course_tiers_to_courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+        $table->add_key('foreign_course_tiers_to_tierid', XMLDB_KEY_FOREIGN, ['tierid'], 'scormremote_tiers', ['id']);
+        $table->add_key('unique_course_tiers_course_to_tier', XMLDB_KEY_UNIQUE, ['courseid', 'tierid']);
+
+        // Conditionally launch create table for scormremote_course_tiers.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2022090201, 'scormremote');
+    }
+
     return true;
 }

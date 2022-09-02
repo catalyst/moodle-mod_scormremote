@@ -79,5 +79,21 @@
         <KEY NAME="unique_subscription_client_to_tier" TYPE="unique" FIELDS="clientid, tierid"/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="scormremote_course_tiers" COMMENT="Couples course to tiers.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="tierid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreign_course_tiers_to_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="foreign_course_tiers_to_tierid" TYPE="foreign" FIELDS="tierid" REFTABLE="scormremote_tiers" REFFIELDS="id"/>
+        <KEY NAME="unique_course_tiers_course_to_tier" TYPE="unique" FIELDS="courseid, tierid"/>
+      </KEYS>
+    </TABLE>
   </TABLES>
 </XMLDB>
