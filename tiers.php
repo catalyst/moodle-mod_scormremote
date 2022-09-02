@@ -30,6 +30,7 @@
 
 use mod_scormremote\tier;
 use mod_scormremote\form\tier as tier_form;
+use mod_scormremote\subscription;
 
 require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
@@ -119,6 +120,7 @@ if (!$editing && !$deleting) {
         get_string('manage_tiername', 'mod_scormremote'),
         get_string('manage_tierseats', 'mod_scormremote'),
         get_string('manage_tierdescription', 'mod_scormremote'),
+        get_string('subscribers', 'mod_scormremote'),
         get_string('actions'),
     ];
 
@@ -136,6 +138,7 @@ if (!$editing && !$deleting) {
             $tier->get('name'),
             $tier->get('seats'),
             $tier->get('description'),
+            subscription::count_records(['tierid' => $tier->get('id')]),
             $editaction . $deleteaction,
         ];
     }

@@ -62,6 +62,7 @@ $string['filenameother_error'] = 'Given filename is not allowed. Use only the fo
 $string['seats'] = 'Seats';
 $string['seatsinuse'] = 'Seats in use';
 $string['subs'] = 'Subscriptions';
+$string['subscribers'] = 'Subscribers';
 $string['wrapper'] = 'Wrapper';
 $string['wrappedpackagefile'] = 'Wrapped package file';
 $string['error_clientconfignan'] = 'The given value for maxseatcount is not a integer.';
