@@ -34,6 +34,8 @@ require_once($CFG->libdir.'/adminlib.php');
 use \mod_scormremote\client;
 use \mod_scormremote\client_domain;
 use \mod_scormremote\form\client as client_form;
+use mod_scormremote\subscription;
+use mod_scormremote\tier;
 use \mod_scormremote\utils;
 
 $BASEURL = '/mod/scormremote/clients.php';
@@ -72,18 +74,20 @@ if ($editing) {
     // Create the form instance. We need to use the current URL and the custom data.
     $customdata = [
         'persistent' => $client,
-        'userid' => $USER->id
+        'userid' => $USER->id,
+        'domains' => '',
+        'tiers'  => [],
     ];
 
     // For customdata we need to supple a PHP_EOL seperated string for domains.
-    if (!$client) {
-        $customdata['domains'] = '';
-    } else {
+    if ($client) {
         $domains = client_domain::get_domain_for_client((int)$client->get('id'));
-        if (count($domains) == 0) {
-            $customdata['domains'] = '';
-        }
         $customdata['domains'] = implode(PHP_EOL, $domains);
+
+        $tiers = tier::get_records_by_clientid((int)$client->get('id'));
+        $customdata['tiers'] = array_map(function($tier) {
+            return (int) $tier->get('id');
+        }, $tiers);
     }
 
     $form = new client_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
@@ -92,12 +96,13 @@ if ($editing) {
         // Form cancelled.
         redirect(new moodle_url($BASEURL));
     } elseif (($data = $form->get_data())) {
-        // Start transaction for creating/updating client and domains.
+        // Start transaction for creating/updating client, domains and subscriptions.
         $transaction = $DB->start_delegated_transaction();
 
         try {
             $domains = utils::textarea_to_string_array($data->domains);
-            unset($data->domains); // We need to remove domain before creating the client.
+            $tiers = $data->tiers;
+            unset($data->domains, $data->tiers); // We need to remove domain and tiers before creating the client.
 
             if (empty($data->id)) {
                 // Create a new record.
@@ -107,16 +112,24 @@ if ($editing) {
                 // Update a record.
                 // First delete all prior entered entries.
                 client_domain::delete_by_client($client->get('id'));
+                subscription::delete_by_client($client->get('id'));
 
                 $client->from_record($data);
                 $client->update();
             }
 
-            // Now let's add the unique domains.
+            // Add the unique domains.
             foreach (array_unique($domains) as $domain) {
                 $data = (object) array('clientid' => $client->get('id'), 'domain' => $domain);
                 $domain = new client_domain(0, $data);
                 $domain->create();
+            }
+
+            // Add the subscriptions.
+            foreach (array_unique($tiers) as $tier) {
+                $data = (object) array('clientid' => $client->get('id'), 'tierid' => $tier);
+                $tier = new subscription(0, $data);
+                $tier->create();
             }
 
             // Only if everything succeeds we commit.
@@ -146,13 +159,14 @@ if ($deleting && $id && $client && $delete === md5($client->get('name'))) {
 // Handling read. Only do this when !$editing and !$deleting.
 if (!$editing && !$deleting) {
     // Not editing? Display the clients table.
-    $clients = client::get_records();
+    $clients = client::get_records([], $sort = 'name');
 
     // Create a table, with three colums; name, domain, actions.
     $table = new html_table();
     $table->head = [
         get_string('manage_clientname', 'mod_scormremote'),
         get_string('manage_clientdomain', 'mod_scormremote'),
+        get_string('subs', 'mod_scormremote'),
         get_string('actions'),
     ];
 
@@ -166,9 +180,16 @@ if (!$editing && !$deleting) {
         $deleteurl =  new moodle_url($BASEURL, ['id' => $client->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
         $domains = client_domain::get_domain_for_client($client->get('id'));
+
+        $tiers = array_map( function ($tier) {
+            return $tier->get('name');
+        }, tier::get_records_by_clientid($client->get('id')));
+
+
         $table->data[] = [
             $client->get('name'),
             implode(', ', $domains),
+            implode(', ', $tiers),
             $editaction . $deleteaction,
         ];
     }

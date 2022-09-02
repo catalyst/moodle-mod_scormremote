@@ -53,6 +53,36 @@ class tier extends \core\persistent {
     }
 
     /**
+     * Get the tiers to which a client has a subscription.
+     *
+     * @param int $clientid
+     * @return tier[]
+     */
+    public static function get_records_by_clientid(int $clientid) {
+        global $DB;
+
+        $sql = "SELECT tier.*
+                  FROM {scormremote_tiers} tier
+                 WHERE EXISTS (
+                           SELECT 1
+                             FROM {scormremote_subscriptions} sub
+                            WHERE tier.id = sub.tierid
+                              AND sub.clientid = :clientid
+                       )
+              ORDER BY tier.seats";
+
+        $persistents = [];
+
+        $recordset = $DB->get_recordset_sql($sql, ['clientid' => $clientid]);
+        foreach ($recordset as $record) {
+            $persistents[] = new static(0, $record);
+        }
+        $recordset->close();
+
+        return $persistents;
+    }
+
+    /**
      * Validate a tier name.
      *
      * A tier name must follow these conditions:

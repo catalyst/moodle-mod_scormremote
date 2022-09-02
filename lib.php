@@ -133,6 +133,14 @@ function scormremote_delete_instance($id) {
     return true;
 }
 
+/**
+ * Map icons for font-awesome themes.
+ */
+function mod_scormremote_get_fontawesome_icon_map() {
+    return [
+        'mod_scormremote:i/subscription' => 'fa-key'
+    ];
+}
 
 /**
  * Serves scorm content, introduction images and packages. Implements needed access control ;-)

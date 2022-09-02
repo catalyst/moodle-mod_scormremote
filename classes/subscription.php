@@ -19,63 +19,33 @@ namespace mod_scormremote;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Class for loading/storing scormremote client domains from the DB.
+ * Class for loading/storing scormremote subscription from the DB.
  *
  * @package     mod_scormremote
  * @author      Scott Verbeek <scottverbeek@catalyst-au.net>
  * @copyright   2022 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class client_domain extends \core\persistent {
-
-    /** Table name for this model. */
-    const TABLE = 'scormremote_client_domains';
+class subscription extends \core\persistent {
+    /** Database table. */
+    const TABLE = 'scormremote_subscriptions';
 
     /**
      * Return the definition of the properties of this model.
      *
      * @return array
      */
-    protected static function define_properties()
-    {
+    protected static function define_properties() {
         return array(
             'clientid' => array(
-                'description' => 'The client id to which this configuration is linked.',
-                'type' => PARAM_INT
+                'type' => PARAM_INT,
+                'description' => 'The id of the client.',
             ),
-            'domain' => array(
-                'description' => 'The domain associated with the client.',
-                'type' => PARAM_RAW,
+            'tierid' => array(
+                'type' => PARAM_INT,
+                'description' => 'The id of the tier.'
             ),
         );
-    }
-
-    /**
-     * Returns the client model of the clientid.
-     *
-     * @return client
-     */
-    public function get_client() {
-        return new client($this->get('clientid'));
-    }
-
-    /**
-     * Get all domains for client id.
-     *
-     * @param int $clientid The client id.
-     * @return string[]
-     */
-    public static function get_domain_for_client($clientid) {
-        global $DB;
-
-        $domains = [];
-
-        $records = $DB->get_records(self::TABLE, ['clientid' => $clientid], $sort='domain', $fields='domain');
-        foreach ($records as $record) {
-            $domains[] = $record->domain;
-        }
-
-        return $domains;
     }
 
     /**
@@ -104,23 +74,14 @@ class client_domain extends \core\persistent {
     }
 
     /**
-     * Validate a client domain.
+     * Validate a tierid.
      *
-     * @param string $value
+     * @param int $value
      * @return true|\lang_string
      */
-    protected function validate_domain(string $value) {
-        if (!\core\ip_utils::is_domain_name($value)) {
-            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote', $value);
-        }
-
-        if ( $records = self::get_records(['domain' => $value])) {
-            foreach($records as $record) {
-                if ($this->get('id') == $record->get('id')) {
-                    continue;
-                }
-                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote', $value);
-            }
+    protected function validate_tierid($value) {
+        if (!tier::record_exists($value)) {
+            return new \lang_string('error_tiernotfound', 'mod_scormremote', $value);
         }
 
         return true;
