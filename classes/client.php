@@ -93,6 +93,42 @@ class client extends \core\persistent {
         return $persistents;
     }
 
+    /**
+     * Get client by domain.
+     *
+     * @param string $domain
+     * @return client
+     */
+    public static function get_record_by_domain(string $domain) {
+        global $DB;
+
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE EXISTS (
+                           SELECT 1
+                             FROM {scormremote_client_domains} dom
+                            WHERE client.id = dom.clientid
+                              AND dom.domain = :domain
+                       )";
+
+        $record = $DB->get_record_sql($sql, ['domain' => $domain]);
+
+        if (!$record) {
+            return null;
+        }
+
+        return new static(0, $record);
+    }
+
+    /**
+     * Return boolean value. It checks if this client has at least one subscription.
+     *
+     * @return bool
+     */
+    public function has_subscription() {
+        return subscription::count_records(['clientid' => $this->get('id')]) > 0;
+    }
+
 
     /**
      * Validate a client name.

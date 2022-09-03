@@ -23,6 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use mod_scormremote\client;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -163,28 +165,51 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // // Authenticate.
-    // if (!isset($_GET['lms_origin'])) {
-    //     // Moodle might have refered, try to get it from referer.
-    //     $referer = parse_url($_SERVER['HTTP_REFERER']);
-    //     $query = array();
-    //     parse_str($referer['query'], $query);
-    //     if (!isset($query['lms_origin'])) {
-    //         // It's NOT coming remotely so login.
-    //         require_login($course, true, $cm);
-    //     } else {
-    //         // We found the client domain, set it to GET so we can use it in recursive call.
-    //         $_GET['lms_origin'] = $query['lms_origin'];
-    //         return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
-    //     }
-    // } else {
-    //     // And authorise.
-    //     $clienthostname = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
-    //     $clientconfig = \mod_scormremote\client_config::get_records_by_domain_and_scormremoteid($clienthostname, $cm->instance);
-    //     if (!$clientconfig->get('id')) {
-    //         die(403);
-    //     }
-    // }
+    // Authenticate.
+    if (!isset($_GET['lms_origin'])) {
+        // Moodle might have refered, try to get it from referer.
+        $referer = parse_url($_SERVER['HTTP_REFERER']);
+        $query = array();
+        parse_str($referer['query'], $query);
+
+        // Show error if we cannot fetch lms_origin.
+        if (!isset($query['lms_origin'])) {
+            $templatedata = [
+                'errorcode'    => 400,
+                'errortitle'   => "Bad Request",
+                'errormessage' => "The server cannot handle this request, you must make modifications to this request in order to proceed.",
+            ];
+
+            exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+        }
+
+        // We found the client domain, set it to GET so we can use it in recursive call.
+        $_GET['lms_origin'] = $query['lms_origin'];
+        return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
+    }
+
+    $origin = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
+    $client = client::get_record_by_domain($origin);
+    if (!$client) {
+        $templatedata = [
+            'errorcode'    => 401,
+            'errortitle'   => "Unauthorized",
+            'errormessage' => "This request is not authorized to continue. Contact your teacher to resolve this problem.",
+        ];
+
+        exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+    }
+
+    $sub = $client->has_subscription();
+    if (!$sub) {
+        $templatedata = [
+            'errorcode'    => 402,
+            'errortitle'   => "Subscription required",
+            'errormessage' => "This content is only available for subscribed users. Contact your teacher to resolve this problem.",
+        ];
+
+        exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+    }
 
     $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
     $lifetime = null;
