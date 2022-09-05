@@ -151,7 +151,7 @@ function scormremote_delete_instance($id) {
  * @return bool false if file not found, does not return if found - just send the file
  */
 function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG, $DB, $OUTPUT;
+    global $CFG, $DB, $OUTPUT, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -209,8 +209,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $username = required_param('student_id', PARAM_USERNAME);
         $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
 
-        $user = utils::get_user($client, $username);
-        if (!$user) {
+        $USER = utils::get_user($client, $username);
+        if (!$USER) {
             if (
                 utils::seats_taken_in_course($course->id, $client->get('id'))
                 >=
@@ -224,14 +224,14 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
                 exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
             }
-            $user = utils::create_user($client, $username, $fullname);
+            $USER = utils::create_user($client, $username, $fullname);
         }
 
         // Check if this user is_enrolled in this course.
-        if (!is_enrolled($context, $user)) {
+        if (!is_enrolled($context, $USER)) {
             $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
             $enrolplugin = enrol_get_plugin($instance->enrol);
-            $enrolplugin->enrol_user($instance, $user->id);
+            $enrolplugin->enrol_user($instance, $USER->id);
         }
 
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
@@ -296,6 +296,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // Finally send the file.
+    // Log last access and send the file.
+    user_accesstime_log();
     send_stored_file($file, $lifetime, 0, false, $options);
 }
