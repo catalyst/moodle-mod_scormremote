@@ -168,4 +168,53 @@ class utils {
         $user->id = user_create_user($user, false);
         return (object) get_complete_user_data('id', $user->id);
     }
+
+    /**
+     * Return integer value of the total seats occupied in this course by enrolments which belong to client.
+     *
+     * @param int $courseid
+     * @param int $clientid
+     * @return int
+     */
+    public static function seats_taken_in_course($courseid, $clientid) {
+        global $DB;
+
+        $sql = "SELECT COUNT(DISTINCT usr.*)
+                  FROM {user} usr
+                  JOIN {user_enrolments} usr_enr
+                    ON usr_enr.userid = usr.id
+                  JOIN {enrol} enr
+                    ON enr.id = usr_enr.enrolid
+                  JOIN {scormremote_course_tiers} ct
+                    ON enr.courseid = :courseid
+                  JOIN {scormremote_subscriptions} sub
+                    ON sub.tierid = ct.tierid
+                 WHERE usr.deleted = 0
+                   AND usr.username LIKE CONCAT('enrol_scormremote_', sub.clientid, '_%')
+                   AND sub.clientid = :clientid";
+
+        return $DB->count_records_sql($sql, ['courseid' => $courseid, 'clientid' => $clientid]);
+    }
+
+    /**
+     * Show a total count of seats that are available for client in course.
+     *
+     * @param int $courseid
+     * @param int $clientid
+     * @return int
+     */
+    public static function seats_available_in_course(int $courseid, int $clientid) {
+        global $DB;
+
+        $sql = "SELECT SUM(t.seats) AS avail
+                  FROM {scormremote_tiers} t
+                  JOIN {scormremote_course_tiers} ct
+                    ON ct.tierid = t.id
+                   AND ct.courseid = :courseid
+                  JOIN {scormremote_subscriptions} sub
+                    ON sub.tierid = t.id
+                   AND sub.clientid = :clientid";
+
+        return $DB->count_records_sql($sql, ['courseid' => $courseid, 'clientid' => $clientid]);
+    }
 }

@@ -211,7 +211,19 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
         $user = utils::get_user($client, $username);
         if (!$user) {
-            // TODO: Only create when seats are available.
+            if (
+                utils::seats_taken_in_course($course->id, $client->get('id'))
+                >=
+                utils::seats_available_in_course($course->id, $client->get('id'))
+            ) {
+                $templatedata = [
+                    'errorcode'    => 402,
+                    'errortitle'   => "Subscription limit reached",
+                    'errormessage' => "Subscription limit has been reached. Contact your teacher to resolve this problem.",
+                ];
+
+                exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+            }
             $user = utils::create_user($client, $username, $fullname);
         }
 
