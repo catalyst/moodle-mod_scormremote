@@ -129,6 +129,24 @@ class client extends \core\persistent {
         return subscription::count_records(['clientid' => $this->get('id')]) > 0;
     }
 
+    /**
+     * Return true if given courseid is in subscription.
+     *
+     * @return int $courseid
+     * @return boolean
+     */
+    public function is_course_in_subscription(int $courseid) {
+        global $DB;
+
+        $sql = "SELECT COUNT(sub.*)
+                  FROM mdl_scormremote_subscriptions sub
+                  JOIN mdl_scormremote_course_tiers ct
+                    ON sub.tierid = ct.tierid
+                   AND ct.courseid = :courseid
+                 WHERE sub.clientid = :clientid";
+
+        return $DB->count_records_sql($sql, ['courseid' => $courseid, 'clientid' => $this->get('id')]) > 0;
+    }
 
     /**
      * Validate a client name.

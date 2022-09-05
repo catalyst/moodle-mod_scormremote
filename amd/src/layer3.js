@@ -134,7 +134,10 @@ function LMSSetDataModel(cmi) {
  */
  function loadContent() {
     const parameters = document.location.search;
-    const datasource  = document.body.dataset.source + parameters;
+    const datasource  =  new URL(document.body.dataset.source + parameters);
+    datasource.search += ( datasource.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
+    datasource.search += 'student_id=' + window.API.cmi.core.student_id;
+    datasource.search += '&student_name=' + window.API.cmi.core.student_name;
 
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", EMBEDDED_WINDOW_ID);

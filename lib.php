@@ -24,6 +24,7 @@
  */
 
 use mod_scormremote\client;
+use mod_scormremote\utils;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -157,7 +158,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     // Authenticate.
-    if (!isset($_GET['lms_origin'])) {
+    if (!$origin = optional_param('lms_origin', null, PARAM_URL)) {
         // Moodle might have refered, try to get it from referer.
         $referer = parse_url($_SERVER['HTTP_REFERER']);
         $query = array();
@@ -175,11 +176,10 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         }
 
         // We found the client domain, set it to GET so we can use it in recursive call.
-        $_GET['lms_origin'] = $query['lms_origin'];
+        $_GET = $query;
         return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
     }
 
-    $origin = filter_var($_GET['lms_origin'], FILTER_SANITIZE_URL);
     $client = client::get_record_by_domain($origin);
     if (!$client) {
         $templatedata = [
@@ -191,7 +191,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
     }
 
-    $sub = $client->has_subscription();
+    $sub = $client->is_course_in_subscription($course->id);
     if (!$sub) {
         $templatedata = [
             'errorcode'    => 402,
@@ -206,6 +206,22 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     $lifetime = null;
 
     if ($filearea === 'content') {
+        $username = required_param('student_id', PARAM_USERNAME);
+        $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
+
+        $user = utils::get_user($client, $username);
+        if (!$user) {
+            // TODO: Only create when seats are available.
+            $user = utils::create_user($client, $username, $fullname);
+        }
+
+        // Check if this user is_enrolled in this course.
+        if (!is_enrolled($context, $user)) {
+            $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
+            $enrolplugin = enrol_get_plugin($instance->enrol);
+            $enrolplugin->enrol_user($instance, $user->id);
+        }
+
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
         $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
