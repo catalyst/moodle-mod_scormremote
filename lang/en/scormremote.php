@@ -48,6 +48,7 @@ $string['manage_clientdeletemessage'] = 'Are you absolutely sure you want to com
 $string['manage_clientname'] = 'Client name';
 $string['manage_clientdomain'] = 'Client domain';
 $string['manage_tiers'] = 'Manage tiers';
+$string['manage_tiersdescription'] = 'Tiers are a way to limit the amount of participants per client. That limit is called seats. Client can subscribe to a tier, which allow for them to have acces to all modules in the configured courses. Below table shows all configured tiers ordered by seats.';
 $string['manage_tieradd'] = 'Add new tier';
 $string['manage_tiercreateheader'] = 'Add new tier';
 $string['manage_tierdeletemessage'] = 'Are you absolutely sure you want to completely delete this tier and all the data it contains?';

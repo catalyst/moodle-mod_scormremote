@@ -33,7 +33,7 @@ class tier extends \core\form\persistent {
     protected static $persistentclass = 'mod_scormremote\\tier';
 
     /** @var array Fields to remove from the persistent validation. */
-    protected static $foreignfields = array('clients', 'courses');
+    protected static $foreignfields = array('courses');
 
     /**
      * Define the form - called by parent constructor
@@ -53,19 +53,6 @@ class tier extends \core\form\persistent {
         $mform->setDefault('seats', 0);
 
         $mform->addElement('textarea', 'description', get_string('manage_tierdescription', 'mod_scormremote'), 'wrap="virtual" rows="5" cols="50"');
-
-
-        $clientrecords = \mod_scormremote\client::get_records([], $sort = 'name');
-        $clients = array();
-        foreach ($clientrecords as $client) {
-            $clients[(int)$client->get('id')] = $client->get('name');
-        }
-        $options = array(
-            'multiple' => true,
-            'noselectionstring' => get_string('none'),
-        );
-        $mform->addElement('autocomplete', 'clients', get_string('subscribers', 'scormremote'), $clients, $options);
-        $mform->setDefault('clients', $this->_customdata['clients']);
 
         $courserecords = get_courses('all', $sort = 'c.shortname ASC', 'c.id, c.shortname');
         $courses = array();

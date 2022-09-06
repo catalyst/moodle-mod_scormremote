@@ -28,7 +28,6 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use mod_scormremote\client;
 use mod_scormremote\course_tier;
 use mod_scormremote\tier;
 use mod_scormremote\form\tier as tier_form;
@@ -75,17 +74,11 @@ if ($editing) {
     $customdata = [
         'persistent' => $tier,
         'userid' => $USER->id,
-        'clients' => [],
         'courses' => [],
     ];
 
     // Setup courses and subscribers if editing.
     if ($tier) {
-        $clients = client::get_records_by_tierid((int)$tier->get('id'));
-        $customdata['clients'] = array_map(function($client) {
-            return (int) $client->get('id');
-        }, $clients);
-
         // Get the courses.
         $sql = "SELECT c.id
                   FROM {course} c
@@ -111,9 +104,8 @@ if ($editing) {
         $transaction = $DB->start_delegated_transaction();
 
         try {
-            $clients = $data->clients;
             $courses = $data->courses;
-            unset($data->clients, $data->courses);
+            unset($data->courses);
 
             if (empty($data->id)) {
                 // Create a new record.
@@ -122,18 +114,10 @@ if ($editing) {
             } else {
                 // Update a record.
                 // Delete all prior entered entries.
-                subscription::delete_by_tier($tier->get('id'));
                 course_tier::delete_by_tier($tier->get('id'));
 
                 $tier->from_record($data);
                 $tier->update();
-            }
-
-            // Add the subscriptions.
-            foreach (array_unique($clients) as $client) {
-                $data = (object) array('clientid' => $client, 'tierid' => $tier->get('id'));
-                $sub = new subscription(0, $data);
-                $sub->create();
             }
 
             // Add the courses.
@@ -242,6 +226,7 @@ if ($editing && $tier == null) {
     $createnewurl = new moodle_url($BASEURL, ['editingon' => 1]);
 
     echo $OUTPUT->heading(get_string('manage_tiers', 'mod_scormremote'), 2);
+    echo html_writer::tag('p', get_string('manage_tiersdescription', 'mod_scormremote'));
     echo html_writer::table($table);
     echo html_writer::tag('p', get_string('manage_tierscmexplaination', 'mod_scormremote'));
     echo $OUTPUT->single_button($createnewurl, get_string('manage_tieradd', 'mod_scormremote'));
