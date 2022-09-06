@@ -77,6 +77,7 @@ $string['error_clientnamenotvalid'] = 'The given value for client name isn\'t va
 $string['error_clientdomainnotvalid'] = 'The given value "{$a}" is not a valid domain (example: google.com).';
 $string['error_clientdomainnotunique'] = 'A client already exists with domain "{$a}". Must be unique.';
 $string['error_coursenotfound'] = 'The given course id was not found (id: {$a->id}).';
+$string['error_coursesnotunique'] = 'Multiple tiers can only be selected when each of these has a unique set of courses.';
 $string['error_tiernotfound'] = 'The given tier id was not found (id: {$a->id}).';
 $string['error_tiernamelength'] = 'Tier name must be between 1 and 100 characters, given name contains {$a}.';
 $string['error_tierseatnumber'] = 'Tier seats must be greater than or equal to 0.';

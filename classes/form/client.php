@@ -103,6 +103,21 @@ class client extends \core\form\persistent {
             }
         }
 
+        if (count($data->tiers) > 1) {
+            global $DB;
+            // Get all the tiers.
+            $courses = array();
+            foreach ($data->tiers as $tierid) {
+                $set = $DB->get_fieldset_select('scormremote_course_tiers', 'courseid',
+                    'tierid = :tierid', ['tierid' => $tierid]);
+                if (array_intersect($courses, $set)) {
+                    $newerrors['tiers'] = get_string('error_coursesnotunique', 'mod_scormremote');
+                    return $newerrors;
+                }
+                $courses = array_merge($courses, $set);
+            }
+        }
+
         return $newerrors;
     }
 }
