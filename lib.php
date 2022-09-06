@@ -24,6 +24,7 @@
  */
 
 use mod_scormremote\client;
+use mod_scormremote\tier;
 use mod_scormremote\utils;
 
 defined('MOODLE_INTERNAL') || die();
@@ -191,7 +192,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
     }
 
-    $sub = $client->is_course_in_subscription($course->id);
+    $sub = $client->get_subscription_by_courseid($course->id);
     if (!$sub) {
         $templatedata = [
             'errorcode'    => 402,
@@ -209,13 +210,10 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $username = required_param('student_id', PARAM_USERNAME);
         $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
 
-        $USER = utils::get_user($client, $username);
-        if (!$USER) {
-            if (
-                utils::seats_taken_in_course($course->id, $client->get('id'))
-                >=
-                utils::seats_available_in_course($course->id, $client->get('id'))
-            ) {
+        $user = utils::get_user($client, $username);
+        if (!$user) {
+            $tier = new tier($sub->get('tierid'));
+            if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 $templatedata = [
                     'errorcode'    => 402,
                     'errortitle'   => "Subscription limit reached",
@@ -224,14 +222,14 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
                 exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
             }
-            $USER = utils::create_user($client, $username, $fullname);
+            $user = utils::create_user($origin, $client, $username, $fullname);
         }
 
         // Check if this user is_enrolled in this course.
-        if (!is_enrolled($context, $USER)) {
+        if (!is_enrolled($context, $user)) {
             $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
             $enrolplugin = enrol_get_plugin($instance->enrol);
-            $enrolplugin->enrol_user($instance, $USER->id);
+            $enrolplugin->enrol_user($instance, $user->id);
         }
 
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
@@ -297,6 +295,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     // Log last access and send the file.
+    $USER = $user;
     user_accesstime_log($course->id);
     send_stored_file($file, $lifetime, 0, false, $options);
 }

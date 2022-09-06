@@ -94,6 +94,34 @@ class client extends \core\persistent {
     }
 
     /**
+     * Get the client that does not have a subscription.
+     *
+     * @return client[]
+     */
+    public static function get_records_without_subscription() {
+        global $DB;
+
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE NOT EXISTS (
+                           SELECT 1
+                             FROM {scormremote_subscriptions} sub
+                            WHERE client.id = sub.clientid
+                       )
+              ORDER BY client.name";
+
+        $persistents = [];
+
+        $recordset = $DB->get_recordset_sql($sql);
+        foreach ($recordset as $record) {
+            $persistents[] = new static(0, $record);
+        }
+        $recordset->close();
+
+        return $persistents;
+    }
+
+    /**
      * Get client by domain.
      *
      * @param string $domain
@@ -118,6 +146,31 @@ class client extends \core\persistent {
         }
 
         return new static(0, $record);
+    }
+
+    /**
+     * Returns the subscription to which the courseid is a part of. This can only be one.
+     *
+     * @param int $courseid
+     * @return subsciption|null
+     */
+    public function get_subscription_by_courseid(int $courseid) {
+        global $DB;
+
+        $sql = "SELECT sub.*
+                  FROM mdl_scormremote_subscriptions sub
+                  JOIN mdl_scormremote_course_tiers ct
+                    ON sub.tierid = ct.tierid
+                   AND ct.courseid = :courseid
+                 WHERE sub.clientid = :clientid";
+
+        $record = $DB->get_record_sql($sql, ['courseid' => $courseid, 'clientid' => $this->get('id')]);
+
+        if (!$record) {
+            return null;
+        }
+
+        return new subscription(0, $record);
     }
 
     /**

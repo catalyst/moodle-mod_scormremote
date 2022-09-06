@@ -49,6 +49,41 @@ class subscription extends \core\persistent {
     }
 
     /**
+     * Get records by client id.
+     *
+     * @param integer $clientid
+     * @return subscription[]
+     */
+    public static function get_records_by_clientid(int $clientid) {
+        return static::get_records(['clientid' => $clientid]);
+    }
+
+    /**
+     * Returns the users objects of users in that are using this subscription for access.
+     *
+     * @return int
+     */
+    public function get_participant_count() {
+        global $DB;
+
+        $sql = "SELECT COUNT(DISTINCT usr.*) as taken
+                  FROM mdl_user usr                      -- from users
+                  JOIN mdl_user_enrolments usr_enr       -- select all enrolments
+                    ON usr_enr.userid = usr.id
+                  JOIN mdl_enrol enr                     -- select course enrolment
+                    ON enr.id = usr_enr.enrolid
+                  JOIN mdl_scormremote_course_tiers ct
+                    ON enr.courseid = ct.courseid        -- join tiers which are connected to the course
+                  JOIN mdl_scormremote_subscriptions sub
+                    ON sub.tierid = ct.tierid            -- the client must be subscribed to the tier
+                 WHERE usr.deleted = 0                   -- dont't select deleted users
+                   AND usr.username LIKE CONCAT('enrol_scormremote_', sub.clientid, '_%')
+                   AND sub.id = :subscriptionid";
+
+        return $DB->count_records_sql($sql, ['subscriptionid' => $this->get('id')]);
+    }
+
+    /**
      * Delete all entries where clientid equals to given client id.
      *
      * @param int $clientid The client id.

@@ -181,15 +181,17 @@ if (!$editing && !$deleting) {
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
         $domains = client_domain::get_domain_for_client($client->get('id'));
 
-        $tiers = array_map( function ($tier) {
-            return $tier->get('name');
-        }, tier::get_records_by_clientid($client->get('id')));
+        $subs = array();
+        foreach (subscription::get_records_by_clientid($client->get('id')) as $sub) {
+            $tier = new tier($sub->get('tierid'));
+            $subs[] = "{$tier->get('name')} ( {$sub->get_participant_count()} / {$tier->get('seats')} )";
+        }
 
 
         $table->data[] = [
             $client->get('name'),
             implode(', ', $domains),
-            implode(', ', $tiers),
+            implode(', ', $subs),
             $editaction . $deleteaction,
         ];
     }
