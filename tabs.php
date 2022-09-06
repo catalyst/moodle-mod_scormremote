@@ -23,8 +23,10 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die;
+
 if (empty($scormremote)) {
-    print_error('cannotaccess', 'mod_scorm');
+    throw new \moodle_exception('cannotaccess', 'mod_scorm');
 }
 if (!isset($currenttab)) {
     $currenttab = '';
@@ -43,7 +45,11 @@ $activated = array();
 $row[] = new tabobject('info', "$CFG->wwwroot/mod/scormremote/view.php?id=$cm->id", get_string('info'));
 
 if (has_capability('mod/scormremote:downloadwrapper', $contextmodule)) {
-    $row[] = new tabobject('wrapper', "$CFG->wwwroot/mod/scormremote/wrapper.php?cmid=$cm->id", get_string('wrapper', 'mod_scormremote'));
+    $row[] = new tabobject(
+        'wrapper',
+        "$CFG->wwwroot/mod/scormremote/wrapper.php?cmid=$cm->id",
+        get_string('wrapper', 'mod_scormremote')
+    );
 }
 
 // This makes it so if only one tab, don't show tabs.

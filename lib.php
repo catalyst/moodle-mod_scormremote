@@ -27,8 +27,6 @@ use mod_scormremote\client;
 use mod_scormremote\tier;
 use mod_scormremote\utils;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Return if the plugin supports $feature.
  *
@@ -121,7 +119,7 @@ function scormremote_delete_instance($id) {
     $cm = get_coursemodule_from_instance('scormremote', $id);
     $context = \context_module::instance($cm->id);
 
-    // Delete all the files
+    // Delete all the files.
     $fs = get_file_storage();
     $fs->delete_area_files($context->id, 'mod_scormremote', 'package');
     $fs->delete_area_files($context->id, 'mod_scormremote', 'content');
@@ -169,8 +167,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         if (!isset($query['lms_origin'])) {
             $templatedata = [
                 'errorcode'    => 400,
-                'errortitle'   => "Bad Request",
-                'errormessage' => "The server cannot handle this request, you must make modifications to this request in order to proceed.",
+                'errortitle'   => get_string('errorpage_badrequesttitle', 'mod_scormremote'),
+                'errormessage' => get_string('errorpage_badrequestmessage', 'mod_scormremote'),
             ];
 
             exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
@@ -185,8 +183,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     if (!$client) {
         $templatedata = [
             'errorcode'    => 401,
-            'errortitle'   => "Unauthorized",
-            'errormessage' => "This request is not authorized to continue. Contact your teacher to resolve this problem.",
+            'errortitle'   => get_string('errorpage_unauthorizedtitle', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote'),
         ];
 
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
@@ -196,8 +194,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     if (!$sub) {
         $templatedata = [
             'errorcode'    => 402,
-            'errortitle'   => "Subscription required",
-            'errormessage' => "This content is only available for subscribed users. Contact your teacher to resolve this problem.",
+            'errortitle'   => get_string('errorpage_subrequiredtitle', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote'),
         ];
 
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
@@ -216,8 +214,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 $templatedata = [
                     'errorcode'    => 402,
-                    'errortitle'   => "Subscription limit reached",
-                    'errormessage' => "Subscription limit has been reached. Contact your teacher to resolve this problem.",
+                    'errortitle'   => get_string('errorpage_sublimittitle', 'mod_scormremote'),
+                    'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote'),
                 ];
 
                 exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
@@ -286,7 +284,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     $fs = get_file_storage();
-    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) || $file->is_directory()) {
         if ($filearea === 'content') { // Return file not found straight away to improve performance.
             send_header_404();
             die;

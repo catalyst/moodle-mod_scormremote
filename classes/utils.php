@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class contains static utilitarion methods.
  *
@@ -155,7 +153,7 @@ class utils {
         global $CFG;
         require_once($CFG->dirroot.'/user/lib.php');
 
-        [$firstname, $lastname] = utils::fullname_to_first_and_lastname($fullname);
+        [$firstname, $lastname] = static::fullname_to_first_and_lastname($fullname);
 
         $user = new \stdClass();
         $user->username = static::transform_username($client, $username);

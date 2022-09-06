@@ -37,7 +37,7 @@ require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 global $DB;
-$BASEURL = '/mod/scormremote/tiers.php';
+$baseurl = '/mod/scormremote/tiers.php';
 
 // Check if we go an ID.
 $id       = optional_param('id', null, PARAM_INT);
@@ -47,7 +47,7 @@ $delete   = optional_param('delete', '', PARAM_ALPHANUM); // Confirmation hash.
 
 // No guest autologin.
 require_login(0, false);
-$PAGE->set_url(new moodle_url($BASEURL, ['id' => $id, 'editingon' => $editing]));
+$PAGE->set_url(new moodle_url($baseurl, ['id' => $id, 'editingon' => $editing]));
 admin_externalpage_setup('scormremotetiers');
 $PAGE->set_title("{$SITE->shortname}: " . get_string('manage_tiers', 'mod_scormremote'));
 
@@ -94,12 +94,12 @@ if ($editing) {
             return (int) $course->id;
         }, $courses);
     }
-    $form = new tier_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
+    $form = new tier_form(new moodle_url($baseurl, ['id' => $id, 'editingon' => 1]), $customdata);
 
     if ($form->is_cancelled()) {
         // Form cancelled.
-        redirect(new moodle_url($BASEURL));
-    } elseif (($data = $form->get_data())) {
+        redirect(new moodle_url($baseurl));
+    } else if (($data = $form->get_data())) {
         // Handle form submission.
         $transaction = $DB->start_delegated_transaction();
 
@@ -136,7 +136,7 @@ if ($editing) {
         }
 
         // We are done, so let's redirect to base.
-        redirect(new moodle_url($BASEURL));
+        redirect(new moodle_url($baseurl));
     }
 }
 
@@ -148,7 +148,7 @@ if ($deleting && $tier && $delete === md5($tier->get('name'))) {
     } catch (Exception $e) {
         \core\notification::error($e->getMessage());
     }
-    redirect(new moodle_url($BASEURL));
+    redirect(new moodle_url($baseurl));
 }
 
 // Handling read.
@@ -178,9 +178,9 @@ if (!$editing && !$deleting) {
                AND ct.tierid = :tierid";
 
     foreach ($tiers as $tier) {
-        $editurl = new moodle_url($BASEURL, ['id' => $tier->get('id'), 'editingon' => 1]);
+        $editurl = new moodle_url($baseurl, ['id' => $tier->get('id'), 'editingon' => 1]);
         $editaction = html_writer::link($editurl, $editicon);
-        $deleteurl =  new moodle_url($BASEURL, ['id' => $tier->get('id'), 'deleting' => 1]);
+        $deleteurl = new moodle_url($baseurl, ['id' => $tier->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
 
         // Subscribers, Courses and Module counters.
@@ -218,12 +218,12 @@ if ($editing && $tier == null) {
     $deletemsg = get_string('manage_tierdeletemessage', 'mod_scormremote');
     $message = "{$deletemsg}</br></br>{$tier->get('name')}";
 
-    $confirmurl = new moodle_url($BASEURL, ['id' => $id, 'deleting' => 1, 'delete' => md5($tier->get('name'))]);
+    $confirmurl = new moodle_url($baseurl, ['id' => $id, 'deleting' => 1, 'delete' => md5($tier->get('name'))]);
     $confirmbtn = new single_button($confirmurl, get_string('delete'), 'post');
-    echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($BASEURL));
+    echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($baseurl));
 } else {
-    // Reading,
-    $createnewurl = new moodle_url($BASEURL, ['editingon' => 1]);
+    // Reading.
+    $createnewurl = new moodle_url($baseurl, ['editingon' => 1]);
 
     echo $OUTPUT->heading(get_string('manage_tiers', 'mod_scormremote'), 2);
     echo html_writer::tag('p', get_string('manage_tiersdescription', 'mod_scormremote'));

@@ -20,8 +20,6 @@ namespace mod_scormremote\form;
 use mod_scormremote\client_domain;
 use mod_scormremote\utils;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * This file contains the form add/update a scormremote client.
  *
@@ -50,7 +48,8 @@ class client extends \core\form\persistent {
         $mform->addRule('name', get_string('required'), 'required', null, 'server');
         $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'server');
 
-        $mform->addElement('textarea', 'domains', get_string("manage_clientdomain", "mod_scormremote"), 'wrap="virtual" rows="5" cols="50"');
+        $mform->addElement('textarea', 'domains', get_string("manage_clientdomain", "mod_scormremote"),
+            'wrap="virtual" rows="5" cols="50"');
         $mform->addHelpButton('domains', 'domain', 'mod_scormremote');
         $mform->setDefault('domains', $this->_customdata['domains']);
 

@@ -27,7 +27,7 @@ require_once("../../config.php");
 require_once($CFG->libdir.'/tablelib.php');
 require_once($CFG->libdir.'/formslib.php');
 
-$BASEURL = '/mod/scormremote/wrapper.php';
+$baseurl = '/mod/scormremote/wrapper.php';
 
 // Parameters.
 $cmid     = required_param('cmid', PARAM_INT); // Must have cmid.
@@ -45,16 +45,16 @@ $contextmodule = context_module::instance($cm->id);
 require_login($course, false, $cm);
 require_capability('mod/scormremote:downloadwrapper', $contextmodule);
 
-$PAGE->set_url(new moodle_url($BASEURL, ['cmid' => $cmid]));
+$PAGE->set_url(new moodle_url($baseurl, ['cmid' => $cmid]));
 $PAGE->set_title("$course->shortname: ".format_string($scormremote->name));
 $PAGE->set_heading($course->fullname);
-$PAGE->navbar->add(get_string('wrapper', 'mod_scormremote'), new moodle_url($BASEURL, ['cmid' => $cmid]));
+$PAGE->navbar->add(get_string('wrapper', 'mod_scormremote'), new moodle_url($baseurl, ['cmid' => $cmid]));
 
 $customdata = [
     'name' => $scormremote->name,
     'reference' => $scormremote->reference,
 ];
-$form = new \mod_scormremote\form\wrapper(new moodle_url($BASEURL, ['cmid' => $cmid, 'editingon' => 1]), $customdata);
+$form = new \mod_scormremote\form\wrapper(new moodle_url($baseurl, ['cmid' => $cmid, 'editingon' => 1]), $customdata);
 
 if ($data = $form->get_data()) {
     switch ((int)$data->filenamegroup['filename']) {

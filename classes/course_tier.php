@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for loading/storing scormremote tier to course relation from the DB.
  *

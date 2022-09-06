@@ -17,8 +17,6 @@
 
 namespace mod_scormremote\form;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * This file contains the form add/update a scormremote tier.
  *
@@ -52,7 +50,8 @@ class tier extends \core\form\persistent {
         $mform->addRule('seats', get_string('required'), 'required', null, 'server');
         $mform->setDefault('seats', 0);
 
-        $mform->addElement('textarea', 'description', get_string('manage_tierdescription', 'mod_scormremote'), 'wrap="virtual" rows="5" cols="50"');
+        $mform->addElement('textarea', 'description', get_string('manage_tierdescription', 'mod_scormremote'),
+             'wrap="virtual" rows="5" cols="50"');
 
         $courserecords = get_courses('all', $sort = 'c.shortname ASC', 'c.id, c.shortname');
         $courses = array();

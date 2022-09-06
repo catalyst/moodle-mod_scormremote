@@ -19,8 +19,6 @@ namespace mod_scormremote\form;
 
 use coding_exception;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * This file contains the form add/update a scormremote client.
  *

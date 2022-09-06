@@ -18,8 +18,6 @@ namespace mod_scormremote;
 
 use core_files\archive_writer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class contains static methods for handling SCORM packagefile.
  *
@@ -51,7 +49,6 @@ class packagefile {
         $context = \context_module::instance($scormremote->coursemodule);
         $component = 'mod_scormremote';
         $filearea = 'package';
-
 
         // Remove any old SCORM packages for this cm instance.
         $fs->delete_area_files($context->id, $component, $filearea);
@@ -142,10 +139,10 @@ class packagefile {
         // From this instance's manifest, we replacing all files by index files. Each resource (SCO) will have it's own index file
         // names sco_1.html, sco_2.html, sco_3.html. This html is generated from the secondlayer.mustache and contains the
         // datasource which points towards the third layer, but contains the filepath for the original file.
-        $count = 0; // $key => value, doesn't appear to work.
+        $count = 0; // The $key => value, doesn't appear to work. So maintain counter ourself.
         foreach ($manifest->resources->resource as $resource) {
             // Remove all the files from each resource.
-            while(count($resource->file) > 0) {
+            while (count($resource->file) > 0) {
                 unset($resource->file[0]);
             }
 

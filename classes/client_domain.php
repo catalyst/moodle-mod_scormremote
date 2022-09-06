@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for loading/storing scormremote client domains from the DB.
  *
@@ -36,8 +34,7 @@ class client_domain extends \core\persistent {
      *
      * @return array
      */
-    protected static function define_properties()
-    {
+    protected static function define_properties() {
         return array(
             'clientid' => array(
                 'description' => 'The client id to which this configuration is linked.',
@@ -70,7 +67,7 @@ class client_domain extends \core\persistent {
 
         $domains = [];
 
-        $records = $DB->get_records(self::TABLE, ['clientid' => $clientid], $sort='domain', $fields='domain');
+        $records = $DB->get_records(self::TABLE, ['clientid' => $clientid], $sort = 'domain', $fields = 'domain');
         foreach ($records as $record) {
             $domains[] = $record->domain;
         }
@@ -115,7 +112,7 @@ class client_domain extends \core\persistent {
         }
 
         if ( $records = self::get_records(['domain' => $value])) {
-            foreach($records as $record) {
+            foreach ($records as $record) {
                 if ($this->get('id') == $record->get('id')) {
                     continue;
                 }
