@@ -61,31 +61,6 @@ $capabilities = [
             'editingteacher' => CAP_ALLOW,
         ],
     ],
-    'mod/scormremote:manageclientconfig' => [
-        'riskbitmap'   => RISK_MANAGETRUST,
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes'   => [
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-        ],
-    ],
-    'mod/scormremote:deleteclientconfig' => [
-        'riskbitmap'   => RISK_DATALOSS,
-        'captype'      => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes'   => [
-            'manager' => CAP_ALLOW,
-        ],
-    ],
-    'mod/scormremote:viewclientconfig' => [
-        'captype'      => 'read',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes'   => [
-            'manager' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-        ],
-    ],
     'mod/scormremote:downloadwrapper' => [
         'captype'      => 'read',
         'contextlevel' => CONTEXT_COURSE,
