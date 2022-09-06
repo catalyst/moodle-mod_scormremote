@@ -297,6 +297,6 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     // Log last access and send the file.
-    user_accesstime_log();
+    user_accesstime_log($course->id);
     send_stored_file($file, $lifetime, 0, false, $options);
 }
