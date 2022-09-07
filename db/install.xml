@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/scormremote/db" VERSION="20220812" COMMENT="XMLDB file for Moodle mod_scormremote"
+<XMLDB PATH="mod/scormremote/db" VERSION="20220902" COMMENT="XMLDB file for Moodle mod_scormremote"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -25,7 +25,19 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the client."/>
-        <FIELD NAME="domain" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The domain of the client."/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="scormremote_client_domains" COMMENT="This is where client domains are stored.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The client id to which this domain is linked."/>
+        <FIELD NAME="domain" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The domain."/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -34,23 +46,53 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="unique_domain" UNIQUE="true" FIELDS="domain" COMMENT="There may only be one domain"/>
+        <INDEX NAME="unique_client_domain" UNIQUE="true" FIELDS="domain" COMMENT="There may only be one domain"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="scormremote_client_configs" COMMENT="This holds the connection between client and course modules, it also contains how many seats are configured.">
+    <TABLE NAME="scormremote_tiers" COMMENT="Holds information about seats and is linked to subscriptions and courses.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="scormremoteid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The scormremote module instance id linked to this config"/>
-        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The client id to which this configuration is linked."/>
-        <FIELD NAME="maxseatcount" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The number of seats open for allocation for this config."/>
+        <FIELD NAME="name" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false" COMMENT="The name of the tier"/>
+        <FIELD NAME="description" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="seats" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The maximum allowable seats."/>
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fk_client" TYPE="foreign" FIELDS="clientid" REFTABLE="scormremote_client_configs" REFFIELDS="id"/>
-        <KEY NAME="fk_scormremote" TYPE="foreign" FIELDS="scormremoteid" REFTABLE="scormremote" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="scormremote_subscriptions" COMMENT="The couples clients to tiers and can contains additional information.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="clientid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="tierid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreign_subscription_to_clientid" TYPE="foreign" FIELDS="clientid" REFTABLE="scormremote_clients" REFFIELDS="id"/>
+        <KEY NAME="foreign_subscription_to_tierid" TYPE="foreign" FIELDS="tierid" REFTABLE="scormremote_tiers" REFFIELDS="id"/>
+        <KEY NAME="unique_subscription_client_to_tier" TYPE="unique" FIELDS="clientid, tierid"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="scormremote_course_tiers" COMMENT="Couples course to tiers.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="tierid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="foreign_course_tiers_to_courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
+        <KEY NAME="foreign_course_tiers_to_tierid" TYPE="foreign" FIELDS="tierid" REFTABLE="scormremote_tiers" REFFIELDS="id"/>
+        <KEY NAME="unique_course_tiers_course_to_tier" TYPE="unique" FIELDS="courseid, tierid"/>
       </KEYS>
     </TABLE>
   </TABLES>

@@ -25,6 +25,8 @@ const ORIGIN = "*"; //TODO: issue 27
 
 /**
  * Initialize communication with
+ *
+ * @returns {null}
  */
 function init() {
     // Create event listener.
@@ -42,7 +44,10 @@ function init() {
         if (!initialized) {
             return;
         }
-        postMessageToParent('LMSFinish')
+        postMessageToParent('LMSFinish');
+        if (window.API.cmi.core.lesson_mode !== 'review') {
+            postCompletion();
+        }
     });
     window.API.on("LMSSetValue", (CMIElement, value) => {
         if (!initialized) {
@@ -131,10 +136,14 @@ function LMSSetDataModel(cmi) {
 /**
  * Load the requested SCO content.
  *
+ * @returns {null}
  */
  function loadContent() {
     const parameters = document.location.search;
-    const datasource  = document.body.dataset.source + parameters;
+    const datasource  =  new URL(document.body.dataset.source + parameters);
+    datasource.search += ( datasource.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
+    datasource.search += 'student_id=' + window.API.cmi.core.student_id;
+    datasource.search += '&student_name=' + window.API.cmi.core.student_name;
 
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", EMBEDDED_WINDOW_ID);
@@ -145,12 +154,76 @@ function LMSSetDataModel(cmi) {
     document.body.insertBefore(iframe, document.getElementById("wrapper"));
 }
 
+/**
+ * Handle LMSSetValue call.
+ *
+ * @param {string} name
+ * @param {string} value
+ */
 function onLMSSetValue(name, value) {
     message('Setting "' + name + '" to value: "' + value + '"');
     postMessageToParent('LMSSetValue', [name, value]);
+
+    // On submit of lesson status we log completion.
+    if (
+        window.API.cmi.core.lesson_mode !== 'review'
+        && name === 'cmi.core.lesson_status'
+        && ['completed', 'failed', 'passed'].includes(value)
+    ) {
+        postCompletion();
+    }
 };
 
+/**
+ * Post to host that activity has been completed.
+ *
+ * @returns {null}
+ */
+function postCompletion() {
+    // Fetch the src of the iframe. This already contains the needed search parameters.
+    const submitsource  =  new URL(document.getElementById(EMBEDDED_WINDOW_ID).src);
 
+    // We need to append the search params with the context id.
+    const contextid = getContextIDFromPathname(submitsource.pathname);
+    submitsource.search += '&contextid=' + contextid;
+
+    // Replace old pathname with submit complete.
+    submitsource.pathname = '/mod/scormremote/submit_completion.php';
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", submitsource.href, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send();
+}
+
+/**
+ * Get context id from pathname.
+ *
+ * Example pathname /pluginfile.php/123/content/0/index.html then the functions returns 123.
+ *
+ * @param {string} pathname
+ * @returns {number}
+ */
+function getContextIDFromPathname(pathname) {
+    const items = pathname.split('/');
+
+    // Return the first element which is a number in items.
+    for (let index = 0; index < items.length; index++) {
+        if (items[index] !== '' && !isNaN(items[index])) {
+            return parseInt(items[index]);
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * Send postMessage to parent window in correct format.
+ *
+ * @param {string} functionName
+ * @param {*} arguments
+ * @returns {null}
+ */
 function postMessageToParent(functionName, arguments = []) {
     message('send a message to parent calling function "' + functionName + '"');
     window.parent.postMessage(

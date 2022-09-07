@@ -47,7 +47,10 @@ echo $OUTPUT->heading($modulenameplural);
 $scormremotes = get_all_instances_in_course('scormremote', $course);
 
 if (empty($scormremotes)) {
-    notice(get_string('no$scormremoteinstances', 'mod_scormremote'), new moodle_url('/course/view.php', array('id' => $course->id)));
+    notice(
+        get_string('no$scormremoteinstances', 'mod_scormremote'),
+        new moodle_url('/course/view.php', array('id' => $course->id))
+    );
 }
 
 $table = new html_table();
@@ -76,7 +79,7 @@ foreach ($scormremotes as $scormremote) {
             format_string($scormremote->name, true));
     }
 
-    if ($course->format == 'weeks' or $course->format == 'topics') {
+    if ($course->format == 'weeks' || $course->format == 'topics') {
         $table->data[] = array($scormremote->section, $link);
     } else {
         $table->data[] = array($link);

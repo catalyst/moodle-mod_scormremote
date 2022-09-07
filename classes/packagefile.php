@@ -16,7 +16,7 @@
 
 namespace mod_scormremote;
 
-defined('MOODLE_INTERNAL') || die();
+use core_files\archive_writer;
 
 /**
  * Class contains static methods for handling SCORM packagefile.
@@ -33,7 +33,7 @@ class packagefile {
      * @param object $scormremote instance - ields are updated and changes saved into database
      * @return void
      */
-    public static function scormremote_store(&$scormremote) {
+    public static function store(&$scormremote) {
         global $DB;
         if (!isset($scormremote->packagefile) || empty($scormremote->packagefile)) {
             // Nothing to do.
@@ -49,7 +49,6 @@ class packagefile {
         $context = \context_module::instance($scormremote->coursemodule);
         $component = 'mod_scormremote';
         $filearea = 'package';
-
 
         // Remove any old SCORM packages for this cm instance.
         $fs->delete_area_files($context->id, $component, $filearea);
@@ -78,7 +77,7 @@ class packagefile {
      * @param object $scormremote instance - fields are updated and changes saved into database
      * @return void
      */
-    public static function scormremote_parse(&$scormremote) {
+    public static function parse(&$scormremote) {
         global $DB;
 
         $fs = get_file_storage();
@@ -120,5 +119,62 @@ class packagefile {
 
         $scormremote->sha1hash = $newhash;
         $DB->update_record('scormremote', $scormremote);
+    }
+
+    /**
+     * Download a .zip archive which is what should be distributed towards clients.
+     *
+     * @param object $scormremote instance
+     * @param string $filename
+     * @return \stored_file
+     */
+    public static function download_wrapper($scormremote, $filename) {
+        global $CFG, $OUTPUT;
+
+        // Local variables.
+        $context = \mod_scormremote\utils::get_context($scormremote);
+        $manifest = simplexml_load_string(\mod_scormremote\utils::get_scormremote_imsmanifest($scormremote));
+        $zip = archive_writer::get_stream_writer($filename, archive_writer::ZIP_WRITER);
+
+        // From this instance's manifest, we replacing all files by index files. Each resource (SCO) will have it's own index file
+        // names sco_1.html, sco_2.html, sco_3.html. This html is generated from the secondlayer.mustache and contains the
+        // datasource which points towards the third layer, but contains the filepath for the original file.
+        $count = 0; // The $key => value, doesn't appear to work. So maintain counter ourself.
+        foreach ($manifest->resources->resource as $resource) {
+            // Remove all the files from each resource.
+            while (count($resource->file) > 0) {
+                unset($resource->file[0]);
+            }
+
+            // All resources must point towards their own layer 2 containing a link to the data source.
+            $datasource = \moodle_url::make_pluginfile_url(
+                $context->id,
+                'mod_scormremote',
+                'remote',                     // THIS is pointing towards the third layer.
+                0,
+                '/',
+                $resource->attributes()->href // The original file path.
+            );
+
+            $templatedata = [
+                'datasource'       => $datasource,
+                'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer2.js',
+            ];
+            $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', $templatedata);
+            $resourcefilename = "sco_$count.html";
+
+            // Add the created file from template to the archive.
+            $zip->add_file_from_string($resourcefilename, $resourcefile);
+
+            $file = $resource->addChild('file');
+            $file->addAttribute('href', $resourcefilename);
+            $resource->attributes()->href = $resourcefilename;
+            $count++;
+        }
+
+        // Add the manifest and finish.
+        $zip->add_file_from_string('imsmanifest.xml', $manifest->asXML());
+        $zip->finish();
+        exit();
     }
 }

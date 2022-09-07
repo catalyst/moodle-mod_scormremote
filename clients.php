@@ -32,9 +32,13 @@ require_once('../../config.php');
 require_once($CFG->libdir.'/adminlib.php');
 
 use \mod_scormremote\client;
+use \mod_scormremote\client_domain;
 use \mod_scormremote\form\client as client_form;
+use mod_scormremote\subscription;
+use mod_scormremote\tier;
+use \mod_scormremote\utils;
 
-$BASEURL = '/mod/scormremote/clients.php';
+$baseurl = '/mod/scormremote/clients.php';
 
 // Check if we go an ID.
 $id       = optional_param('id', null, PARAM_INT);
@@ -44,14 +48,14 @@ $delete   = optional_param('delete', '', PARAM_ALPHANUM); // Confirmation hash.
 
 // No guest autologin.
 require_login(0, false);
-$PAGE->set_url(new moodle_url($BASEURL, ['id' => $id, 'editingon' => $editing]));
+$PAGE->set_url(new moodle_url($baseurl, ['id' => $id, 'editingon' => $editing]));
 admin_externalpage_setup('scormremoteclients');
 $PAGE->set_title("{$SITE->shortname}: " . get_string('manage_clients', 'mod_scormremote'));
 
 // Authorize.
 $context = context_system::instance();
 if ($editing) {
-    require_capability('mod/scormremote:manageclient', $context);
+    require_all_capabilities(['mod/scormremote:manageclient', 'mod/scormremote:managetier'], $context);
 } else if ($deleting) {
     require_capability('mod/scormremote:deleteclient', $context);
 } else {
@@ -70,55 +74,99 @@ if ($editing) {
     // Create the form instance. We need to use the current URL and the custom data.
     $customdata = [
         'persistent' => $client,
-        'userid' => $USER->id
+        'userid' => $USER->id,
+        'domains' => '',
+        'tiers'  => [],
     ];
-    $form = new client_form(new moodle_url($BASEURL, ['id' => $id, 'editingon' => 1]), $customdata);
+
+    // For customdata we need to supple a PHP_EOL seperated string for domains.
+    if ($client) {
+        $domains = client_domain::get_domain_for_client((int)$client->get('id'));
+        $customdata['domains'] = implode(PHP_EOL, $domains);
+
+        $tiers = tier::get_records_by_clientid((int)$client->get('id'));
+        $customdata['tiers'] = array_map(function($tier) {
+            return (int) $tier->get('id');
+        }, $tiers);
+    }
+
+    $form = new client_form(new moodle_url($baseurl, ['id' => $id, 'editingon' => 1]), $customdata);
 
     if ($form->is_cancelled()) {
         // Form cancelled.
-        redirect(new moodle_url($BASEURL));
-    } elseif (($data = $form->get_data())) {
+        redirect(new moodle_url($baseurl));
+    } else if (($data = $form->get_data())) {
+        // Start transaction for creating/updating client, domains and subscriptions.
+        $transaction = $DB->start_delegated_transaction();
+
         try {
+            $domains = utils::textarea_to_string_array($data->domains);
+            $tiers = $data->tiers;
+            unset($data->domains, $data->tiers); // We need to remove domain and tiers before creating the client.
+
             if (empty($data->id)) {
                 // Create a new record.
                 $client = new client(0, $data);
                 $client->create();
             } else {
                 // Update a record.
+                // First delete all prior entered entries.
+                client_domain::delete_by_client($client->get('id'));
+                subscription::delete_by_client($client->get('id'));
+
                 $client->from_record($data);
                 $client->update();
             }
+
+            // Add the unique domains.
+            foreach (array_unique($domains) as $domain) {
+                $data = (object) array('clientid' => $client->get('id'), 'domain' => $domain);
+                $domain = new client_domain(0, $data);
+                $domain->create();
+            }
+
+            // Add the subscriptions.
+            foreach (array_unique($tiers) as $tier) {
+                $data = (object) array('clientid' => $client->get('id'), 'tierid' => $tier);
+                $sub = new subscription(0, $data);
+                $sub->create();
+            }
+
+            // Only if everything succeeds we commit.
+            $transaction->allow_commit();
             \core\notification::success(get_string('changessaved'));
         } catch (Exception $e) {
             \core\notification::error($e->getMessage());
+            $transaction->rollback($e);
         }
 
         // We are done, so let's redirect to base.
-        redirect(new moodle_url($BASEURL));
+        redirect(new moodle_url($baseurl));
     }
 }
 
 // Handling delete.
-if ($deleting && $id && $client && $delete === md5($client->get('domain'))) {
+if ($deleting && $id && $client && $delete === md5($client->get('name'))) {
     try {
         $client->delete();
         \core\notification::success(get_string('manage_clientdeletesuccess', 'mod_scormremote'));
     } catch (Exception $e) {
         \core\notification::error($e->getMessage());
     }
-    redirect(new moodle_url($BASEURL));
+    redirect(new moodle_url($baseurl));
 }
 
 // Handling read. Only do this when !$editing and !$deleting.
 if (!$editing && !$deleting) {
     // Not editing? Display the clients table.
-    $clients = client::get_records();
+    $clients = client::get_records([], $sort = 'name');
 
     // Create a table, with three colums; name, domain, actions.
     $table = new html_table();
     $table->head = [
         get_string('manage_clientname', 'mod_scormremote'),
         get_string('manage_clientdomain', 'mod_scormremote'),
+        get_string('subs', 'mod_scormremote'),
         get_string('actions'),
     ];
 
@@ -127,13 +175,23 @@ if (!$editing && !$deleting) {
 
     // Create remote client table rows.
     foreach ($clients as $client) {
-        $editurl = new moodle_url($BASEURL, ['id' => $client->get('id'), 'editingon' => 1]);
+        $editurl = new moodle_url($baseurl, ['id' => $client->get('id'), 'editingon' => 1]);
         $editaction = html_writer::link($editurl, $editicon);
-        $deleteurl =  new moodle_url($BASEURL, ['id' => $client->get('id'), 'deleting' => 1]);
+        $deleteurl = new moodle_url($baseurl, ['id' => $client->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
+        $domains = client_domain::get_domain_for_client($client->get('id'));
+
+        $subs = array();
+        foreach (subscription::get_records_by_clientid($client->get('id')) as $sub) {
+            $tier = new tier($sub->get('tierid'));
+            $subs[] = "{$tier->get('name')} ( {$sub->get_participant_count()} / {$tier->get('seats')} )";
+        }
+
+
         $table->data[] = [
             $client->get('name'),
-            $client->get('domain'),
+            implode(', ', $domains),
+            implode(', ', $subs),
             $editaction . $deleteaction,
         ];
     }
@@ -143,7 +201,7 @@ if (!$editing && !$deleting) {
 echo $OUTPUT->header();
 echo $OUTPUT->box_start('generalbox');
 
-if($editing && $id == null && $client == null) {
+if ($editing && $id == null && $client == null) {
     // Creating.
     echo $OUTPUT->heading(get_string('manage_clientcreateheader', 'mod_scormremote'), 2);
     $form->display();
@@ -157,17 +215,17 @@ if($editing && $id == null && $client == null) {
     // Deleting.
     // This is showing a confimation box, no header here.
     $deletemsg = get_string('manage_clientdeletemessage', 'mod_scormremote');
-    $message = "{$deletemsg}</br></br>{$client->get('name')} ({$client->get('domain')})";
+    $message = "{$deletemsg}</br></br>{$client->get('name')}";
 
-    $confirmurl = new moodle_url($BASEURL, ['id' => $id, 'deleting' => 1, 'delete' => md5($client->get('domain'))]);
+    $confirmurl = new moodle_url($baseurl, ['id' => $id, 'deleting' => 1, 'delete' => md5($client->get('name'))]);
     $confirmbtn = new single_button($confirmurl, get_string('delete'), 'post');
-    echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($BASEURL));
+    echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($baseurl));
 
 } else {
     // Reading.
     echo $OUTPUT->heading(get_string('manage_clients', 'mod_scormremote'), 2);
 
-    $createnewurl = new moodle_url($BASEURL, ['editingon' => 1]);
+    $createnewurl = new moodle_url($baseurl, ['editingon' => 1]);
     echo html_writer::table($table);
     echo $OUTPUT->single_button($createnewurl, get_string('manage_clientadd', 'mod_scormremote'));
 

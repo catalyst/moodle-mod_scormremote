@@ -59,6 +59,8 @@ const ALLOWED_TO_LMSGETVALUE = [
 function init() {
     const datasource = new URL(document.body.dataset.source)
     datasource.search = document.location.search;
+    datasource.search += ( document.location.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
+    datasource.search += 'lms_origin=' + document.location.host;
     ORIGIN = datasource.origin;
 
     // Add event listener.

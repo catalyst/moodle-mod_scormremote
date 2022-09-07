@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Class for loading/storing scormremote client from the DB.
  *
@@ -41,40 +39,164 @@ class client extends \core\persistent {
                 'type' => PARAM_TEXT,
                 'description' => 'The name of the client.',
             ),
-            'domain' => array(
-                'type' => PARAM_RAW,
-                'description' => 'The domain associated with the client.',
-            ),
         );
     }
 
     /**
-     * Get all records where no configuration isset given scormremote instance id.
+     * Do something right before the object is deleted from the database.
      *
-     * @param int $scormremoteid
+     * @return void
+     */
+    protected function before_delete() {
+        client_domain::delete_by_client($this->get('id'));
+        subscription::delete_by_client($this->get('id'));
+    }
+
+    /**
+     * Get the domains for this client.
+     *
+     * @return client_domain[]
+     */
+    public function get_domains() {
+        return client_domain::get_records(['clientid' => $this->get('id')]);
+    }
+
+    /**
+     * Get the client which is subscriped to given tier with tierid.
+     *
+     * @param int $tierid
      * @return client[]
      */
-    public static function get_records_not_configured_for_scormremote($scormremoteid) {
+    public static function get_records_by_tierid(int $tierid) {
         global $DB;
 
-        $sql = 'SELECT c.*
-                  FROM {' . static::TABLE . '} AS c
-                 WHERE NOT EXISTS (
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE EXISTS (
                            SELECT 1
-                             FROM {' . client_config::TABLE . '}
-                            WHERE clientid = c.id
-                              AND scormremoteid = :scormremoteid
-                       )';
+                             FROM {scormremote_subscriptions} sub
+                            WHERE client.id = sub.clientid
+                              AND sub.tierid = :tierid
+                       )
+              ORDER BY client.name";
 
-        $clients = [];
+        $persistents = [];
 
-        $recordset = $DB->get_recordset_sql($sql, ['scormremoteid' => $scormremoteid]);
+        $recordset = $DB->get_recordset_sql($sql, ['tierid' => $tierid]);
         foreach ($recordset as $record) {
-            $clients[] = new static(0, $record);
+            $persistents[] = new static(0, $record);
         }
         $recordset->close();
 
-        return $clients;
+        return $persistents;
+    }
+
+    /**
+     * Get the client that does not have a subscription.
+     *
+     * @return client[]
+     */
+    public static function get_records_without_subscription() {
+        global $DB;
+
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE NOT EXISTS (
+                           SELECT 1
+                             FROM {scormremote_subscriptions} sub
+                            WHERE client.id = sub.clientid
+                       )
+              ORDER BY client.name";
+
+        $persistents = [];
+
+        $recordset = $DB->get_recordset_sql($sql);
+        foreach ($recordset as $record) {
+            $persistents[] = new static(0, $record);
+        }
+        $recordset->close();
+
+        return $persistents;
+    }
+
+    /**
+     * Get client by domain.
+     *
+     * @param string $domain
+     * @return client
+     */
+    public static function get_record_by_domain(string $domain) {
+        global $DB;
+
+        $sql = "SELECT client.*
+                  FROM {scormremote_clients} client
+                 WHERE EXISTS (
+                           SELECT 1
+                             FROM {scormremote_client_domains} dom
+                            WHERE client.id = dom.clientid
+                              AND dom.domain = :domain
+                       )";
+
+        $record = $DB->get_record_sql($sql, ['domain' => $domain]);
+
+        if (!$record) {
+            return null;
+        }
+
+        return new static(0, $record);
+    }
+
+    /**
+     * Returns the subscription to which the courseid is a part of. This can only be one.
+     *
+     * @param int $courseid
+     * @return subsciption|null
+     */
+    public function get_subscription_by_courseid(int $courseid) {
+        global $DB;
+
+        $sql = "SELECT sub.*
+                  FROM mdl_scormremote_subscriptions sub
+                  JOIN mdl_scormremote_course_tiers ct
+                    ON sub.tierid = ct.tierid
+                   AND ct.courseid = :courseid
+                 WHERE sub.clientid = :clientid";
+
+        $record = $DB->get_record_sql($sql, ['courseid' => $courseid, 'clientid' => $this->get('id')]);
+
+        if (!$record) {
+            return null;
+        }
+
+        return new subscription(0, $record);
+    }
+
+    /**
+     * Return boolean value. It checks if this client has at least one subscription.
+     *
+     * @return bool
+     */
+    public function has_subscription() {
+        return subscription::count_records(['clientid' => $this->get('id')]) > 0;
+    }
+
+    /**
+     * Return true if given courseid is in subscription.
+     *
+     * @return int $courseid
+     * @return boolean
+     */
+    public function is_course_in_subscription(int $courseid) {
+        global $DB;
+
+        $sql = "SELECT COUNT(sub.*)
+                  FROM mdl_scormremote_subscriptions sub
+                  JOIN mdl_scormremote_course_tiers ct
+                    ON sub.tierid = ct.tierid
+                   AND ct.courseid = :courseid
+                 WHERE sub.clientid = :clientid";
+
+        return $DB->count_records_sql($sql, ['courseid' => $courseid, 'clientid' => $this->get('id')]) > 0;
     }
 
     /**
@@ -93,33 +215,6 @@ class client extends \core\persistent {
         // Must be between 2 and 100 characters in length.
         if ($len <= 2 || $len > 100) {
             return new \lang_string('error_clientnamelength', 'mod_scormremote', $len);
-        }
-
-        return true;
-    }
-
-    /**
-     * Validate a client domain.
-     *
-     * @param string $value
-     * @return true|\lang_string
-     */
-    protected function validate_domain(string $value) {
-        if (
-            !(preg_match("/^([a-z\d](-*[a-z\d])*)(\.([a-z\d](-*[a-z\d])*))*$/i", $value) // Uses valid characters.
-            && preg_match("/^.{1,253}$/", $value)                    // Is restricted to a maximum length of 253.
-            && preg_match("/^[^\.]{1,63}(\.[^\.]{1,63})*$/", $value)) // Lengths of each label is < 64.
-        ) {
-            return new \lang_string('error_clientdomainnotvalid', 'mod_scormremote');
-        }
-
-        if ( $records = self::get_records(['domain' => $value])) {
-            foreach($records as $record) {
-                if ($this->get('id') == $record->get('id')) {
-                    continue;
-                }
-                return new \lang_string('error_clientdomainnotunique', 'mod_scormremote');
-            }
         }
 
         return true;
