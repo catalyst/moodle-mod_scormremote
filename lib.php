@@ -156,7 +156,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // Authenticate.
+    // Get lms_origin from request.
     if (!$origin = optional_param('lms_origin', null, PARAM_URL)) {
         // Moodle might have refered, try to get it from referer.
         $referer = parse_url($_SERVER['HTTP_REFERER']);
@@ -170,7 +170,6 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                 'errortitle'   => get_string('errorpage_badrequesttitle', 'mod_scormremote'),
                 'errormessage' => get_string('errorpage_badrequestmessage', 'mod_scormremote'),
             ];
-
             exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
         }
 
@@ -179,6 +178,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
     }
 
+    // Get client by origin.
     $client = client::get_record_by_domain($origin);
     if (!$client) {
         $templatedata = [
@@ -186,10 +186,10 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             'errortitle'   => get_string('errorpage_unauthorizedtitle', 'mod_scormremote'),
             'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote'),
         ];
-
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
     }
 
+    // Get active subscription of client to tier where the course id exists.
     $sub = $client->get_subscription_by_courseid($course->id);
     if (!$sub) {
         $templatedata = [
@@ -197,19 +197,20 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             'errortitle'   => get_string('errorpage_subrequiredtitle', 'mod_scormremote'),
             'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote'),
         ];
-
         exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
     }
 
-    $canmanageactivity = has_capability('moodle/course:manageactivities', $context);
     $lifetime = null;
 
     if ($filearea === 'content') {
+        // When retrieving content we need user details.
         $username = required_param('student_id', PARAM_USERNAME);
         $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
 
+        // Does the user exist?
         $user = utils::get_user($client, $username);
         if (!$user) {
+            // If user doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 $templatedata = [
@@ -217,7 +218,6 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'errortitle'   => get_string('errorpage_sublimittitle', 'mod_scormremote'),
                     'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote'),
                 ];
-
                 exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
             }
             $user = utils::create_user($origin, $client, $username, $fullname);
@@ -251,12 +251,11 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             'jssource'         => $CFG->wwwroot . '/lib/javascript.php/'.$CFG->jsrev.'/mod/scormremote/amd/src/layer3.js',
             'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/scorm12.js',
         ];
-
-        echo $OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata);
-        die;
+        exit($OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata));
     } else if ($filearea === 'package') {
+        require_login($course, true, $cm);
         // Check if the global setting for disabling package downloads is enabled.
-        if (!$canmanageactivity) {
+        if (!has_capability('moodle/course:manageactivities', $context)) {
             return false;
         }
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
@@ -264,6 +263,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $fullpath = "/$context->id/mod_scormremote/$filearea/$revision/$relativepath";
         $lifetime = 0; // No caching here.
     } else if ($filearea === 'imsmanifest') { // This isn't a real filearea, it's a url parameter for this type of package.
+        require_login($course, true, $cm);
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
 
@@ -284,7 +284,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     $fs = get_file_storage();
-    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) || $file->is_directory()) {
+    $file = $fs->get_file_by_hash(sha1($fullpath));
+    if (!$file || $file->is_directory()) {
         if ($filearea === 'content') { // Return file not found straight away to improve performance.
             send_header_404();
             die;
@@ -293,7 +294,9 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
     }
 
     // Log last access and send the file.
+    $original = $USER;
     $USER = $user;
     user_accesstime_log($course->id);
+    $USER = $original;
     send_stored_file($file, $lifetime, 0, false, $options);
 }
