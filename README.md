@@ -17,3 +17,9 @@ This has a few advantages as you can:
 3) add seat restriction at the domain level
 4) swap the scorm packages in place and not require the remote LMS
    to do anything they automatically get the latest version of the package
+
+## Configuration
+
+To allow iframes to load on the other site this needs to be set:
+
+allowframembedding = 1
