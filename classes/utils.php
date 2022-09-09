@@ -119,6 +119,31 @@ class utils {
     }
 
     /**
+     * Transform passed username to client specific email address.
+     *
+     * @param client $client
+     * @param string $username
+     * @param string $origin
+     * @return string
+     */
+    public static function transform_email(client $client, string $username, string $origin) {
+        $prefix = 'enrol_scormremote_' . $client->get('id') . '_' . $username;
+        $suffix = $origin;
+
+        // Make sure email is valid.
+        if (strpos($suffix, '.') === false) {
+            $suffix .= '.com';
+        }
+
+        // Override prefix with username if too long.
+        if (strlen($username) > 32) {
+            $prefix = static::transform_username($client, $username);
+        }
+
+        return "$prefix@$suffix";
+    }
+
+    /**
      * Transform passed username to client specific username.
      *
      * @param client $client
@@ -126,7 +151,7 @@ class utils {
      * @return string
      */
     public static function transform_username(client $client, string $username) {
-        return 'enrol_scormremote_' . $client->get('id') . '_' . sha1($client->get('id') . '_' . $username);
+        return 'enrol_scormremote_' . $client->get('id') . '_' . substr(sha1($username), 0, 10);
     }
 
     /**
@@ -157,7 +182,7 @@ class utils {
 
         $user = new \stdClass();
         $user->username = static::transform_username($client, $username);
-        $user->email = "{$user->username}@{$origin}";
+        $user->email = static::transform_email($client, $username, $origin);
         $user->auth = 'nologin';
         $user->mnethostid = $CFG->mnet_localhost_id;
         $user->firstname = $firstname ?? $username;
@@ -165,11 +190,6 @@ class utils {
         $user->password = '';
         $user->confirmed = 1;
         $user->id = user_create_user($user, false);
-
-        // Make sure email is valid.
-        if (strpos($origin, '.') === false) {
-            $user->email .= '.com';
-        }
 
         return (object) get_complete_user_data('id', $user->id);
     }
