@@ -140,6 +140,11 @@ class utils {
             $prefix = static::transform_username($client, $username);
         }
 
+        // Replace any @ chars with at.
+        if (strpos($prefix, '@') !== false) {
+            $prefix = str_replace('@', 'at', $prefix);
+        }
+
         return "$prefix@$suffix";
     }
 
