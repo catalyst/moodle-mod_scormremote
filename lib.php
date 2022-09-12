@@ -226,8 +226,9 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Check if this user is_enrolled in this course.
         if (!is_enrolled($context, $user)) {
             $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
+            $student = reset(get_archetype_roles('student'));
             $enrolplugin = enrol_get_plugin($instance->enrol);
-            $enrolplugin->enrol_user($instance, $user->id);
+            $enrolplugin->enrol_user($instance, $user->id, $student->id ?? null);
         }
 
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
