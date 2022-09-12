@@ -170,10 +170,10 @@ if (!$editing && !$deleting) {
     $deleteicon = $OUTPUT->pix_icon('i/delete', get_string('delete'));
 
     $sql = "SELECT COUNT(*)
-              FROM mdl_scormremote sr
-              JOIN mdl_course c
+              FROM {scormremote} sr
+              JOIN {course} c
                 ON sr.course = c.id
-              JOIN mdl_scormremote_course_tiers ct
+              JOIN {scormremote_course_tiers} ct
                 ON c.id = ct.courseid
                AND ct.tierid = :tierid";
 
