@@ -35,3 +35,10 @@ $ADMIN->add('modscormremotecat', $clientslink);
 $ADMIN->add('modscormremotecat', $tierslink);
 
 $settings = null;
+
+
+$options = get_default_enrol_roles(context_system::instance());
+$student = get_archetype_roles('student');
+$student = reset($student);
+$general->add(new admin_setting_configselect('mod_scormremote/roleid',
+    get_string('defaultrole', 'role'), '', $student->id ?? null, $options));
