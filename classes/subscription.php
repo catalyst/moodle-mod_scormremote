@@ -67,14 +67,14 @@ class subscription extends \core\persistent {
         $sql = "SELECT COUNT(*) as taken
                   FROM (
                         SELECT DISTINCT usr.id
-                          FROM mdl_user usr                      -- from users
-                          JOIN mdl_user_enrolments usr_enr       -- select all enrolments
+                          FROM {user} usr                      -- from users
+                          JOIN {user_enrolments} usr_enr       -- select all enrolments
                             ON usr_enr.userid = usr.id
-                          JOIN mdl_enrol enr                     -- select course enrolment
+                          JOIN {enrol} enr                     -- select course enrolment
                             ON enr.id = usr_enr.enrolid
-                          JOIN mdl_scormremote_course_tiers ct
+                          JOIN {scormremote_course_tiers} ct
                             ON enr.courseid = ct.courseid        -- join tiers which are connected to the course
-                          JOIN mdl_scormremote_subscriptions sub
+                          JOIN {scormremote_subscriptions} sub
                             ON sub.tierid = ct.tierid            -- the client must be subscribed to the tier
                          WHERE usr.deleted = 0                   -- dont't select deleted users
                            AND usr.username LIKE CONCAT('enrol_scormremote_', sub.clientid, '_%')

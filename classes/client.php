@@ -156,8 +156,8 @@ class client extends \core\persistent {
         global $DB;
 
         $sql = "SELECT sub.*
-                  FROM mdl_scormremote_subscriptions sub
-                  JOIN mdl_scormremote_course_tiers ct
+                  FROM {scormremote_subscriptions} sub
+                  JOIN {scormremote_course_tiers} ct
                     ON sub.tierid = ct.tierid
                    AND ct.courseid = :courseid
                  WHERE sub.clientid = :clientid";
@@ -190,8 +190,8 @@ class client extends \core\persistent {
         global $DB;
 
         $sql = "SELECT COUNT(*)
-                  FROM mdl_scormremote_subscriptions sub
-                  JOIN mdl_scormremote_course_tiers ct
+                  FROM {scormremote_subscriptions} sub
+                  JOIN {scormremote_course_tiers} ct
                     ON sub.tierid = ct.tierid
                    AND ct.courseid = :courseid
                  WHERE sub.clientid = :clientid";
