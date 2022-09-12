@@ -169,7 +169,7 @@ if (!$editing && !$deleting) {
     $editicon = $OUTPUT->pix_icon('i/settings', get_string('edit'));
     $deleteicon = $OUTPUT->pix_icon('i/delete', get_string('delete'));
 
-    $sql = "SELECT COUNT(sr.*)
+    $sql = "SELECT COUNT(*)
               FROM mdl_scormremote sr
               JOIN mdl_course c
                 ON sr.course = c.id
