@@ -88,7 +88,7 @@ if ($editing) {
                             WHERE c.id = ct.courseid
                               AND ct.tierid = :tierid
                        )
-              ORDER BY C.shortname ASC";
+              ORDER BY c.shortname ASC";
         $courses = $DB->get_records_sql($sql, ['tierid' => $tier->get('id')]);
         $customdata['courses'] = array_map( function($course) {
             return (int) $course->id;
