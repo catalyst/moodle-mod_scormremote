@@ -189,7 +189,7 @@ class client extends \core\persistent {
     public function is_course_in_subscription(int $courseid) {
         global $DB;
 
-        $sql = "SELECT COUNT(sub.*)
+        $sql = "SELECT COUNT(*)
                   FROM mdl_scormremote_subscriptions sub
                   JOIN mdl_scormremote_course_tiers ct
                     ON sub.tierid = ct.tierid
