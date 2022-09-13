@@ -161,6 +161,10 @@ function LMSGetValue(name) {
             result = "";
         }
     }
+
+    if (result === null) {
+        return "";
+    }
     return result.toString();
 }
 
