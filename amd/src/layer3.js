@@ -45,9 +45,6 @@ function init() {
             return;
         }
         postMessageToParent('LMSFinish');
-        if (window.API.cmi.core.lesson_mode !== 'review') {
-            postCompletion();
-        }
     });
     window.API.on("LMSSetValue", (CMIElement, value) => {
         if (!initialized) {
