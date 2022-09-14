@@ -209,7 +209,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Send layer3.
         if (in_array('layer3.js', $args)) {
             $lifetime = 300; // 5 Minutes.
-            send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js', $lifetime);
+            send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js?contextid='.$context->id, $lifetime);
         }
 
     } else if ($filearea === 'content') {
