@@ -169,23 +169,15 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Get client by origin.
         $client = client::get_record_by_domain($origin);
         if (!$client) {
-            $templatedata = [
-                'errorcode'    => 401,
-                'errortitle'   => get_string('errorpage_unauthorizedtitle', 'mod_scormremote'),
-                'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote'),
-            ];
-            exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
         // Get active subscription of client to tier where the course id exists.
         $sub = $client->get_subscription_by_courseid($course->id);
         if (!$sub) {
-            $templatedata = [
-                'errorcode'    => 402,
-                'errortitle'   => get_string('errorpage_subrequiredtitle', 'mod_scormremote'),
-                'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote'),
-            ];
-            exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired';
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
         // Does the user exist?
@@ -194,12 +186,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             // If user doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
-                $templatedata = [
-                    'errorcode'    => 402,
-                    'errortitle'   => get_string('errorpage_sublimittitle', 'mod_scormremote'),
-                    'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote'),
-                ];
-                exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+                $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
+                exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
             $user = utils::create_user($origin, $client, $username, $fullname);
         }
