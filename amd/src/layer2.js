@@ -57,10 +57,14 @@ const ALLOWED_TO_LMSGETVALUE = [
 ];
 
 function init() {
+    LMSGetDataModel();
+
     const datasource = new URL(document.body.dataset.source)
     datasource.search = document.location.search;
     datasource.search += ( document.location.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
     datasource.search += 'lms_origin=' + document.location.host;
+    datasource.search += '&student_id=' + CMI.core.student_id;
+    datasource.search += '&student_name=' + CMI.core.student_name;
     ORIGIN = datasource.origin;
 
     // Add event listener.
@@ -75,7 +79,6 @@ function init() {
     iframe.setAttribute("width", "100%");
     document.body.insertBefore(iframe, document.getElementById("wrapper"));
     embeddedWindow = iframe.contentWindow;
-    LMSGetDataModel();
 }
 
 /**

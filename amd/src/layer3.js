@@ -45,9 +45,6 @@ function init() {
             return;
         }
         postMessageToParent('LMSFinish');
-        if (window.API.cmi.core.lesson_mode !== 'review') {
-            postCompletion();
-        }
     });
     window.API.on("LMSSetValue", (CMIElement, value) => {
         if (!initialized) {
@@ -141,9 +138,6 @@ function LMSSetDataModel(cmi) {
  function loadContent() {
     const parameters = document.location.search;
     const datasource  =  new URL(document.body.dataset.source + parameters);
-    datasource.search += ( datasource.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
-    datasource.search += 'student_id=' + window.API.cmi.core.student_id;
-    datasource.search += '&student_name=' + window.API.cmi.core.student_name;
 
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", EMBEDDED_WINDOW_ID);

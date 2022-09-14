@@ -156,56 +156,29 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // Get lms_origin from request.
-    if (!$origin = optional_param('lms_origin', null, PARAM_URL)) {
-        // Moodle might have refered, try to get it from referer.
-        $referer = parse_url($_SERVER['HTTP_REFERER']);
-        $query = array();
-        parse_str($referer['query'], $query);
-
-        // Show error if we cannot fetch lms_origin.
-        if (!isset($query['lms_origin'])) {
-            $templatedata = [
-                'errorcode'    => 400,
-                'errortitle'   => get_string('errorpage_badrequesttitle', 'mod_scormremote'),
-                'errormessage' => get_string('errorpage_badrequestmessage', 'mod_scormremote'),
-            ];
-            exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
-        }
-
-        // We found the client domain, set it to GET so we can use it in recursive call.
-        $_GET = $query;
-        return scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, $options);
-    }
-
-    // Get client by origin.
-    $client = client::get_record_by_domain($origin);
-    if (!$client) {
-        $templatedata = [
-            'errorcode'    => 401,
-            'errortitle'   => get_string('errorpage_unauthorizedtitle', 'mod_scormremote'),
-            'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote'),
-        ];
-        exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
-    }
-
-    // Get active subscription of client to tier where the course id exists.
-    $sub = $client->get_subscription_by_courseid($course->id);
-    if (!$sub) {
-        $templatedata = [
-            'errorcode'    => 402,
-            'errortitle'   => get_string('errorpage_subrequiredtitle', 'mod_scormremote'),
-            'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote'),
-        ];
-        exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+    // Set required parameters.
+    if (in_array($filearea, ['bootstrap', 'remote'])) {
+        $origin   = required_param('lms_origin', PARAM_RAW_TRIMMED);
+        $username = required_param('student_id', PARAM_USERNAME);
+        $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
     }
 
     $lifetime = null;
 
-    if ($filearea === 'content') {
-        // When retrieving content we need user details.
-        $username = required_param('student_id', PARAM_USERNAME);
-        $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
+    if ($filearea === 'bootstrap') {
+        // Get client by origin.
+        $client = client::get_record_by_domain($origin);
+        if (!$client) {
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
+        }
+
+        // Get active subscription of client to tier where the course id exists.
+        $sub = $client->get_subscription_by_courseid($course->id);
+        if (!$sub) {
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired';
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
+        }
 
         // Does the user exist?
         $user = utils::get_user($client, $username);
@@ -213,12 +186,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             // If user doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
-                $templatedata = [
-                    'errorcode'    => 402,
-                    'errortitle'   => get_string('errorpage_sublimittitle', 'mod_scormremote'),
-                    'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote'),
-                ];
-                exit($OUTPUT->render_from_template('mod_scormremote/errorpage', $templatedata));
+                $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
+                exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
             $user = utils::create_user($origin, $client, $username, $fullname);
         }
@@ -230,6 +199,20 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             $enrolplugin = enrol_get_plugin($instance->enrol);
             $enrolplugin->enrol_user($instance, $user->id, $roleid);
         }
+
+        // Log last access.
+        $original = $USER;
+        $USER = $user;
+        user_accesstime_log($course->id);
+        $USER = $original;
+
+        // Send layer3.
+        if (in_array('layer3.js', $args)) {
+            $lifetime = 300; // 5 Minutes.
+            send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js?contextid='.$context->id, $lifetime);
+        }
+
+    } else if ($filearea === 'content') {
 
         $revision = (int)array_shift($args); // Prevents caching problems - ignored here.
         $relativepath = implode('/', $args);
@@ -247,9 +230,18 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             implode('/', $args) // The original file path.
         );
 
+        $jssource = \moodle_url::make_pluginfile_url(
+            $context->id,
+            'mod_scormremote',
+            'bootstrap',
+            null,
+            '/',
+            'layer3.js'
+        );
+
         $templatedata = [
             'datasource'       => $datasource,
-            'jssource'         => $CFG->wwwroot . '/lib/javascript.php/'.$CFG->jsrev.'/mod/scormremote/amd/src/layer3.js',
+            'jssource'         => $jssource . "?lms_origin={$origin}&student_id={$username}&student_name={$fullname}",
             'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/scorm12.js',
         ];
         exit($OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata));
@@ -294,10 +286,5 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         return false;
     }
 
-    // Log last access and send the file.
-    $original = $USER;
-    $USER = $user;
-    user_accesstime_log($course->id);
-    $USER = $original;
     send_stored_file($file, $lifetime, 0, false, $options);
 }
