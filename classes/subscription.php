@@ -77,11 +77,14 @@ class subscription extends \core\persistent {
                           JOIN {scormremote_subscriptions} sub
                             ON sub.tierid = ct.tierid            -- the client must be subscribed to the tier
                          WHERE usr.deleted = 0                   -- dont't select deleted users
-                           AND usr.username LIKE CONCAT('enrol_scormremote_', sub.clientid, '_%')
+                           AND usr.username LIKE :usernamewildcard
                            AND sub.id = :subscriptionid
                        ) temp";
 
-        return $DB->count_records_sql($sql, ['subscriptionid' => $this->get('id')]);
+        return $DB->count_records_sql($sql, [
+            'subscriptionid'   => $this->get('id'),
+            'usernamewildcard' => $DB->sql_like_escape("enrol_scormremote_{$this->get('clientid')}_") . "%",
+        ]);
     }
 
     /**
