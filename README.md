@@ -1,3 +1,5 @@
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-mod_scormremote/ci/MOODLE_39_STABLE?label=ci)
+
 # Moodle Mod Scormremote
 
 ## What is this?
@@ -23,3 +25,13 @@ This has a few advantages as you can:
 To allow iframes to load on the other site this needs to be set:
 
 allowframembedding = 1
+
+## Credits
+
+This development of this plugin was sponsored by Early Childhood Australia
+
+![image](https://user-images.githubusercontent.com/187449/213033404-75ea1cca-eb44-48b0-acad-7d39a4dcc0bf.png)
+
+This plugin was developed by [Catalyst IT Australia](https://www.catalyst-au.net/).
+
+<img alt="Catalyst IT" src="https://cdn.rawgit.com/CatalystIT-AU/moodle-auth_saml2/MOODLE_39_STABLE/pix/catalyst-logo.svg" width="400">
