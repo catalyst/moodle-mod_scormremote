@@ -28,11 +28,26 @@ This has a few advantages as you can:
 4) swap the scorm packages in place and not require the remote LMS
    to do anything they automatically get the latest version of the package
 
+
+## How does it work?
+
+This library embeds and serves the Scorm file using the Scorm again library:
+
+https://github.com/jcputney/scorm-again
+
+The wrapper file which is running on the remote site loads the real scorm file
+inside a sandboxed iframe and then creates a Scorm API communication bridge 
+between the two sites using window.postMessage:
+
+https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+
+
 ## Branches
 
 | Moodle version    | Branch             |
 | ----------------- | ------------------ |
 | Moodle 3.9+       | `MOODLE_39_STABLE` |
+
 
 ## Installation
 
