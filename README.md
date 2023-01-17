@@ -28,7 +28,6 @@ This has a few advantages as you can:
 4) swap the scorm packages in place and not require the remote LMS
    to do anything they automatically get the latest version of the package
 
-
 ## How does it work?
 
 This library embeds and serves the Scorm file using the Scorm again library:
