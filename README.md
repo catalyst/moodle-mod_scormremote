@@ -62,7 +62,7 @@ git clone git@github.com:catalyst/moodle-mod_scormremote.git auth/saml2
 
 ### General config
 
-To allow iframes to load on the remote site this needs to be set:
+To allow iframes to load on the remote site this admin setting needs to be set:
 
 ```
 allowframembedding = 1
