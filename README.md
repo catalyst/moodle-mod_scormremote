@@ -118,7 +118,7 @@ sponsor a new feature then please contact
 
 ## Credits
 
-This development of this plugin was sponsored by Early Childhood Australia
+This development of this plugin was sponsored by [Early Childhood Australia](https://www.earlychildhoodaustralia.org.au/).
 
 ![image](https://user-images.githubusercontent.com/187449/213033404-75ea1cca-eb44-48b0-acad-7d39a4dcc0bf.png)
 
