@@ -119,7 +119,9 @@ sponsor a new feature then please contact
 
 This development of this plugin was sponsored by Early Childhood Australia
 
-![image](https://user-images.githubusercontent.com/187449/213033404-75ea1cca-eb44-48b0-acad-7d39a4dcc0bf.png)
+http://www.earlychildhoodaustralia.org.au/
+
+[<img src="https://user-images.githubusercontent.com/187449/213033404-75ea1cca-eb44-48b0-acad-7d39a4dcc0bf.png">](http://www.earlychildhoodaustralia.org.au/)
 
 This plugin uses the excellent SCORM Again library:
 
