@@ -53,7 +53,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
 1. Yyou can use git to clone it into your source:
 
 ```sh
-git clone git@github.com:catalyst/moodle-mod_scormremote.git auth/saml2
+git clone git@github.com:catalyst/moodle-mod_scormremote.git mod/scormremote
 ```
 
 2. Then run the Moodle upgrade
