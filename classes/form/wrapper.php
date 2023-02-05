@@ -28,8 +28,13 @@ use coding_exception;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class wrapper extends \moodleform {
+    /** Instance name. */
     const MODULE_INSTANCE_NAME = 0;
+
+    /** Instance reference. */
     const MODULE_INSTANCE_REFERENCE = 1;
+
+    /** Other. */
     const OTHER = 2;
 
     /**

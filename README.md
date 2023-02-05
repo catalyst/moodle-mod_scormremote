@@ -50,7 +50,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
 
 ## Installation
 
-1. Yyou can use git to clone it into your source:
+1. You can use git to clone it into your source:
 
 ```sh
 git clone git@github.com:catalyst/moodle-mod_scormremote.git mod/scormremote

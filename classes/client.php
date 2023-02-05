@@ -183,7 +183,7 @@ class client extends \core\persistent {
     /**
      * Return true if given courseid is in subscription.
      *
-     * @return int $courseid
+     * @param int $courseid
      * @return boolean
      */
     public function is_course_in_subscription(int $courseid) {

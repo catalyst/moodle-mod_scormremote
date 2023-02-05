@@ -24,6 +24,14 @@
  */
 class mod_scormremote_generator extends testing_module_generator {
 
+    /**
+     * Create scormremote instance.
+     *
+     * @param array|stdClass $record
+     * @param array|null $options
+     * @return stdClass
+     * @throws coding_exception
+     */
     public function create_instance($record = null, array $options = null) {
         global $CFG;
         require_once($CFG->dirroot . '/lib/resourcelib.php');

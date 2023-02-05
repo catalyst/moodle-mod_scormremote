@@ -24,7 +24,8 @@
  */
 
 /**
- * @global moodle_database $DB
+ * Upgrade the plugin.
+ *
  * @param int $oldversion
  * @return bool
  */

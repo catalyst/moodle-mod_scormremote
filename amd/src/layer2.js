@@ -56,10 +56,16 @@ const ALLOWED_TO_LMSGETVALUE = [
     'cmi.interactions.*.correct_responses._count',
 ];
 
+/**
+ * Initialize communication with the LMS
+ *
+ * @returns {null}
+ */
+// eslint-disable-next-line no-unused-vars
 function init() {
     LMSGetDataModel();
 
-    const datasource = new URL(document.body.dataset.source)
+    const datasource = new URL(document.body.dataset.source);
     datasource.search = document.location.search;
     datasource.search += ( document.location.search.indexOf('?') === -1 ? '?' : '&' ); // if ?param=1 then & else ?.
     datasource.search += 'lms_origin=' + document.location.host;
@@ -93,7 +99,7 @@ function LMSInitialize() {
     }
 
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSInitialize was not successful.");
         return "false";
     }
@@ -105,7 +111,7 @@ function LMSInitialize() {
     }
     else {
         initialized = true;
-        message("LMSInitialized succeeded.")
+        message("LMSInitialized succeeded.");
     }
 
     return result.toString();
@@ -116,11 +122,12 @@ function LMSInitialize() {
  *
  * @returns {string} true|false depending wheter successful.
  */
+// eslint-disable-next-line no-unused-vars
 function LMSFinish() {
-    if (!initialized) return "true";
+    if (!initialized) {return "true";}
 
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSFinish was not successful.");
         return "false";
     }
@@ -147,7 +154,7 @@ function LMSFinish() {
 function LMSGetValue(name) {
     var api = getAPIHandle();
     var result = "";
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -178,10 +185,11 @@ function LMSGetValue(name) {
  * @param {mixed} value the value that the named element or category will be assigned.
  * @returns {string} true|false depending wheter successful.
  */
+// eslint-disable-next-line no-unused-vars
 function LMSSetValue(name, value) {
     var api = getAPIHandle();
     var result = "false";
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSSetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -204,10 +212,11 @@ function LMSSetValue(name, value) {
  *
  * @returns {string} true|false depending wheter successful.
  */
+// eslint-disable-next-line no-unused-vars
 function LMSCommit() {
     var api = getAPIHandle();
     var result = "false";
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSCommit was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -230,9 +239,10 @@ function LMSCommit() {
  *
  * @returns {string} The error code that was set by the LMS function call.
  */
+// eslint-disable-next-line no-unused-vars
 function LMSGetLastError() {
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetLastError was not successful.");
         //since we can't get the error code from the LMS, return a general error
         return _GeneralException.code; //General Exception
@@ -247,9 +257,10 @@ function LMSGetLastError() {
  * @param {number|string|null} errorCode
  * @returns {string} The textual description that corresponds to the input error code
  */
+// eslint-disable-next-line no-unused-vars
 function LMSGetErrorString(errorCode) {
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetErrorString was not successful.");
         return _GeneralException.string;
     }
@@ -263,9 +274,10 @@ function LMSGetErrorString(errorCode) {
  * @param {number|string|null} errorCode
  * @returns {string} The vendor specific textual description that corresponds to the input error code.
  */
+// eslint-disable-next-line no-unused-vars
 function LMSGetDiagnostic(errorCode) {
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetDiagnostic was not successful.");
         return "Unable to locate the LMS's API Implementation. LMSGetDiagnostic was not successful.";
     }
@@ -290,7 +302,7 @@ function LMSGetDiagnostic(errorCode) {
 function ErrorHandler() {
     var error = { "code": _NoError.code, "string": _NoError.string, "diagnostic": _NoError.diagnostic };
     var api = getAPIHandle();
-    if (api == null) {
+    if (api === null) {
         message("Unable to locate the LMS's API Implementation.\nCannot determine LMS error code.");
         error.code = _GeneralException.code;
         error.string = _GeneralException.string;
@@ -315,7 +327,7 @@ function ErrorHandler() {
  * @returns {*}
  */
 function getAPIHandle() {
-    if (apiHandle == null) {
+    if (apiHandle === null) {
         apiHandle = getAPI();
     }
 
@@ -330,7 +342,7 @@ function getAPIHandle() {
  */
 function findAPI(win) {
     var findAPITries = 0;
-    while ((win.API == null) && (win.parent != null) && (win.parent != win)) {
+    while ((win.API === null) && (win.parent !== null) && (win.parent !== win)) {
         findAPITries++;
         // Note: 7 is an arbitrary number, but should be more than sufficient
         if (findAPITries > 7) {
@@ -351,13 +363,13 @@ function findAPI(win) {
  */
 function getAPI() {
     var theAPI = findAPI(window);
-    if ((theAPI == null) && (window.opener != null) && (typeof (window.opener) != "undefined")) {
+    if ((theAPI === null) && (window.opener !== null) && (typeof (window.opener) != "undefined")) {
         theAPI = findAPI(window.opener);
     }
-    if (theAPI == null) {
+    if (theAPI === null) {
         message("Unable to find an API adapter");
     }
-    return theAPI
+    return theAPI;
 }
 
 // TODO: Move this to UTILS.
@@ -430,6 +442,7 @@ function initMessageReciever() {
  *
  * @returns {Window|null} value contained by embeddedWindow
  */
+// eslint-disable-next-line no-unused-vars
  function getEmbeddedWindow() {
     if (embeddedWindow === null) {
         const element = document.findElementById(EMBEDDED_WINDOW_ID);
@@ -456,8 +469,9 @@ function initMessageReciever() {
  * @returns {object}
  */
 function LMSGetDataModel() {
-    if ( CMI == null ) {
-        const result = 'core,suspend_data,launch_data,comments,comments_from_lms,objectives,student_data,student_preference,interactions';
+    if ( CMI === null ) {
+        const result = 'core,suspend_data,launch_data,comments,comments_from_lms,objectives,student_data,student_preference' +
+            ',interactions';
         CMI = LMSGetChildren('cmi', result.split(','));
     }
     return CMI;
@@ -478,7 +492,7 @@ function LMSGetChildren(parent, children) {
 
         for (let i = 0; i < count; i++) {
             const key = parent + '.' + i;
-            child[i] = LMSGetChildren(key, children)
+            child[i] = LMSGetChildren(key, children);
         }
     } else {
         // Singular children only.
@@ -533,6 +547,7 @@ function LMSGetNumberStored(name) {
  *
  * @returns {null}
  */
+// eslint-disable-next-line no-unused-vars
 function postLMSDataModel() {
     const datamodel = LMSGetDataModel();
     embeddedWindow.postMessage(

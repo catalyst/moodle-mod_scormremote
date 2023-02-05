@@ -83,6 +83,12 @@ class mod_scormremote_mod_form extends moodleform_mod {
         $this->add_action_buttons();
     }
 
+    /**
+     * Form preprocessing.
+     *
+     * @param array $defaultvalues
+     * @return void
+     */
     public function data_preprocessing(&$defaultvalues) {
         global $COURSE;
 
@@ -117,6 +123,12 @@ class mod_scormremote_mod_form extends moodleform_mod {
         }
     }
 
+    /**
+     * Form validation.
+     * @param array $data
+     * @param array $files
+     * @return array
+     */
     public function validation($data, $files) {
         global $CFG, $USER;
 
