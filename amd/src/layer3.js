@@ -24,21 +24,24 @@ const ORIGIN = "*"; //TODO: issue 27
 
 
 /**
- * Initialize communication with
+ * Initialize communication with the LMS
  *
  * @returns {null}
  */
+// eslint-disable-next-line no-unused-vars
 function init() {
     // Create event listener.
     initMessageReciever();
 
     // Setup the API.
+    // TODO: issue 23.
+    // eslint-disable-next-line no-undef
     window.API = new Scorm12API(settings);
     window.API.on("LMSCommit", () => {
         if (!initialized) {
             return;
         }
-        postMessageToParent('LMSCommit')
+        postMessageToParent('LMSCommit');
     });
     window.API.on("LMSFinish", () => {
         if (!initialized) {
@@ -124,6 +127,7 @@ function init() {
  *
  * @param {object} cmi
  */
+// eslint-disable-next-line no-unused-vars
 function LMSSetDataModel(cmi) {
     window.API.loadFromJSON(cmi);
     initialized = true;
@@ -166,7 +170,7 @@ function onLMSSetValue(name, value) {
     ) {
         postCompletion();
     }
-};
+}
 
 /**
  * Post to host that activity has been completed.
@@ -215,13 +219,13 @@ function getContextIDFromPathname(pathname) {
  * Send postMessage to parent window in correct format.
  *
  * @param {string} functionName
- * @param {*} arguments
+ * @param {*} args
  * @returns {null}
  */
-function postMessageToParent(functionName, arguments = []) {
+function postMessageToParent(functionName, args = []) {
     message('send a message to parent calling function "' + functionName + '"');
     window.parent.postMessage(
-        {function: functionName, arguments},
+        {"function": functionName, args},
         ORIGIN
     );
 }

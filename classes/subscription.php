@@ -49,10 +49,10 @@ class subscription extends \core\persistent {
     /**
      * Get records by client id.
      *
-     * @param integer $clientid
+     * @param int $clientid The client id.
      * @return subscription[]
      */
-    public static function get_records_by_clientid(int $clientid) {
+    public static function get_records_by_clientid(int $clientid): array {
         return static::get_records(['clientid' => $clientid]);
     }
 

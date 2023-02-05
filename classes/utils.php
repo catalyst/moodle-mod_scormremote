@@ -162,6 +162,7 @@ class utils {
     /**
      * Return a client user object from username.
      *
+     * @param client $client
      * @param string $username
      * @return \stdClass|bool
      */
