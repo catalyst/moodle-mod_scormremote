@@ -99,7 +99,7 @@ function LMSInitialize() {
     }
 
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSInitialize was not successful.");
         return "false";
     }
@@ -127,7 +127,7 @@ function LMSFinish() {
     if (!initialized) {return "true";}
 
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSFinish was not successful.");
         return "false";
     }
@@ -154,7 +154,7 @@ function LMSFinish() {
 function LMSGetValue(name) {
     var api = getAPIHandle();
     var result = "";
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -189,7 +189,7 @@ function LMSGetValue(name) {
 function LMSSetValue(name, value) {
     var api = getAPIHandle();
     var result = "false";
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSSetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -216,7 +216,7 @@ function LMSSetValue(name, value) {
 function LMSCommit() {
     var api = getAPIHandle();
     var result = "false";
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSCommit was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
@@ -242,7 +242,7 @@ function LMSCommit() {
 // eslint-disable-next-line no-unused-vars
 function LMSGetLastError() {
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetLastError was not successful.");
         //since we can't get the error code from the LMS, return a general error
         return _GeneralException.code; //General Exception
@@ -260,7 +260,7 @@ function LMSGetLastError() {
 // eslint-disable-next-line no-unused-vars
 function LMSGetErrorString(errorCode) {
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetErrorString was not successful.");
         return _GeneralException.string;
     }
@@ -277,7 +277,7 @@ function LMSGetErrorString(errorCode) {
 // eslint-disable-next-line no-unused-vars
 function LMSGetDiagnostic(errorCode) {
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nLMSGetDiagnostic was not successful.");
         return "Unable to locate the LMS's API Implementation. LMSGetDiagnostic was not successful.";
     }
@@ -302,7 +302,7 @@ function LMSGetDiagnostic(errorCode) {
 function ErrorHandler() {
     var error = { "code": _NoError.code, "string": _NoError.string, "diagnostic": _NoError.diagnostic };
     var api = getAPIHandle();
-    if (api === null) {
+    if (api === null || api === undefined) {
         message("Unable to locate the LMS's API Implementation.\nCannot determine LMS error code.");
         error.code = _GeneralException.code;
         error.string = _GeneralException.string;
@@ -327,7 +327,7 @@ function ErrorHandler() {
  * @returns {*}
  */
 function getAPIHandle() {
-    if (apiHandle === null) {
+    if (apiHandle === null || apiHandle === undefined) {
         apiHandle = getAPI();
     }
 
@@ -342,7 +342,8 @@ function getAPIHandle() {
  */
 function findAPI(win) {
     var findAPITries = 0;
-    while ((win.API === null) && (win.parent !== null) && (win.parent !== win)) {
+    while ((win.API === null || win.API === undefined) && (win.parent !== null && win.parent !== undefined) &&
+        (win.parent !== win)) {
         findAPITries++;
         // Note: 7 is an arbitrary number, but should be more than sufficient
         if (findAPITries > 7) {
@@ -363,10 +364,11 @@ function findAPI(win) {
  */
 function getAPI() {
     var theAPI = findAPI(window);
-    if ((theAPI === null) && (window.opener !== null) && (typeof (window.opener) != "undefined")) {
+    if ((theAPI === null || theAPI === undefined) && (window.opener !== null && window.opener !== undefined) &&
+        (typeof (window.opener) !== "undefined")) {
         theAPI = findAPI(window.opener);
     }
-    if (theAPI === null) {
+    if (theAPI === null || theAPI === undefined) {
         message("Unable to find an API adapter");
     }
     return theAPI;
@@ -469,9 +471,9 @@ function initMessageReciever() {
  * @returns {object}
  */
 function LMSGetDataModel() {
-    if ( CMI === null ) {
-        const result = 'core,suspend_data,launch_data,comments,comments_from_lms,objectives,student_data,student_preference' +
-            ',interactions';
+    if (CMI === null || CMI === undefined) {
+        const result = 'core,suspend_data,launch_data,comments,comments_from_lms,objectives,student_data' +
+            ',student_preference,interactions';
         CMI = LMSGetChildren('cmi', result.split(','));
     }
     return CMI;

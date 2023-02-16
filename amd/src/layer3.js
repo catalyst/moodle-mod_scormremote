@@ -219,13 +219,13 @@ function getContextIDFromPathname(pathname) {
  * Send postMessage to parent window in correct format.
  *
  * @param {string} functionName
- * @param {*} args
+ * @param {*} params
  * @returns {null}
  */
-function postMessageToParent(functionName, args = []) {
+function postMessageToParent(functionName, params = []) {
     message('send a message to parent calling function "' + functionName + '"');
     window.parent.postMessage(
-        {"function": functionName, args},
+        {function: functionName, params},
         ORIGIN
     );
 }
