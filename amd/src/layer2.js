@@ -413,7 +413,7 @@ function initMessageReciever() {
         }
 
         const functionName = e.data['function'];
-        const functionArgs = e.data['arguments'];
+        const functionArgs = e.data['params'];
 
         // Can't run unknown function.
         if (!functionName || typeof window[functionName] !== 'function') {
