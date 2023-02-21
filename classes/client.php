@@ -39,6 +39,10 @@ class client extends \core\persistent {
                 'type' => PARAM_TEXT,
                 'description' => 'The name of the client.',
             ),
+            'primarydomain' => array(
+                'type' => PARAM_TEXT,
+                'description' => 'The primary domain of the client.',
+            ),
         );
     }
 

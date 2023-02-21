@@ -75,14 +75,15 @@ if ($editing) {
     $customdata = [
         'persistent' => $client,
         'userid' => $USER->id,
-        'domains' => '',
+        'domains' => [],
         'tiers'  => [],
     ];
 
     // For customdata we need to supple a PHP_EOL seperated string for domains.
     if ($client) {
         $domains = client_domain::get_domain_for_client((int)$client->get('id'));
-        $customdata['domains'] = implode(PHP_EOL, $domains);
+//        $customdata['domains'] = implode(PHP_EOL, $domains);
+        $customdata['domains'] = $domains;
 
         $tiers = tier::get_records_by_clientid((int)$client->get('id'));
         $customdata['tiers'] = array_map(function($tier) {
@@ -100,9 +101,11 @@ if ($editing) {
         $transaction = $DB->start_delegated_transaction();
 
         try {
-            $domains = utils::textarea_to_string_array($data->domains);
+//            $domains = utils::textarea_to_string_array($data->domains);
+            $domains = $data->domains;
             $tiers = $data->tiers;
-            unset($data->domains, $data->tiers); // We need to remove domain and tiers before creating the client.
+            unset($data->domains, $data->tiers, $data->mform_isexpanded_id_clientdetails,
+                $data->mform_isexpanded_id_alloweddomains, $data->mform_isexpanded_id_subscriptions); // We need to remove domain and tiers before creating the client.
 
             if (empty($data->id)) {
                 // Create a new record.
@@ -180,6 +183,8 @@ if (!$editing && !$deleting) {
         $deleteurl = new moodle_url($baseurl, ['id' => $client->get('id'), 'deleting' => 1]);
         $deleteaction = html_writer::link($deleteurl, $deleteicon);
         $domains = client_domain::get_domain_for_client($client->get('id'));
+
+        if ($client->get('primarydomain')) array_unshift($domains, $client->get('primarydomain'));
 
         $subs = array();
         foreach (subscription::get_records_by_clientid($client->get('id')) as $sub) {

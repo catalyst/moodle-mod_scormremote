@@ -190,5 +190,44 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022090201, 'scormremote');
     }
 
-    return true;
+    if ($oldversion < 2023022000) {
+
+        $table = new xmldb_table('scormremote_clients');
+
+        $field = new xmldb_field('primarydomain', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+        $index = new xmldb_index('primarydomain', XMLDB_INDEX_NOTUNIQUE, ['primarydomain']);
+
+        $dbman->add_field($table, $field);
+        $dbman->add_index($table, $index);
+
+        // Update the primary domain field with the first domain in the
+        $sql = "UPDATE 
+                  {scormremote_clients} 
+                SET 
+                  (primarydomain) = (
+                    SELECT 
+                      mscd2.domain 
+                    FROM 
+                      (
+                        SELECT 
+                          mscd1.clientid, 
+                          MIN(mscd1.id) AS firstdomainid 
+                        FROM 
+                          {scormremote_client_domains} AS mscd1 
+                        GROUP BY 
+                          mscd1.clientid
+                      ) AS firstdomains 
+                      JOIN {scormremote_client_domains} AS mscd2 ON firstdomains.firstdomainid = mscd2.id 
+                    WHERE 
+                      {scormremote_clients}.id = firstdomains.clientid
+                  )
+                ";
+
+        $DB->execute($sql);
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2023022000, 'scormremote');
+    }
+
+        return true;
 }
