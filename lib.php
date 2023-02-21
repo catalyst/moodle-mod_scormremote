@@ -35,6 +35,7 @@ use mod_scormremote\utils;
  */
 function scormremote_supports($feature) {
     switch ($feature) {
+        case FEATURE_BACKUP_MOODLE2:
         case FEATURE_MOD_INTRO:
             return true;
         default:
