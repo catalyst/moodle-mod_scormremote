@@ -161,13 +161,14 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $origin   = required_param('lms_origin', PARAM_RAW_TRIMMED);
         $username = required_param('student_id', PARAM_USERNAME);
         $fullname = required_param('student_name', PARAM_RAW_TRIMMED);
+        $clientid = optional_param('client_id', '', PARAM_RAW_TRIMMED);
     }
 
     $lifetime = null;
 
     if ($filearea === 'bootstrap') {
         // Get client by origin.
-        $client = client::get_record_by_domain($origin);
+        $client = client::get_record_by_domain($origin, $clientid);
         if (!$client) {
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
@@ -189,7 +190,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                 $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
-            $user = utils::create_user($origin, $client, $username, $fullname);
+            $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
         }
 
         // Check if this user is_enrolled in this course.
@@ -208,7 +209,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
         // Send layer3.
         if (in_array('layer3.js', $args)) {
-            $lifetime = 300; // 5 Minutes.
+            $lifetime = 60; // 1 Minute.
             send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js?contextid='.$context->id, $lifetime,
                 0, false, false, 'text/javascript');
         }

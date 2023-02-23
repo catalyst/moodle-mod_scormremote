@@ -53,6 +53,7 @@ $PAGE->navbar->add(get_string('wrapper', 'mod_scormremote'), new moodle_url($bas
 $customdata = [
     'name' => $scormremote->name,
     'reference' => $scormremote->reference,
+    'courseid' => $course->id,
 ];
 $form = new \mod_scormremote\form\wrapper(new moodle_url($baseurl, ['cmid' => $cmid, 'editingon' => 1]), $customdata);
 
@@ -69,12 +70,26 @@ if ($data = $form->get_data()) {
             break;
     }
 
+    // Process client id and file name for client specific wrapper.
+    $clientid = null;
+    if ($data->clients) {
+        $clientid = $data->clients[0];
+        $client = new \mod_scormremote\client($clientid);
+
+        // Return filename part without .zip which may or may not be added if provided by user.
+        // Add the client name and .zip extension.
+        preg_match('/(.*?)(\.zip)*?$/', $filename, $matches);
+        $filename = $matches[1] . ' - for ' . $client->get('name') . '.zip';
+
+    }
+
+
     // Make sure the filename is *.zip.
     if (strlen($filename) < 4 || substr($filename, -4) != '.zip') {
         $filename .= '.zip';
     }
 
-    \mod_scormremote\packagefile::download_wrapper($scormremote, $filename);
+    \mod_scormremote\packagefile::download_wrapper($scormremote, $filename, $clientid);
 }
 
 // Start of output.
