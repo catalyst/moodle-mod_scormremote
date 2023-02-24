@@ -39,6 +39,10 @@ class client extends \core\persistent {
                 'type' => PARAM_TEXT,
                 'description' => 'The name of the client.',
             ),
+            'primarydomain' => array(
+                'type' => PARAM_TEXT,
+                'description' => 'The primary domain of the client.',
+            ),
         );
     }
 
@@ -123,27 +127,64 @@ class client extends \core\persistent {
      * Get client by domain.
      *
      * @param string $domain
+     * @param string $clientid Optional to restrict access to scorm if domain is used by more than one client.
      * @return client
+     * @throws \dml_exception
      */
-    public static function get_record_by_domain(string $domain) {
+    public static function get_record_by_domain(string $domain, string $clientid) {
         global $DB;
 
-        $sql = "SELECT client.*
-                  FROM {scormremote_clients} client
-                 WHERE EXISTS (
-                           SELECT 1
-                             FROM {scormremote_client_domains} dom
-                            WHERE client.id = dom.clientid
-                              AND dom.domain = :domain
-                       )";
+        $clientidclause = ($clientid) ? "client.id = :clientid" : "1";
 
-        $record = $DB->get_record_sql($sql, ['domain' => $domain]);
+        $sql = "SELECT client.*
+                  FROM   mdl_scormremote_clients AS client
+                 WHERE  client.id IN (SELECT scd.clientid
+                      FROM   mdl_scormremote_client_domains AS scd
+                     WHERE  scd.domain = :domain1
+                     UNION
+                    SELECT sc.id AS clientid
+                      FROM   mdl_scormremote_clients AS sc
+                     WHERE  sc.primarydomain = :domain2)
+                       AND $clientidclause";
+
+        $record = $DB->get_record_sql($sql, ['domain1' => $domain, 'domain2' => $domain, 'clientid' => $clientid]);
 
         if (!$record) {
             return null;
         }
 
         return new static(0, $record);
+    }
+
+    /**
+     * Get clients with subscription by course id.
+     *
+     * @param int $courseid
+     * @return array
+     * @throws \dml_exception
+     */
+    public static function get_clients_by_courseid(int $courseid) {
+        global $DB;
+
+        $sql = "SELECT
+                  sc.*
+                FROM
+                  mdl_scormremote_clients AS sc
+                  JOIN mdl_scormremote_subscriptions AS ss ON ss.clientid = sc.id
+                  JOIN mdl_scormremote_course_tiers AS sct ON sct.tierid = ss.tierid
+                WHERE
+                  sct.courseid = :courseid
+                ";
+
+        $persistents = [];
+
+        $recordset = $DB->get_recordset_sql($sql, ['courseid' => $courseid]);
+        foreach ($recordset as $record) {
+            $persistents[] = new static(0, $record);
+        }
+        $recordset->close();
+
+        return $persistents;
     }
 
     /**

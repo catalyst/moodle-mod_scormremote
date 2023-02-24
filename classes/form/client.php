@@ -34,7 +34,8 @@ class client extends \core\form\persistent {
     protected static $persistentclass = 'mod_scormremote\\client';
 
     /** @var array Fields to remove from the persistent validation. */
-    protected static $foreignfields = array('domains', 'tiers');
+    protected static $foreignfields = array('domains', 'tiers', 'mform_isexpanded_id_clientdetails',
+        'mform_isexpanded_id_alloweddomains', 'mform_isexpanded_id_subscriptions');
 
     /**
      * Define the form - called by parent constructor
@@ -43,14 +44,32 @@ class client extends \core\form\persistent {
         $mform = $this->_form;
         $updating = !!$this->get_persistent()->get('id');
 
+        $mform->addElement('header', 'clientdetails', get_string('manage_clientdetails', 'mod_scormremote'));
+
         $mform->addElement('text', 'name', get_string('manage_clientname', 'mod_scormremote'), 'maxlength="100"');
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', get_string('required'), 'required', null, 'server');
         $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'server');
 
-        $mform->addElement('textarea', 'domains', get_string("manage_clientdomain", "mod_scormremote"),
-            'wrap="virtual" rows="5" cols="50"');
-        $mform->addHelpButton('domains', 'domain', 'mod_scormremote');
+        $mform->addElement('text', 'primarydomain', get_string('manage_primaryclientdomain', 'mod_scormremote'), 'maxlength="255"');
+        $mform->setType('primarydomain', PARAM_TEXT);
+        $mform->addRule('primarydomain', get_string('required'), 'required', null, 'server');
+        $mform->addRule('primarydomain', get_string('maximumchars', '', 255), 'maxlength', 255, 'server');
+        $mform->addHelpButton('primarydomain', 'domain', 'mod_scormremote');
+
+        $mform->addElement('header', 'alloweddomains', get_string('manage_alloweddomains', 'mod_scormremote'));
+
+        $domainoptions = array(
+            'multiple' => true,
+            'noselectionstring' => get_string('none'),
+            'tags' => true,
+            'placeholder' => get_string('manage_adddomain', 'mod_scormremote'),
+        );
+        $mform->addElement('autocomplete', 'domains', get_string('manage_additionalclientdomain',
+            'mod_scormremote'), array(), $domainoptions);
+        $mform->addElement('static', 'domains_desc', '', get_string('manage_domains_desc',
+            'mod_scormremote'));
+
         $mform->setDefault('domains', $this->_customdata['domains']);
 
         $savetext = get_string('savechanges');
@@ -65,6 +84,9 @@ class client extends \core\form\persistent {
             $value = "{$tier->get('name')} ( {$tier->get('seats')} seats )";
             $tiers[$key] = $value;
         }
+
+        $mform->addElement('header', 'subscriptions', get_string('manage_subscriptions', 'scormremote'));
+
         $options = array(
             'multiple' => true,
             'noselectionstring' => get_string('none'),
@@ -73,6 +95,14 @@ class client extends \core\form\persistent {
         $mform->setDefault('tiers', $this->_customdata['tiers']);
 
         $this->add_action_buttons(true, $savetext);
+
+        $mform->setExpanded('clientdetails', true);
+
+        // Expand allowed domains if the list is not empty.
+        $expandalloweddomains = (bool)count($this->_customdata['domains']);
+        $mform->setExpanded('alloweddomains', $expandalloweddomains);
+        $mform->setExpanded('subscriptions', true);
+
     }
 
     /**
@@ -85,19 +115,17 @@ class client extends \core\form\persistent {
      */
     protected function extra_validation($data, $files, array &$errors) {
         $newerrors = array();
-        $domains = utils::textarea_to_string_array($data->domains);
+        $domains = $data->domains;
         $clientid = $this->get_persistent()->get('id');
+
+        if (!\core\ip_utils::is_domain_name($data->primarydomain)) {
+            $newerrors['primarydomain'] = get_string('error_clientdomainnotvalid', 'mod_scormremote', $data->primarydomain);
+            return $newerrors;
+        }
 
         foreach ($domains as $domain) {
             if (!\core\ip_utils::is_domain_name($domain)) {
                 $newerrors['domains'] = get_string('error_clientdomainnotvalid', 'mod_scormremote', $domain);
-                return $newerrors;
-            }
-
-            // Check if the domain is in use by a different client.
-            $exists = client_domain::get_record(['domain' => $domain]);
-            if ($exists && $exists->get('clientid') != $clientid) {
-                $newerrors['domains'] = get_string('error_clientdomainnotunique', 'mod_scormremote', $domain);
                 return $newerrors;
             }
         }

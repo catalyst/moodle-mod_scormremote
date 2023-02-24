@@ -71,6 +71,7 @@ function init() {
     datasource.search += 'lms_origin=' + document.location.host;
     datasource.search += '&student_id=' + CMI.core.student_id;
     datasource.search += '&student_name=' + CMI.core.student_name;
+    datasource.search += '&client_id=' + document.body.dataset.clientid;
     ORIGIN = datasource.origin;
 
     // Add event listener.

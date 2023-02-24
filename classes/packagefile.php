@@ -126,9 +126,11 @@ class packagefile {
      *
      * @param object $scormremote instance
      * @param string $filename
+     * @param null|int $clientid
      * @return \stored_file
+     * @throws \moodle_exception
      */
-    public static function download_wrapper($scormremote, $filename) {
+    public static function download_wrapper($scormremote, $filename, $clientid) {
         global $CFG, $OUTPUT;
 
         // Local variables.
@@ -159,6 +161,7 @@ class packagefile {
             $templatedata = [
                 'datasource'       => $datasource,
                 'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer2.js',
+                'clientid'         => self::format_clientid($clientid),
             ];
             $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', $templatedata);
             $resourcefilename = "sco_$count.html";
@@ -176,5 +179,16 @@ class packagefile {
         $zip->add_file_from_string('imsmanifest.xml', $manifest->asXML());
         $zip->finish();
         exit();
+    }
+
+    /**
+     * Format the clientid as a url parameter for the mustache template.
+     *
+     * @param int|null $clientid
+     * @return string
+     */
+    private static function format_clientid(?int $clientid) {
+        // Format the clientid as a url parameter for the mustache template.
+        return ($clientid) ? (string)$clientid : '';
     }
 }
