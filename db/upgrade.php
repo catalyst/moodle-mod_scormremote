@@ -201,29 +201,37 @@ function xmldb_scormremote_upgrade($oldversion) {
         $dbman->add_index($table, $index);
 
         // Update the primary domain field with the first domain in the
-        $sql = "UPDATE 
-                  {scormremote_clients} 
-                SET 
+        $sql = "UPDATE
+                  {scormremote_clients}
+                SET
                   (primarydomain) = (
-                    SELECT 
-                      mscd2.domain 
-                    FROM 
+                    SELECT
+                      mscd2.domain
+                    FROM
                       (
-                        SELECT 
-                          mscd1.clientid, 
-                          MIN(mscd1.id) AS firstdomainid 
-                        FROM 
-                          {scormremote_client_domains} AS mscd1 
-                        GROUP BY 
+                        SELECT
+                          mscd1.clientid,
+                          MIN(mscd1.id) firstdomainid
+                        FROM
+                          {scormremote_client_domains} mscd1
+                        GROUP BY
                           mscd1.clientid
-                      ) AS firstdomains 
-                      JOIN {scormremote_client_domains} AS mscd2 ON firstdomains.firstdomainid = mscd2.id 
-                    WHERE 
+                      ) AS firstdomains
+                      JOIN {scormremote_client_domains} mscd2 ON firstdomains.firstdomainid = mscd2.id
+                    WHERE
                       {scormremote_clients}.id = firstdomains.clientid
                   )
                 ";
 
         $DB->execute($sql);
+
+        $table = new xmldb_table('scormremote_client_domains');
+        $index = new xmldb_index('unique_client_domain', XMLDB_INDEX_UNIQUE, ['domain']);
+
+        $dbman->drop_index($table, $index);
+
+        $index = new xmldb_index('client_domain', XMLDB_INDEX_NOTUNIQUE, ['domain']);
+        $dbman->add_index($table, $index);
 
         // Scormremote savepoint reached.
         upgrade_mod_savepoint(true, 2023022000, 'scormremote');

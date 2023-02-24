@@ -51,8 +51,11 @@ class client extends \core\form\persistent {
         $mform->addRule('name', get_string('required'), 'required', null, 'server');
         $mform->addRule('name', get_string('maximumchars', '', 100), 'maxlength', 100, 'server');
 
-        $mform->addElement('text', 'primarydomain', get_string('manage_primaryclientdomain', 'mod_scormremote'), 'maxlength="100"');
+        $mform->addElement('text', 'primarydomain', get_string('manage_primaryclientdomain', 'mod_scormremote'), 'maxlength="255"');
         $mform->setType('primarydomain', PARAM_TEXT);
+        $mform->addRule('primarydomain', get_string('required'), 'required', null, 'server');
+        $mform->addRule('primarydomain', get_string('maximumchars', '', 255), 'maxlength', 255, 'server');
+        $mform->addHelpButton('primarydomain', 'domain', 'mod_scormremote');
 
         $mform->addElement('header', 'alloweddomains', get_string('manage_alloweddomains', 'mod_scormremote'));
 
@@ -64,9 +67,9 @@ class client extends \core\form\persistent {
         );
         $mform->addElement('autocomplete', 'domains', get_string('manage_additionalclientdomain',
             'mod_scormremote'), array(), $domainoptions);
+        $mform->addElement('static', 'domains_desc', '', get_string('manage_domains_desc',
+            'mod_scormremote'));
 
-
-        $mform->addHelpButton('primarydomain', 'domain', 'mod_scormremote');
         $mform->setDefault('domains', $this->_customdata['domains']);
 
         $savetext = get_string('savechanges');
@@ -84,7 +87,6 @@ class client extends \core\form\persistent {
 
         $mform->addElement('header', 'subscriptions', get_string('manage_subscriptions', 'scormremote'));
 
-
         $options = array(
             'multiple' => true,
             'noselectionstring' => get_string('none'),
@@ -95,7 +97,10 @@ class client extends \core\form\persistent {
         $this->add_action_buttons(true, $savetext);
 
         $mform->setExpanded('clientdetails', true);
-        $mform->setExpanded('alloweddomains', false);
+
+        // Expand allowed domains if the list is not empty.
+        $expandalloweddomains = (bool)count($this->_customdata['domains']);
+        $mform->setExpanded('alloweddomains', $expandalloweddomains);
         $mform->setExpanded('subscriptions', true);
 
     }
@@ -112,14 +117,6 @@ class client extends \core\form\persistent {
         $newerrors = array();
         $domains = $data->domains;
         $clientid = $this->get_persistent()->get('id');
-
-        // Check if the domain is in use by a different client.
-        $exists = client_domain::get_record(['domain' => $data->primarydomain]);
-        $exists = \mod_scormremote\client::get_record(['primarydomain' => $data->primarydomain]);
-        if ($exists && $exists->get('id') != $clientid) {
-            $newerrors['primarydomain'] = get_string('error_clientdomainnotunique', 'mod_scormremote', $data->primarydomain);
-            return $newerrors;
-        }
 
         if (!\core\ip_utils::is_domain_name($data->primarydomain)) {
             $newerrors['primarydomain'] = get_string('error_clientdomainnotvalid', 'mod_scormremote', $data->primarydomain);
