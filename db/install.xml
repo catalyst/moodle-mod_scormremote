@@ -47,7 +47,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="unique_client_domain" UNIQUE="true" FIELDS="domain" COMMENT="There may only be one domain"/>
+        <INDEX NAME="client_domain" UNIQUE="false" FIELDS="domain"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="scormremote_tiers" COMMENT="Holds information about seats and is linked to subscriptions and courses.">

@@ -61,6 +61,27 @@ class wrapper extends \moodleform {
         $mform->setType('filenameother', PARAM_RAW);
         $mform->addHelpButton('filenameother', 'filenameother', 'mod_scormremote');
 
+        $mform->addElement('header', 'optionalsettings', get_string('optionalsettings', 'scormremote'));
+
+        $courseid = $this->_customdata['courseid'];
+
+        $clientrecords = \mod_scormremote\client::get_clients_by_courseid($courseid);
+        $clients = array();
+        foreach ($clientrecords as $client) {
+            $key   = $client->get('id');
+            $value = "{$client->get('name')}";
+            $clients[$key] = $value;
+        }
+
+        $options = array(
+            'multiple' => true,
+            'noselectionstring' => get_string('none'),
+            'placeholder' => get_string('searchclient', 'scormremote'),
+            'casesensitive' => false
+        );
+        $mform->addElement('autocomplete', 'clients', get_string('chooseclient', 'scormremote'), $clients, $options);
+        $mform->setDefault('clients', -1);
+
         $this->add_action_buttons(false, get_string('download'));
     }
 

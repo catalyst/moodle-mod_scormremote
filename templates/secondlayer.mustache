@@ -29,11 +29,13 @@
     Context variables required for this template:
     * datasource - a url which target the href for a specific SCO.
     * jssource - a url which target the src for a the javascript.
+    * clientid - optional client id to associate this wrapper with a client.
 
     Example context (json):
     {
         "datasource": "https://example.com/pluginfile.php/24/mod_scormremote/remote/2/index.html",
-        "jssource": "https://example.com/mod/scormremote/amd/src/layer2.js"
+        "jssource": "https://example.com/mod/scormremote/amd/src/layer2.js",
+        "clientid": 2
     }
 }}
 <!DOCTYPE html>
@@ -75,7 +77,7 @@
 </head>
 <!-- Set the body's data-source attribute to the SCO's remote endpoint. -->
 
-<body onload="init();" data-source="{{datasource}}">
+<body onload="init();" data-source="{{datasource}}" data-clientid="{{#clientid}}{{.}}{{/clientid}}">
   <div id="wrapper">
     <h1>Your content is loading...</h1>
   </div>
