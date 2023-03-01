@@ -134,7 +134,7 @@ class client extends \core\persistent {
     public static function get_record_by_domain(string $domain, string $clientid) {
         global $DB;
 
-        $clientidclause = ($clientid) ? "client.id = :clientid" : "1";
+        $clientidclause = ($clientid) ? "AND client.id = :clientid" : "";
 
         $sql = "SELECT client.*
                   FROM   mdl_scormremote_clients AS client
@@ -145,7 +145,7 @@ class client extends \core\persistent {
                     SELECT sc.id AS clientid
                       FROM   mdl_scormremote_clients AS sc
                      WHERE  sc.primarydomain = :domain2)
-                       AND $clientidclause";
+                            $clientidclause";
 
         $record = $DB->get_record_sql($sql, ['domain1' => $domain, 'domain2' => $domain, 'clientid' => $clientid]);
 

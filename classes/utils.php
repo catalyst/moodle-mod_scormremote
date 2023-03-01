@@ -199,4 +199,17 @@ class utils {
 
         return (object) get_complete_user_data('id', $user->id);
     }
+
+    /**
+     * Manipulate the string to token replace the debug log level.
+     * @param string $filecontent
+     * @param int $loglevel
+     * @return void
+     */
+    public static function applyloglevel(string &$filecontent, $loglevel) {
+        $re = '/LOGLEVEL_TOKEN,/';
+        $subst = "$loglevel,";
+        $filecontent = preg_replace($re, $subst, $filecontent);
+    }
+
 }
