@@ -1,4 +1,4 @@
-const debug = true;
+var debug = true;
 const output = window.console;
 
 // Define exception/error codes
@@ -86,6 +86,16 @@ function init() {
     iframe.setAttribute("width", "100%");
     document.body.insertBefore(iframe, document.getElementById("wrapper"));
     embeddedWindow = iframe.contentWindow;
+}
+
+/**
+ * Sets the debug from layer3
+ * @param {bool} debugsetting The debug setting from layer3.
+ */
+// eslint-disable-next-line no-unused-vars
+function SetDebug(debugsetting) {
+    debug = debugsetting;
+    message("Debug has been set: " + (debug ? 'true' : 'false'));
 }
 
 /**

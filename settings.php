@@ -49,3 +49,15 @@ $student = get_archetype_roles('student');
 $student = reset($student);
 $general->add(new admin_setting_configselect('mod_scormremote/roleid',
     get_string('defaultrole', 'role'), '', $student->id ?? null, $options));
+
+$choices = [
+    0 => get_string('logdebug', 'mod_scormremote'),
+    1 => get_string('loginfo', 'mod_scormremote'),
+    2 => get_string('logwarn', 'mod_scormremote'),
+    3 => get_string('logerror', 'mod_scormremote'),
+    4 => get_string('lognone', 'mod_scormremote'),
+    ];
+
+$general->add(new admin_setting_configselect('mod_scormremote/debugloglevel',
+    get_string('debugloglevel', 'mod_scormremote'),
+    get_string('debuglogleveldescription', 'mod_scormremote'), 3, $choices));

@@ -211,8 +211,19 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Send layer3.
         if (in_array('layer3.js', $args)) {
             $lifetime = 60; // 1 Minute.
-            send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js?contextid='.$context->id, $lifetime,
-                0, false, false, 'text/javascript');
+            $layer3content = file_get_contents(__DIR__.'/amd/src/layer3.js');
+
+            $loglevel = get_config('mod_scormremote', 'debugloglevel');
+            utils::applyloglevel($layer3content, $loglevel);
+
+            // Set headers with mimetype and cache.
+            $filename = 'layer3.js?contextid=' . $context->id;
+            header('Content-Disposition: inline; filename="'.$filename.'"');
+            header('Cache-Control: private, max-age='.$lifetime.', no-transform');
+            header('Expires: '. gmdate('D, d M Y H:i:s', time() + $lifetime) .' GMT');
+            header('Pragma: ');
+
+            readstring_accel( $layer3content, 'text/javascript');
         }
 
     } else if ($filearea === 'content') {
@@ -242,9 +253,13 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             'layer3.js'
         );
 
+        $jssource->param('lms_origin', $origin);
+        $jssource->param('student_id', $username);
+        $jssource->param('student_name', $fullname);
+
         $templatedata = [
             'datasource'       => $datasource,
-            'jssource'         => $jssource . "?lms_origin={$origin}&student_id={$username}&student_name={$fullname}",
+            'jssource'         => $jssource->out(false),
             'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/scorm12.js',
         ];
         exit($OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata));

@@ -1,13 +1,14 @@
-const settings = {
+const LOGLEVEL_TOKEN = 1;
+var settings = {
     // Determines whether the API schedules an autocommit to the LMS after setting a value. |
     autocommit:            true,
     // Number of seconds to wait before autocommiting. Timer is restarted if another value is set. |
     autocommitSeconds:     5,
-    logLevel:              2, // 1 => DEBUG,
-                              // 2 => INFO,
-                              // 3 => WARN,
-                              // 4 => ERROR, // Default.
-                              // 5 => NONE
+    logLevel: LOGLEVEL_TOKEN, // 0 => DEBUG,
+                              // 1 => INFO,
+                              // 2 => WARN,
+                              // 3 => ERROR, // Default.
+                              // 4 => NONE
     // Function to transform the commit object before sending it to lmsCommitUrl.
     //requestHandler:        () => {},
     // Function to be called whenever a message is logged.
@@ -15,7 +16,7 @@ const settings = {
 };
 
 var initialized = false;
-const debug = settings.logLevel <= 2;
+var debug = settings.logLevel <= 1;
 const output = window.console;
 
 // TODO: Move constants to their own file.
@@ -32,6 +33,10 @@ const ORIGIN = "*"; //TODO: issue 27
 function init() {
     // Create event listener.
     initMessageReciever();
+
+    // Update debug setting.
+    debug = settings.logLevel <= 1;
+    postMessageToParent('SetDebug', [debug]);
 
     // Setup the API.
     // TODO: issue 23.
