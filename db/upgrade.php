@@ -194,11 +194,21 @@ function xmldb_scormremote_upgrade($oldversion) {
 
         $table = new xmldb_table('scormremote_clients');
 
+        // Define field primarydomain to be added to scormremote_clients.
         $field = new xmldb_field('primarydomain', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+
+        // Conditionally launch add field primarydomain.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define index primarydomain to be added to scormremote_clients.
         $index = new xmldb_index('primarydomain', XMLDB_INDEX_NOTUNIQUE, ['primarydomain']);
 
-        $dbman->add_field($table, $field);
-        $dbman->add_index($table, $index);
+        // Conditionally launch add index clientid.
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
 
         // Update the primary domain field with the first domain in the
         $sql = "UPDATE
