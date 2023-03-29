@@ -223,10 +223,10 @@ function xmldb_scormremote_upgrade($oldversion) {
 
         // Remove duplicate domains from the scormremote_client_domains table
         $sql = "DELETE
-                  FROM {scormremote_client_domains} scd
-                 WHERE scd.domain IN (SELECT sc.primarydomain
+                  FROM {scormremote_client_domains}
+                 WHERE {scormremote_client_domains}.domain IN (SELECT sc.primarydomain
                                         FROM {scormremote_clients} sc
-                                       WHERE sc.id = scd.clientid)";
+                                       WHERE sc.id = {scormremote_client_domains}.clientid)";
 
         $DB->execute($sql);
 
