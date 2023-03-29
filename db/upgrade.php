@@ -190,48 +190,46 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2022090201, 'scormremote');
     }
 
-    if ($oldversion < 2023022000) {
+    if ($oldversion < 2023032900) {
 
         $table = new xmldb_table('scormremote_clients');
 
         // Define field primarydomain to be added to scormremote_clients.
-        $field = new xmldb_field('primarydomain', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
-
-        // Conditionally launch add field primarydomain.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
+        $field = new xmldb_field('primarydomain', XMLDB_TYPE_CHAR, '255', null, null, null, null);
 
         // Define index primarydomain to be added to scormremote_clients.
         $index = new xmldb_index('primarydomain', XMLDB_INDEX_NOTUNIQUE, ['primarydomain']);
 
-        // Conditionally launch add index clientid.
-        if (!$dbman->index_exists($table, $index)) {
-            $dbman->add_index($table, $index);
+        // Drop index and field if exists
+        // Changes field primarydomain to allow null. Needed when a client has an empty domian list.
+        if ($dbman->index_exists($table, $index)) {
+            $dbman->drop_index($table, $index);
         }
 
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->drop_field($table, $field);
+        }
+
+        $dbman->add_field($table, $field);
+        $dbman->add_index($table, $index);
+
         // Update the primary domain field with the first domain in the
-        $sql = "UPDATE
-                  {scormremote_clients}
-                SET
-                  (primarydomain) = (
-                    SELECT
-                      mscd2.domain
-                    FROM
-                      (
-                        SELECT
-                          mscd1.clientid,
-                          MIN(mscd1.id) firstdomainid
-                        FROM
-                          {scormremote_client_domains} mscd1
-                        GROUP BY
-                          mscd1.clientid
-                      ) AS firstdomains
-                      JOIN {scormremote_client_domains} mscd2 ON firstdomains.firstdomainid = mscd2.id
-                    WHERE
-                      {scormremote_clients}.id = firstdomains.clientid
-                  )
-                ";
+        $sql = "UPDATE {scormremote_clients}
+                   SET primarydomain = (SELECT scd.domain
+                                          FROM {scormremote_client_domains} scd
+                                         WHERE scd.id IN (SELECT MIN(scd1.id) firstdomainid
+                                                            FROM {scormremote_client_domains} scd1
+                                                        GROUP BY scd1.clientid)
+                                         AND scd.clientid = {scormremote_clients}.id)";
+
+        $DB->execute($sql);
+
+        // Remove duplicate domains from the scormremote_client_domains table
+        $sql = "DELETE
+                  FROM {scormremote_client_domains} scd
+                 WHERE scd.domain IN (SELECT sc.primarydomain
+                                        FROM {scormremote_clients} sc
+                                       WHERE sc.id = scd.clientid)";
 
         $DB->execute($sql);
 
@@ -244,7 +242,7 @@ function xmldb_scormremote_upgrade($oldversion) {
         $dbman->add_index($table, $index);
 
         // Scormremote savepoint reached.
-        upgrade_mod_savepoint(true, 2023022000, 'scormremote');
+        upgrade_mod_savepoint(true, 2023032900, 'scormremote');
     }
 
         return true;
