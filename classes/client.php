@@ -137,15 +137,17 @@ class client extends \core\persistent {
         $clientidclause = ($clientid) ? "client.id = :clientid" : "1";
 
         $sql = "SELECT client.*
-                  FROM   mdl_scormremote_clients AS client
-                 WHERE  client.id IN (SELECT scd.clientid
-                      FROM   mdl_scormremote_client_domains AS scd
-                     WHERE  scd.domain = :domain1
-                     UNION
-                    SELECT sc.id AS clientid
-                      FROM   mdl_scormremote_clients AS sc
-                     WHERE  sc.primarydomain = :domain2)
-                       AND $clientidclause";
+                  FROM {scormremote_clients} client
+                 WHERE client.id IN (
+                           SELECT scd.clientid
+                             FROM {scormremote_client_domains} scd
+                            WHERE scd.domain = :domain1
+                            UNION
+                           SELECT sc.id AS clientid
+                             FROM {scormremote_clients} sc
+                            WHERE sc.primarydomain = :domain2
+                       )
+                   AND $clientidclause";
 
         $record = $DB->get_record_sql($sql, ['domain1' => $domain, 'domain2' => $domain, 'clientid' => $clientid]);
 
@@ -166,15 +168,11 @@ class client extends \core\persistent {
     public static function get_clients_by_courseid(int $courseid) {
         global $DB;
 
-        $sql = "SELECT
-                  sc.*
-                FROM
-                  mdl_scormremote_clients AS sc
-                  JOIN mdl_scormremote_subscriptions AS ss ON ss.clientid = sc.id
-                  JOIN mdl_scormremote_course_tiers AS sct ON sct.tierid = ss.tierid
-                WHERE
-                  sct.courseid = :courseid
-                ";
+        $sql = "SELECT sc.*
+                  FROM {scormremote_clients} sc
+                  JOIN {scormremote_subscriptions} ss ON ss.clientid = sc.id
+                  JOIN {scormremote_course_tiers} sct ON sct.tierid = ss.tierid
+                 WHERE sct.courseid = :courseid";
 
         $persistents = [];
 
