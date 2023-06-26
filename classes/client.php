@@ -134,7 +134,7 @@ class client extends \core\persistent {
     public static function get_record_by_domain(string $domain, string $clientid) {
         global $DB;
 
-        $clientidclause = ($clientid) ? "client.id = :clientid" : "1";
+        $clientidclause = ($clientid) ? "client.id = :clientid" : "1 = 1";
 
         $sql = "SELECT client.*
                   FROM   mdl_scormremote_clients AS client
