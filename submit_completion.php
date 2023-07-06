@@ -35,8 +35,9 @@ require_login(0, false);
 $contextid = required_param('contextid', PARAM_INT);
 $origin    = required_param('lms_origin', PARAM_URL);
 $username  = required_param('student_id', PARAM_RAW_TRIMMED);
+$clientid  = optional_param('client_id', '', PARAM_TEXT);
 
-$client = client::get_record_by_domain($origin);
+$client = client::get_record_by_domain($origin, $clientid);
 if (!$client) {
     exit('NOT OK');
 }
