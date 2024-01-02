@@ -172,6 +172,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $client = client::get_record_by_domain($origin, $clientid);
         if (!$client) {
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
+            header('Content-Type: text/javascript');
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
@@ -179,6 +180,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $sub = $client->get_subscription_by_courseid($course->id);
         if (!$sub) {
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired';
+            header('Content-Type: text/javascript');
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
@@ -189,6 +191,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
+                header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
             $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
