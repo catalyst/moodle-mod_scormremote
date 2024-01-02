@@ -30,8 +30,6 @@ require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot.'/lib/completionlib.php');
 
-// No guest autologin.
-require_login(0, false);
 $contextid = required_param('contextid', PARAM_INT);
 $origin    = required_param('lms_origin', PARAM_URL);
 $username  = required_param('student_id', PARAM_RAW_TRIMMED);
