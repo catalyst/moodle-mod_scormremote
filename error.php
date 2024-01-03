@@ -26,8 +26,6 @@
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 
-// No guest autologin.
-require_login(0, false);
 $errorstring = optional_param('error', null, PARAM_RAW_TRIMMED);
 $PAGE->set_url('/mod/scormremote/error.php', array('error' => $errorstring));
 $PAGE->set_context(context_system::instance());
