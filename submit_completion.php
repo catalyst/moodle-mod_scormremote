@@ -26,12 +26,13 @@
 use \mod_scormremote\client;
 use \mod_scormremote\utils;
 
+// No login check is expected here because this is accessed from external LMS and
+// all required checks are performed before updating completion info.
+// @codingStandardsIgnoreLine
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 require_once($CFG->dirroot.'/lib/completionlib.php');
 
-// No guest autologin.
-require_login(0, false);
 $contextid = required_param('contextid', PARAM_INT);
 $origin    = required_param('lms_origin', PARAM_URL);
 $username  = required_param('student_id', PARAM_RAW_TRIMMED);
