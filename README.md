@@ -1,4 +1,6 @@
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/catalyst/moodle-mod_scormremote/ci/MOODLE_39_STABLE?label=ci)
+<a  href="https://github.com/catalyst/moodle-mod_scormremote/actions/workflows/ci.yml?query=branch%3AMOODLE_39_STABLE">
+<img src="https://github.com/catalyst/moodle-mod_scormremote/workflows/ci/badge.svg?branch=MOODLE_39_STABLE">
+</a>
 
 # Moodle Mod Scormremote
 
