@@ -186,23 +186,27 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
 
         // Does the user exist?
         $user = utils::get_user($client, $username);
-        if (!$user) {
-            // If user doesn't exist create, only when seats are higher then participant count.
+        if (!$user || !is_enrolled($context, $user)) {
+            // If user doesn't exist or is not previously enrolled check if
+            // seats are available.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
                 header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
-            $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
-        }
 
-        // Check if this user is_enrolled in this course.
-        if (!is_enrolled($context, $user)) {
-            $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
-            $roleid = get_config('mod_scormremote', 'roleid') ?? null;
-            $enrolplugin = enrol_get_plugin($instance->enrol);
-            $enrolplugin->enrol_user($instance, $user->id, $roleid);
+            if (!$user) {
+                $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
+            }
+
+            // Check if this user is_enrolled in this course.
+            if (!is_enrolled($context, $user)) {
+                $instance = $DB->get_record('enrol', ['courseid' => $course->id, 'enrol' => 'manual']);
+                $roleid = get_config('mod_scormremote', 'roleid') ?? null;
+                $enrolplugin = enrol_get_plugin($instance->enrol);
+                $enrolplugin->enrol_user($instance, $user->id, $roleid);
+            }
         }
 
         // Log last access.
