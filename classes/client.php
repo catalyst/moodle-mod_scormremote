@@ -39,6 +39,11 @@ class client extends \core\persistent {
                 'type' => PARAM_TEXT,
                 'description' => 'The name of the client.',
             ),
+            'expiry' => array(
+                'type' => PARAM_INT,
+                'description' => 'The expiry date of the client.',
+                'default' => 0,
+            ),
             'primarydomain' => array(
                 'type' => PARAM_TEXT,
                 'description' => 'The primary domain of the client.',

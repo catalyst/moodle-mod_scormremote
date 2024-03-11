@@ -242,5 +242,21 @@ function xmldb_scormremote_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2023032900, 'scormremote');
     }
 
+    if ($oldversion < 2024030701) {
+
+        $table = new xmldb_table('scormremote_clients');
+
+        // Define field expiry to be added to scormremote_clients.
+        $field = new xmldb_field('expiry', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'primarydomain');
+
+        // Conditionally launch add field expiry.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Scormremote savepoint reached.
+        upgrade_mod_savepoint(true, 2024030701, 'scormremote');
+    }
+
         return true;
 }

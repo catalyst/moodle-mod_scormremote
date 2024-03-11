@@ -58,6 +58,14 @@ switch ($errorstring) {
         ];
         $PAGE->set_title('402 Payment Required');
         break;
+    case 'expired':
+        $templatedata = [
+            'errorcode'    => 402,
+            'errortitle'   => get_string('errorpage_expiredtitle', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_expiredmessage', 'mod_scormremote'),
+        ];
+        $PAGE->set_title('402 Payment Required');
+        break;
     default:
         $templatedata = [
             'errorcode'    => 400,

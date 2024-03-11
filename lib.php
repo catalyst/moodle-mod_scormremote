@@ -176,6 +176,12 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
+        if (!empty($client->get('expiry')) && $client->get('expiry') < time()) {
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=expired';
+            header('Content-Type: text/javascript');
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
+        }
+
         // Get active subscription of client to tier where the course id exists.
         $sub = $client->get_subscription_by_courseid($course->id);
         if (!$sub) {

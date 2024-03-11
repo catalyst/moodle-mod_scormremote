@@ -57,6 +57,8 @@ class client extends \core\form\persistent {
         $mform->addRule('primarydomain', get_string('maximumchars', '', 255), 'maxlength', 255, 'server');
         $mform->addHelpButton('primarydomain', 'domain', 'mod_scormremote');
 
+        $mform->addElement('date_time_selector', 'expiry', get_string('expiry', 'mod_scormremote'), array('optional' => true));
+
         $mform->addElement('header', 'alloweddomains', get_string('manage_alloweddomains', 'mod_scormremote'));
 
         $domainoptions = array(
