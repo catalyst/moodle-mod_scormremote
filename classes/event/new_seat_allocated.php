@@ -24,8 +24,6 @@
 
 namespace mod_scormremote\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The new seat allocated event class.
  *

@@ -24,8 +24,6 @@
 
 namespace mod_scormremote\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The SCORM remote package view error event class.
  *

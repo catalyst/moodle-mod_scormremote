@@ -238,13 +238,13 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     ]
                 ]);
                 $event->trigger();
-                $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=sublimitreached&origin=" . $origin ;
+                $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=sublimitreached&origin=" . $origin;
                 header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
             $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
 
-            // Create event: new seat allocated
+            // Create event: new seat allocated.
             $event = \mod_scormremote\event\new_seat_allocated::create([
                 'context' => $context,
                 'courseid' => $course->id,
@@ -280,10 +280,9 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             'context' => $context,
             'courseid' => $course->id,
             'userid' => $user->id,
-            // 'relateduserid' => $user->id,
             'other' => [
               'description' => get_string('event_scormviewed', 'mod_scormremote', [
-                'clientname'=> $client->get('name'),
+                'clientname' => $client->get('name'),
                 'fullname' => $fullname,
                 'courseid' => $course->id,
               ]),
