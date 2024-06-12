@@ -171,14 +171,48 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Get client by origin.
         $client = client::get_record_by_domain($origin, $clientid);
         if (!$client) {
+
+            // Create event: client cannot be found.
+            $event = \mod_scormremote\event\remote_view_error::create([
+                'context' => $context,
+                'courseid' => $course->id,
+                'other' => [
+                  'origin' => $origin,
+                  'fullname' => $fullname,
+                  'reason' => get_string('event_unknownorigin', 'mod_scormremote', [
+                    'fullname' => $fullname,
+                    'origin' => $origin,
+                    'courseid' => $course->id,
+                  ]),
+                ]
+            ]);
+            $event->trigger();
+
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
+
             header('Content-Type: text/javascript');
+
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
         // Get active subscription of client to tier where the course id exists.
         $sub = $client->get_subscription_by_courseid($course->id);
         if (!$sub) {
+            // Create event: client has inactive subscription.
+            $event = \mod_scormremote\event\remote_view_error::create([
+                'context' => $context,
+                'courseid' => $course->id,
+                'other' => [
+                  'origin' => $origin,
+                  'reason' => get_string('event_nosubscription', 'mod_scormremote', [
+                    'fullname' => $fullname,
+                    'clientname' => $client->get('name'),
+                    'courseid' => $course->id,
+                  ]),
+                ]
+            ]);
+            $event->trigger();
+
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired';
             header('Content-Type: text/javascript');
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
@@ -190,11 +224,40 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             // If user doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
+                // Create event: seat allocation limit reached.
+                $event = \mod_scormremote\event\remote_view_error::create([
+                    'context' => $context,
+                    'courseid' => $course->id,
+                    'other' => [
+                      'reason' => get_string('event_seatlimitreached', 'mod_scormremote', [
+                        'fullname' => $fullname,
+                        'clientname' => $client->get('name'),
+                        'courseid' => $course->id,
+                        'seatlimit' => $tier->get('seats'),
+                      ]),
+                    ]
+                ]);
+                $event->trigger();
                 $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
                 header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
             $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
+
+            // Create event: new seat allocated
+            $event = \mod_scormremote\event\new_seat_allocated::create([
+                'context' => $context,
+                'courseid' => $course->id,
+                'other' => [
+                  'description' => get_string('event_seatallocated', 'mod_scormremote', [
+                    'fullname' => $fullname,
+                    'clientname' => $client->get('name'),
+                    'seatcount' => $sub->get_participant_count() + 1,
+                    'seatlimit' => $tier->get('seats'),
+                  ]),
+                ]
+            ]);
+            $event->trigger();
         }
 
         // Check if this user is_enrolled in this course.
@@ -210,6 +273,20 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $USER = $user;
         user_accesstime_log($course->id);
         $USER = $original;
+
+        // Create event: user viewed SCORM.
+        $event = \mod_scormremote\event\remote_viewed::create([
+            'context' => $context,
+            'courseid' => $course->id,
+            'other' => [
+              'description' => get_string('event_scormviewed', 'mod_scormremote', [
+                'clientname'=> $client->get('name'),
+                'fullname' => $fullname,
+                'courseid' => $course->id,
+              ]),
+            ]
+        ]);
+        $event->trigger();
 
         // Send layer3.
         if (in_array('layer3.js', $args)) {
