@@ -188,10 +188,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             ]);
             $event->trigger();
 
-            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
-
+            $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=unauthorized&origin=" . $origin;
             header('Content-Type: text/javascript');
-
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
@@ -213,7 +211,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             ]);
             $event->trigger();
 
-            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired';
+            $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=subrequired&origin=' . $origin;
             header('Content-Type: text/javascript');
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
@@ -228,17 +226,19 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                 $event = \mod_scormremote\event\remote_view_error::create([
                     'context' => $context,
                     'courseid' => $course->id,
+                    'relateduserid' => $user->id,
                     'other' => [
                       'reason' => get_string('event_seatlimitreached', 'mod_scormremote', [
                         'fullname' => $fullname,
                         'clientname' => $client->get('name'),
                         'courseid' => $course->id,
                         'seatlimit' => $tier->get('seats'),
+                        'origin' => $origin,
                       ]),
                     ]
                 ]);
                 $event->trigger();
-                $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=sublimitreached';
+                $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=sublimitreached&origin=" . $origin ;
                 header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
@@ -248,6 +248,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             $event = \mod_scormremote\event\new_seat_allocated::create([
                 'context' => $context,
                 'courseid' => $course->id,
+                'relateduserid' => $user->id,
                 'other' => [
                   'description' => get_string('event_seatallocated', 'mod_scormremote', [
                     'fullname' => $fullname,
@@ -278,6 +279,8 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $event = \mod_scormremote\event\remote_viewed::create([
             'context' => $context,
             'courseid' => $course->id,
+            'userid' => $user->id,
+            // 'relateduserid' => $user->id,
             'other' => [
               'description' => get_string('event_scormviewed', 'mod_scormremote', [
                 'clientname'=> $client->get('name'),

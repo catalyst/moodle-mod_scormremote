@@ -30,7 +30,8 @@ require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
 
 $errorstring = optional_param('error', null, PARAM_RAW_TRIMMED);
-$PAGE->set_url('/mod/scormremote/error.php', array('error' => $errorstring));
+$originstring = optional_param('origin', null, PARAM_RAW_TRIMMED);
+$PAGE->set_url('/mod/scormremote/error.php', array('error' => $errorstring, 'origin' => $originstring));
 $PAGE->set_context(context_system::instance());
 
 switch ($errorstring) {
@@ -38,7 +39,7 @@ switch ($errorstring) {
         $templatedata = [
             'errorcode'    => 401,
             'errortitle'   => get_string('errorpage_unauthorizedtitle', 'mod_scormremote'),
-            'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_unauthorizedmessage', 'mod_scormremote', ['domain' => $originstring]),
         ];
         $PAGE->set_title('401 Unauthorized');
         break;
@@ -46,7 +47,7 @@ switch ($errorstring) {
         $templatedata = [
             'errorcode'    => 402,
             'errortitle'   => get_string('errorpage_subrequiredtitle', 'mod_scormremote'),
-            'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_subrequiredmessage', 'mod_scormremote', ['domain' => $originstring]),
         ];
         $PAGE->set_title('402 Payment Required');
         break;
@@ -54,7 +55,7 @@ switch ($errorstring) {
         $templatedata = [
             'errorcode'    => 402,
             'errortitle'   => get_string('errorpage_sublimittitle', 'mod_scormremote'),
-            'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote'),
+            'errormessage' => get_string('errorpage_sublimitmessage', 'mod_scormremote', ['domain' => $originstring]),
         ];
         $PAGE->set_title('402 Payment Required');
         break;
