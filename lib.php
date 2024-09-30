@@ -247,6 +247,22 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
+        if (empty($username)) {
+            \mod_scormremote\event\remote_view_error::create([
+                'context' => $context,
+                'courseid' => $course->id,
+                'other' => [
+                  'reason' => get_string('event_nouser', 'mod_scormremote', [
+                    'clientname' => $client->get('name'),
+                    'courseid' => $course->id,
+                  ]),
+                ]
+            ])->trigger();
+            $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=unauthorized&origin=" . $origin;
+            header('Content-Type: text/javascript');
+            exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
+        }
+
         // Does the user exist?
         $user = utils::get_user($client, $username);
         if (!$user) {
