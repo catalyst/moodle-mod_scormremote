@@ -98,6 +98,7 @@ $string['event_seatlimitreached'] = 'The user \'{$a->fullname}\' was denied acce
 $string['event_scormviewed'] = 'The user \'{$a->fullname}\' viewed a SCORM package for the course with id \'{$a->courseid}\' from client \'{$a->clientname}\'.';
 $string['event_seatallocated'] = 'A new seat ({$a->seatcount}/{$a->seatlimit}) was allocated for client \'{$a->clientname}\' for user \'{$a->fullname}\'.';
 $string['event_unknownorigin'] = 'The user \'{$a->fullname}\' was denied access to a SCORM package for the course with id \'{$a->courseid}\' as the request originated from an unknown client \'{$a->origin}\'.';
+$string['event_unknownpair'] = 'The user \'{$a->fullname}\' was denied access to a SCORM package for the course with id \'{$a->courseid}\' as \'{$a->origin}\' is not a valid domain for the client \'{$a->clientname}\'.';
 $string['event_clientidrequired'] = 'The user \'{$a->fullname}\' was denied access to a SCORM package for the course with id \'{$a->courseid}\' as the request did not contain a client id.';
 $string['scormremote:addinstance'] = 'Add SCORM remote instance';
 $string['scormremote:manageclient'] = 'Manage SCORM remote clients';

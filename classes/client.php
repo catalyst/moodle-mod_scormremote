@@ -129,6 +129,18 @@ class client extends \core\persistent {
     }
 
     /**
+     * Gets a clients name from a client id.
+     *
+     * @param int $clientid
+     * @return string client name, or the id if no match was found.
+     */
+    public static function get_clientname_by_id(int $clientid): string {
+        // If the clientid doesn't exist return the clientid.
+        $record = self::get_record(['id' => $clientid]);
+        return !empty($record) ? $record->get('name') : (string) $clientid;
+    }
+
+    /**
      * Get client by domain.
      *
      * @param string $domain

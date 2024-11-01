@@ -175,16 +175,19 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         if (!$client) {
 
             // Create event: client cannot be found.
+            $expectedclient = $clientid ? client::get_clientname_by_id($clientid) : $clientid;
+            $reasonname = $clientid ? 'event_unknownpair' : 'event_unknownorigin';
             $event = \mod_scormremote\event\remote_view_error::create([
                 'context' => $context,
                 'courseid' => $course->id,
                 'other' => [
                   'origin' => $origin,
                   'fullname' => $fullname,
-                  'reason' => get_string('event_unknownorigin', 'mod_scormremote', [
+                  'reason' => get_string($reasonname, 'mod_scormremote', [
                     'fullname' => $fullname,
                     'origin' => $origin,
                     'courseid' => $course->id,
+                    'clientname' => $expectedclient,
                   ]),
                 ]
             ]);
