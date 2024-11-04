@@ -153,7 +153,7 @@ function scormremote_delete_instance($id) {
  * @return bool false if file not found, does not return if found - just send the file
  */
 function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG, $DB, $OUTPUT, $USER;
+    global $CFG, $DB, $OUTPUT, $PAGE, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -167,6 +167,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $clientid = optional_param('client_id', '', PARAM_RAW_TRIMMED);
     }
 
+    $PAGE->set_context($context);
     $lifetime = null;
 
     if ($filearea === 'bootstrap') {
