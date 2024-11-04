@@ -16,8 +16,6 @@
 
 namespace mod_scormremote;
 
-use core_files\archive_writer;
-
 /**
  * Class contains static methods for handling SCORM packagefile.
  *
@@ -137,7 +135,9 @@ class packagefile {
         // Local variables.
         $context = \mod_scormremote\utils::get_context($scormremote);
         $manifest = simplexml_load_string(\mod_scormremote\utils::get_scormremote_imsmanifest($scormremote));
-        $zip = archive_writer::get_stream_writer($filename, archive_writer::ZIP_WRITER);
+        $zip = new \zip_archive();
+        $filepath = make_request_directory() . '/' . $filename;;
+        $zip->open($filepath);
 
         // From this instance's manifest, we replacing all files by index files. Each resource (SCO) will have it's own index file
         // names sco_1.html, sco_2.html, sco_3.html. This html is generated from the secondlayer.mustache and contains the
@@ -179,7 +179,8 @@ class packagefile {
 
         // Add the manifest and finish.
         $zip->add_file_from_string('imsmanifest.xml', $manifest->asXML());
-        $zip->finish();
+        $zip->close();
+        send_temp_file($filepath, $filename);
         exit();
     }
 
