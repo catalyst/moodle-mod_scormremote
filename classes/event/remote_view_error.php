@@ -75,6 +75,6 @@ class remote_view_error extends \core\event\base {
         $params = array(
             'id' => $this->contextinstanceid,
         );
-        return new \moodle_url('mod/scormremote/view.php', $params);
+        return new \moodle_url('/mod/scormremote/view.php', $params);
     }
 }
