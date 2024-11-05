@@ -72,6 +72,9 @@ function init() {
     datasource.search += '&student_id=' + (CMI.core ? CMI.core.student_id : '');
     datasource.search += '&student_name=' + (CMI.core ? CMI.core.student_name : '');
     datasource.search += '&client_id=' + ('clientid' in document.body.dataset ? document.body.dataset.clientid : '');
+    if ('version' in document.body.dataset) {
+        datasource.search += '&version=' + document.body.dataset.version;
+    }
     ORIGIN = datasource.origin;
 
     // Add event listener.

@@ -164,6 +164,7 @@ class packagefile {
                 'datasource'       => $datasource,
                 'jssource'         => $CFG->wwwroot . '/mod/scormremote/amd/src/layer2.js',
                 'clientid'         => self::format_clientid($clientid),
+                'version'          => get_config('mod_scormremote', 'version'),
             ];
             $resourcefile = $OUTPUT->render_from_template('mod_scormremote/secondlayer', $templatedata);
             $resourcefilename = "sco_$count.html";
