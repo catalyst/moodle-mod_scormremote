@@ -267,10 +267,10 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
         }
 
-        // Does the user exist?
+        // Does the user exist and are they part of the subscription?
         $user = utils::get_user($client, $username);
-        if (!$user) {
-            // If user doesn't exist create, only when seats are higher then participant count.
+        if (!$user || !$sub->contains_user($user->id)) {
+            // If user or sub doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
             if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
                 // Create event: seat allocation limit reached.
@@ -293,7 +293,10 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                 header('Content-Type: text/javascript');
                 exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
             }
-            $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
+
+            if (!$user) {
+                $user = utils::create_user($client->get('primarydomain'), $client, $username, $fullname);
+            }
 
             // Create event: new seat allocated.
             $event = \mod_scormremote\event\new_seat_allocated::create([

@@ -88,6 +88,36 @@ class subscription extends \core\persistent {
     }
 
     /**
+     * Returns whether the user is already included in the subscription count.
+     *
+     * @param int $userid
+     * @return bool
+     */
+    public function contains_user(int $userid): bool {
+        global $DB;
+
+        // Use same criteria as get_participant_count with the specific userid.
+        $sql = "SELECT usr.id
+                  FROM {user} usr                        -- from users
+                  JOIN {user_enrolments} usr_enr         -- select all enrolments
+                    ON usr_enr.userid = usr.id
+                  JOIN {enrol} enr                       -- select course enrolment
+                    ON enr.id = usr_enr.enrolid
+                  JOIN {scormremote_course_tiers} ct
+                    ON enr.courseid = ct.courseid        -- join tiers which are connected to the course
+                  JOIN {scormremote_subscriptions} sub
+                    ON sub.tierid = ct.tierid            -- the client must be subscribed to the tier
+                 WHERE usr.deleted = 0                   -- dont't select deleted users
+                   AND usr.id = :userid
+                   AND sub.id = :subscriptionid";
+
+        return $DB->record_exists_sql($sql, [
+            'subscriptionid' => $this->get('id'),
+            'userid'         => $userid,
+        ]);
+    }
+
+    /**
      * Delete all entries where clientid equals to given client id.
      *
      * @param int $clientid The client id.
