@@ -1,9 +1,17 @@
-const settings = {
+const levels = {
+    DEBUG: 1,
+    INFO: 2,
+    WARN: 3,
+    ERROR: 4,
+    NONE: 5,
+};
+var settings = {
     // Determines whether the API schedules an autocommit to the LMS after setting a value. |
     autocommit:            true,
     // Number of seconds to wait before autocommiting. Timer is restarted if another value is set. |
     autocommitSeconds:     5,
-    logLevel:              2, // 1 => DEBUG,
+    // Log level passed to scormagain. Use 4 as the default if not set. |
+    logLevel:              4, // 1 => DEBUG,
                               // 2 => INFO,
                               // 3 => WARN,
                               // 4 => ERROR, // Default.
@@ -15,7 +23,6 @@ const settings = {
 };
 
 var initialized = false;
-const debug = settings.logLevel <= 2;
 const output = window.console;
 
 // TODO: Move constants to their own file.
@@ -30,8 +37,17 @@ const ORIGIN = "*"; //TODO: issue 27
  */
 // eslint-disable-next-line no-unused-vars
 function init() {
+    // Load log level.
+    const body = document.querySelector('body');
+    if (body && body.dataset.level && body.dataset.level !== '0') {
+        settings.logLevel = body.dataset.level;
+    }
+
     // Create event listener.
     initMessageReciever();
+
+    // Update layer2 log level setting.
+    postMessageToParent('SetLogLevel', [settings.logLevel]);
 
     // Setup the API.
     // TODO: issue 23.
@@ -87,19 +103,19 @@ function init() {
             !ALLOWED_METHODS.includes(functionName) ||
             typeof window[functionName] !== 'function'
         ) {
-            message('Recieved message contains unexpected data for param function, recieved "' + functionName + '"');
+            message(levels.WARN, 'Recieved message contains unexpected data for param function, recieved "' + functionName + '"');
             return;
         }
 
         // Can't run function with no arguments passed.
         // Even when the desired function has no argument, the passed param MUST be a empty array.
         if (!functionArgs || typeof functionArgs !== 'object' || !Array.isArray(functionArgs)) {
-            message('Recieved message contains unexpected data for param arguments, expected array (recieved "' +
+            message(levels.WARN, 'Recieved message contains unexpected data for param arguments, expected array (recieved "' +
                 Object.prototype.toString.call(functionArgs) + '")');
             return;
         }
 
-        message('Message recieved. Calling function: "' + functionName + '"');
+        message(levels.DEBUG, 'Message recieved. Calling function: "' + functionName + '"');
         window[functionName].apply(null, functionArgs);
     });
 }
@@ -109,15 +125,36 @@ function init() {
  * log(string) function. This interface was used so that the output could be assigned the window.console object.
  *
  * Depends on:
- *  - {boolean} debug to indicate if output is wanted
+ *  - {int} log level to indicate where to sent output
  *  - {object} output to handle the messages. This object must implement a function log(string).
  *
+ * @param {int} level
  * @param {string} str
  * @returns {null}
  */
- function message(str) {
-    if (debug) {
-        output.log("[LAYER 3]: " + str);
+ function message(level, str) {
+    if (level < settings.logLevel) {
+        return;
+    }
+
+    var msg = "[LAYER 3]: " + str;
+    switch (level) {
+        case levels.ERROR:
+            output.error(msg);
+            break;
+        case levels.WARN:
+            output.warn(msg);
+            break;
+        case levels.INFO:
+            output.info(msg);
+            break;
+        case levels.DEBUG:
+            if (output.debug) {
+                output.debug(msg);
+            } else {
+                output.log(msg);
+            }
+            break;
     }
 }
 
@@ -159,7 +196,7 @@ function LMSSetDataModel(cmi) {
  * @param {string} value
  */
 function onLMSSetValue(name, value) {
-    message('Setting "' + name + '" to value: "' + value + '"');
+    message(levels.DEBUG, 'Setting "' + name + '" to value: "' + value + '"');
     postMessageToParent('LMSSetValue', [name, value]);
 
     // On submit of lesson status we log completion.
@@ -223,7 +260,7 @@ function getContextIDFromPathname(pathname) {
  * @returns {null}
  */
 function postMessageToParent(functionName, params = []) {
-    message('send a message to parent calling function "' + functionName + '"');
+    message(levels.DEBUG, 'send a message to parent calling function "' + functionName + '"');
     window.parent.postMessage(
         {function: functionName, params},
         ORIGIN

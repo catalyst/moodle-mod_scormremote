@@ -428,6 +428,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $templatedata = [
             'datasource'       => $datasource,
             'jssource'         => $jssource->out(false),
+            'loglevel'         => get_config('mod_scormremote', 'debugloglevel'),
             'scormagainsource' => $CFG->wwwroot . '/mod/scormremote/scorm-again/scorm12.js',
         ];
         exit($OUTPUT->render_from_template('mod_scormremote/thirdlayer', $templatedata));

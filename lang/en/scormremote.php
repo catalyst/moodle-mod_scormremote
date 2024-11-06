@@ -122,6 +122,13 @@ $string['errorpage_subrequiredtitle'] = 'Subscription required';
 $string['errorpage_subrequiredmessage'] = 'This content is only available for subscribed users. Contact your teacher to resolve this problem. Domain: {$a->domain}';
 $string['errorpage_sublimittitle'] = 'Subscription limit reached';
 $string['errorpage_sublimitmessage'] = 'Subscription limit has been reached. Contact your teacher to resolve this problem. Domain: {$a->domain}';
+$string['settings:debugloglevel'] = 'Debugging log level';
+$string['settings:debuglogleveldescription'] = 'When the log level is set it emits logs into the browser developer tools using console.log';
+$string['settings:logdebug'] = 'Debug';
+$string['settings:logerror'] = 'Error';
+$string['settings:loginfo'] = 'Info';
+$string['settings:lognone'] = 'None';
+$string['settings:logwarn'] = 'Warning';
 $string['settings:protectmanifest'] = 'Protect imsmanifest.xml files';
 $string['settings:protectmanifest:desc'] = 'Adds additional protection for imsmanifest.xml files by preventing user access and not allowing them to be served as pluginfile content.
     Scormremote does not access this as a pluginfile, and neither should standard scorm packages, but it may potentially break some rare custom packages where custom JS is used to access the file directly.';

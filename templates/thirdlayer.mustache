@@ -35,6 +35,7 @@
     {
         "datasource": "https://example.com/pluginfile.php/24/mod_scormremote/content/2/index.html",
         "jssource": "https://example.com/mod/scormremote/amd/src/layer3.js",
+        "loglevel": "4",
         "scormagainsource": "https://example.com/mod/scormremote/scorm-again/scorm12.min.js"
     }
 }}
@@ -69,7 +70,7 @@
   </style>
 </head>
 
-<body onload="init();" data-source="{{datasource}}">
+<body onload="init();" data-source="{{datasource}}" data-level="{{loglevel}}">
   <div id="wrapper">
     <h1>Your content is loading...</h1>
   </div>

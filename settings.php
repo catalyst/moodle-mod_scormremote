@@ -58,6 +58,19 @@ $general->add(new admin_setting_configselect('mod_scormremote/validationtype',
     get_string('settings:validationtype', 'scormremote'),
     get_string('settings:validationtype:desc', 'scormremote'), 'referrer', $validationoptions));
 
+// Log levels that are aligned with scormagain.
+$loglevels = [
+    1 => get_string('settings:logdebug', 'mod_scormremote'),
+    2 => get_string('settings:loginfo', 'mod_scormremote'),
+    3 => get_string('settings:logwarn', 'mod_scormremote'),
+    4 => get_string('settings:logerror', 'mod_scormremote'),
+    5 => get_string('settings:lognone', 'mod_scormremote'),
+];
+
+$general->add(new admin_setting_configselect('mod_scormremote/debugloglevel',
+    get_string('settings:debugloglevel', 'mod_scormremote'),
+    get_string('settings:debuglogleveldescription', 'mod_scormremote'), 4, $loglevels));
+
 $general->add(new admin_setting_configcheckbox('mod_scormremote/protectmanifest',
     get_string('settings:protectmanifest', 'scormremote'),
     get_string('settings:protectmanifest:desc', 'scormremote'), 0));

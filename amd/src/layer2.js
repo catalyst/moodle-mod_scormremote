@@ -1,4 +1,11 @@
-const debug = true;
+var logLevel = 4; // Use error as the default until we are sent the log level from layer3.
+const levels = {
+    DEBUG: 1,
+    INFO: 2,
+    WARN: 3,
+    ERROR: 4,
+    NONE: 5,
+};
 const output = window.console;
 
 // Define exception/error codes
@@ -92,30 +99,40 @@ function init() {
 }
 
 /**
+ * Sets the log level from layer3
+ * @param {int} level The level setting from layer3.
+ */
+// eslint-disable-next-line no-unused-vars
+function SetLogLevel(level) {
+    logLevel = level;
+    message(levels.DEBUG, "Log level has been set: " + level);
+}
+
+/**
  * Initialize communication with LMS by calling the LMSInitialize function which will be implemented by the LMS.
  *
  * @returns {string} true|false depending wheter successful.
  */
 function LMSInitialize() {
     if (initialized) {
-        message("LMSInitialize succeeded, already initialized.");
+        message(levels.DEBUG, "LMSInitialize succeeded, already initialized.");
         return "true";
     }
 
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSInitialize was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSInitialize was not successful.");
         return "false";
     }
 
     var result = api.LMSInitialize("");
     if (result.toString() != "true") {
         var err = ErrorHandler();
-        message("LMSInitialize failed with error code: " + err.code);
+        message(levels.ERROR, "LMSInitialize failed with error code: " + err.code);
     }
     else {
         initialized = true;
-        message("LMSInitialized succeeded.");
+        message(levels.INFO, "LMSInitialized succeeded.");
     }
 
     return result.toString();
@@ -132,7 +149,7 @@ function LMSFinish() {
 
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSFinish was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSFinish was not successful.");
         return "false";
     }
     else {
@@ -140,7 +157,7 @@ function LMSFinish() {
         var result = api.LMSFinish("");
         if (result.toString() != "true") {
             var err = ErrorHandler();
-            message("LMSFinish failed with error code: " + err.code);
+            message(levels.ERROR, "LMSFinish failed with error code: " + err.code);
         }
     }
 
@@ -159,11 +176,11 @@ function LMSGetValue(name) {
     var api = getAPIHandle();
     var result = "";
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSGetValue was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSGetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
         var err = ErrorHandler(); // get why LMSInitialize() returned false
-        message("LMSGetValue failed - Could not initialize communication with the LMS - error code: " + err.code);
+        message(levels.ERROR, "LMSGetValue failed - Could not initialize communication with the LMS - error code: " + err.code);
     }
     else if (LMSGetValueAllowed(name)) {
         result = api.LMSGetValue(name);
@@ -171,7 +188,7 @@ function LMSGetValue(name) {
         var error = ErrorHandler();
         if (error.code != _NoError.code) {
             // an error was encountered so display the error description
-            message("LMSGetValue(" + name + ") failed. \n" + error.code + ": " + error.string);
+            message(levels.ERROR, "LMSGetValue(" + name + ") failed. \n" + error.code + ": " + error.string);
             result = "";
         }
     }
@@ -194,17 +211,17 @@ function LMSSetValue(name, value) {
     var api = getAPIHandle();
     var result = "false";
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSSetValue was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSSetValue was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
         var err = ErrorHandler(); // get why LMSInitialize() returned false
-        message("LMSSetValue failed - Could not initialize communication with the LMS - error code: " + err.code);
+        message(levels.ERROR, "LMSSetValue failed - Could not initialize communication with the LMS - error code: " + err.code);
     }
     else {
         result = api.LMSSetValue(name, value);
         if (result.toString() != "true") {
             var err = ErrorHandler();
-            message("LMSSetValue(" + name + ", " + value + ") failed. \n" + err.code + ": " + err.string);
+            message(levels.ERROR, "LMSSetValue(" + name + ", " + value + ") failed. \n" + err.code + ": " + err.string);
         }
     }
 
@@ -221,17 +238,17 @@ function LMSCommit() {
     var api = getAPIHandle();
     var result = "false";
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSCommit was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSCommit was not successful.");
     }
     else if (!initialized && !LMSInitialize()) {
         var err = ErrorHandler(); // get why LMSInitialize() returned false
-        message("LMSCommit failed - Could not initialize communication with the LMS - error code: " + err.code);
+        message(levels.ERROR, "LMSCommit failed - Could not initialize communication with the LMS - error code: " + err.code);
     }
     else {
         result = api.LMSCommit("");
         if (result != "true") {
             var err = ErrorHandler();
-            message("LMSCommit failed - error code: " + err.code);
+            message(levels.ERROR, "LMSCommit failed - error code: " + err.code);
         }
     }
 
@@ -247,7 +264,7 @@ function LMSCommit() {
 function LMSGetLastError() {
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSGetLastError was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSGetLastError was not successful.");
         //since we can't get the error code from the LMS, return a general error
         return _GeneralException.code; //General Exception
     }
@@ -265,7 +282,7 @@ function LMSGetLastError() {
 function LMSGetErrorString(errorCode) {
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSGetErrorString was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSGetErrorString was not successful.");
         return _GeneralException.string;
     }
 
@@ -282,7 +299,7 @@ function LMSGetErrorString(errorCode) {
 function LMSGetDiagnostic(errorCode) {
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nLMSGetDiagnostic was not successful.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nLMSGetDiagnostic was not successful.");
         return "Unable to locate the LMS's API Implementation. LMSGetDiagnostic was not successful.";
     }
 
@@ -307,7 +324,7 @@ function ErrorHandler() {
     var error = { "code": _NoError.code, "string": _NoError.string, "diagnostic": _NoError.diagnostic };
     var api = getAPIHandle();
     if (api === null || api === undefined) {
-        message("Unable to locate the LMS's API Implementation.\nCannot determine LMS error code.");
+        message(levels.ERROR, "Unable to locate the LMS's API Implementation.\nCannot determine LMS error code.");
         error.code = _GeneralException.code;
         error.string = _GeneralException.string;
         error.diagnostic = "Unable to locate the LMS's API Implementation. Cannot determine LMS error code.";
@@ -351,7 +368,7 @@ function findAPI(win) {
         findAPITries++;
         // Note: 7 is an arbitrary number, but should be more than sufficient
         if (findAPITries > 7) {
-            message("Error finding API -- too deeply nested.");
+            message(levels.ERROR, "Error finding API -- too deeply nested.");
             return null;
         }
 
@@ -373,7 +390,7 @@ function getAPI() {
         theAPI = findAPI(window.opener);
     }
     if (theAPI === null || theAPI === undefined) {
-        message("Unable to find an API adapter");
+        message(levels.ERROR, "Unable to find an API adapter");
     }
     return theAPI;
 }
@@ -384,15 +401,36 @@ function getAPI() {
  * log(string) function. This interface was used so that the output could be assigned the window.console object.
  *
  * Depends on:
- *  - {boolean} debug to indicate if output is wanted
+ *  - {int} log level to indicate where to sent output
  *  - {object} output to handle the messages. This object must implement a function log(string).
  *
+ * @param {int} level
  * @param {string} str
  * @returns {null}
  */
-function message(str) {
-    if (debug) {
-        output.log("[LAYER 2]: " + str);
+function message(level, str) {
+    if (level < logLevel) {
+        return;
+    }
+
+    var msg = "[LAYER 2]: " + str;
+    switch (level) {
+        case levels.ERROR:
+            output.error(msg);
+            break;
+        case levels.WARN:
+            output.warn(msg);
+            break;
+        case levels.INFO:
+            output.info(msg);
+            break;
+        case levels.DEBUG:
+            if (output.debug) {
+                output.debug(msg);
+            } else {
+                output.log(msg);
+            }
+            break;
     }
 }
 
@@ -412,7 +450,7 @@ function initMessageReciever() {
     window.addEventListener('message', (e) => {
         // Don't run anything if message is not coming from expected host.
         if (e.origin !== ORIGIN) {
-            message('Recieved message from unknown origin "' + e.origin + '", (expected: "' + ORIGIN + '")');
+            message(levels.WARN, 'Recieved message from unknown origin "' + e.origin + '", (expected: "' + ORIGIN + '")');
             return;
         }
 
@@ -421,19 +459,19 @@ function initMessageReciever() {
 
         // Can't run unknown function.
         if (!functionName || typeof window[functionName] !== 'function') {
-            message('Recieved message contains unexpected data for param function, recieved "' + functionName + '"');
+            message(levels.WARN, 'Recieved message contains unexpected data for param function, recieved "' + functionName + '"');
             return;
         }
 
         // Can't run function with no arguments passed.
         // Even when the desired function has no argument, the passed param MUST be a empty array.
         if (!functionArgs || typeof functionArgs !== 'object' || !Array.isArray(functionArgs)) {
-            message('Recieved message contains unexpected data for param arguments, expected array (recieved "' +
+            message(levels.WARN, 'Recieved message contains unexpected data for param arguments, expected array (recieved "' +
                 Object.prototype.toString.call(functionArgs) + '")');
             return;
         }
 
-        message('Message recieved. Calling function: "' + functionName + '"');
+        message(levels.DEBUG, 'Message recieved. Calling function: "' + functionName + '"');
         window[functionName].apply(null, functionArgs);
     });
 }
@@ -454,12 +492,12 @@ function initMessageReciever() {
         const element = document.findElementById(EMBEDDED_WINDOW_ID);
 
         if (element === null) {
-            message('Could not find embedded window object, searched for element by id: "'+ EMBEDDED_WINDOW_ID +'"');
+            message(levels.WARN, 'Could not find embedded window object, searched for element by id: "'+ EMBEDDED_WINDOW_ID +'"');
             return null;
         }
 
         if (element.tagName !== 'IFRAME') {
-            message('Unexpected tagName for embedded window object, expected "IFRAME" got: "'+ element.tagName +'"');
+            message(levels.WARN, 'Unexpected tagName for embedded window object, expected "IFRAME" got: "'+ element.tagName +'"');
             return null;
         }
 
