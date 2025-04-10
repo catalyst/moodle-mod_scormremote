@@ -26,8 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_scormremote';
-$plugin->release = 2024110600;
-$plugin->version = 2024110600; // Keep in lockstep with version.
+$plugin->release = 2025041000;
+$plugin->version = 2025041000; // Keep in lockstep with version.
 $plugin->requires = 2020061500;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->supported = [39, 404];     // A range of branch numbers of supported moodle versions.

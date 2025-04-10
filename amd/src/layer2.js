@@ -63,6 +63,20 @@ const ALLOWED_TO_LMSGETVALUE = [
     'cmi.interactions.*.correct_responses._count',
 ];
 
+const CMI_CORE_FALLBACK = [
+    'student_id',
+    'student_name',
+    'lesson_location',
+    'credit',
+    'lesson_status',
+    'entry',
+    'score',
+    'total_time',
+    'lesson_mode',
+    'exit',
+    'session_time',
+];
+
 /**
  * Initialize communication with the LMS
  *
@@ -565,7 +579,11 @@ function LMSGetChildren(parent, children) {
  */
 function LMSGetSupportedChildren(name) {
     const result = LMSGetValue(name + '._children');
-    if (result === "") {
+    if (result === "" && name === "cmi.core") {
+        // Add a fallback in case cmi.core._children isn't specified.
+        message(levels.ERROR, 'LMS has not implemented cmi.core._children, checking all cmi.core');
+        return CMI_CORE_FALLBACK;
+    } else if (result === "") {
         return false;
     }
     return result.split(',');
