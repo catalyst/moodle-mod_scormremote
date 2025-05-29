@@ -107,6 +107,8 @@ class packagefile {
             // Not gonna do the same thing again.
             return;
         }
+        $scormremote->sha1hash = $newhash;
+        $scormremote->pathtoken = random_string(20);
 
         // Delete old files.
         $fs->delete_area_files($context->id, $component, $filearea);
@@ -118,7 +120,6 @@ class packagefile {
             $packagefile->extract_to_storage($packer, $context->id, $component, $filearea, 0, $pathbase);
         }
 
-        $scormremote->sha1hash = $newhash;
         $DB->update_record('scormremote', $scormremote);
     }
 
