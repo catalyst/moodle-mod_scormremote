@@ -34,7 +34,7 @@ use mod_scormremote\form\tier as tier_form;
 use mod_scormremote\subscription;
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
 global $DB;
 $baseurl = '/mod/scormremote/tiers.php';
@@ -90,7 +90,7 @@ if ($editing) {
                        )
               ORDER BY c.shortname ASC";
         $courses = $DB->get_records_sql($sql, ['tierid' => $tier->get('id')]);
-        $customdata['courses'] = array_map( function($course) {
+        $customdata['courses'] = array_map(function ($course) {
             return (int) $course->id;
         }, $courses);
     }
@@ -122,7 +122,7 @@ if ($editing) {
 
             // Add the courses.
             foreach (array_unique($courses) as $course) {
-                $data = (object) array('courseid' => $course, 'tierid' => $tier->get('id'));
+                $data = (object) ['courseid' => $course, 'tierid' => $tier->get('id')];
                 $ctier = new course_tier(0, $data);
                 $ctier->create();
             }

@@ -34,16 +34,16 @@ class course_tier extends \core\persistent {
      * @return array
      */
     protected static function define_properties() {
-        return array(
-            'courseid' => array(
+        return [
+            'courseid' => [
                 'type' => PARAM_INT,
                 'description' => 'The id of the course.',
-            ),
-            'tierid' => array(
+            ],
+            'tierid' => [
                 'type' => PARAM_INT,
-                'description' => 'The id of the tier.'
-            ),
-        );
+                'description' => 'The id of the tier.',
+            ],
+        ];
     }
 
     /**
@@ -54,7 +54,7 @@ class course_tier extends \core\persistent {
      */
     public static function delete_by_course($courseid) {
         global $DB;
-        return $DB->delete_records(self::TABLE, array('courseid' => $courseid));
+        return $DB->delete_records(self::TABLE, ['courseid' => $courseid]);
     }
 
     /**
@@ -65,7 +65,7 @@ class course_tier extends \core\persistent {
      */
     public static function delete_by_tier($tierid) {
         global $DB;
-        return $DB->delete_records(self::TABLE, array('tierid' => $tierid));
+        return $DB->delete_records(self::TABLE, ['tierid' => $tierid]);
     }
 
     /**

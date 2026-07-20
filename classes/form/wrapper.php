@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-
 namespace mod_scormremote\form;
 
 use coding_exception;
@@ -71,19 +70,19 @@ class wrapper extends \moodleform {
         $courseid = $this->_customdata['courseid'];
 
         $clientrecords = \mod_scormremote\client::get_clients_by_courseid($courseid);
-        $clients = array();
+        $clients = [];
         foreach ($clientrecords as $client) {
             $key   = $client->get('id');
             $value = "{$client->get('name')}";
             $clients[$key] = $value;
         }
 
-        $options = array(
+        $options = [
             'multiple' => true,
             'noselectionstring' => get_string('none'),
             'placeholder' => get_string('searchclient', 'scormremote'),
-            'casesensitive' => false
-        );
+            'casesensitive' => false,
+        ];
         $mform->addElement('autocomplete', 'clients', get_string('chooseclient', 'scormremote'), $clients, $options);
         $mform->setDefault('clients', -1);
         if ($clientoptional) {

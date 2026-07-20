@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/mod/scormremote/backup/moodle2/restore_scormremot
  * scormremote restore task that provides all the settings and steps to perform one complete restore of the activity
  */
 class restore_scormremote_activity_task extends restore_activity_task {
-
     /**
      * Define (add) particular settings this activity can have
      */
@@ -53,9 +52,9 @@ class restore_scormremote_activity_task extends restore_activity_task {
      * processed by the link decoder
      */
     public static function define_decode_contents() {
-        $contents = array();
+        $contents = [];
 
-        $contents[] = new restore_decode_content('scormremote', array('intro'), 'scormremote');
+        $contents[] = new restore_decode_content('scormremote', ['intro'], 'scormremote');
 
         return $contents;
     }
@@ -65,13 +64,12 @@ class restore_scormremote_activity_task extends restore_activity_task {
      * to the activity to be executed by the link decoder
      */
     public static function define_decode_rules() {
-        $rules = array();
+        $rules = [];
 
         $rules[] = new restore_decode_rule('SCORMREMOTEVIEWBYID', '/mod/scormremote/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('SCORMREMOTEINDEX', '/mod/scormremote/index.php?id=$1', 'course');
 
         return $rules;
-
     }
 
     /**
@@ -81,7 +79,7 @@ class restore_scormremote_activity_task extends restore_activity_task {
      * of restore_log_rule objects
      */
     public static function define_restore_log_rules() {
-        $rules = array();
+        $rules = [];
 
         // TODO: add log rules.
         return $rules;
@@ -98,7 +96,7 @@ class restore_scormremote_activity_task extends restore_activity_task {
      * activity level. All them are rules not linked to any module instance (cmid = 0)
      */
     public static function define_restore_log_rules_for_course() {
-        $rules = array();
+        $rules = [];
 
         $rules[] = new restore_log_rule('scormremote', 'view all', 'index.php?id={course}', null);
 

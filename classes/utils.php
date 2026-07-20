@@ -75,7 +75,7 @@ class utils {
      * @return string[]
      */
     public static function textarea_to_string_array($value) {
-        $lines = array();
+        $lines = [];
 
         if (empty($value)) {
             return $lines;
@@ -183,7 +183,7 @@ class utils {
      */
     public static function create_user(string $origin, client $client, string $username, string $fullname) {
         global $CFG;
-        require_once($CFG->dirroot.'/user/lib.php');
+        require_once($CFG->dirroot . '/user/lib.php');
 
         [$firstname, $lastname] = static::fullname_to_first_and_lastname($fullname);
 

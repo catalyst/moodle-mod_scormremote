@@ -34,16 +34,16 @@ class subscription extends \core\persistent {
      * @return array
      */
     protected static function define_properties() {
-        return array(
-            'clientid' => array(
+        return [
+            'clientid' => [
                 'type' => PARAM_INT,
                 'description' => 'The id of the client.',
-            ),
-            'tierid' => array(
+            ],
+            'tierid' => [
                 'type' => PARAM_INT,
-                'description' => 'The id of the tier.'
-            ),
-        );
+                'description' => 'The id of the tier.',
+            ],
+        ];
     }
 
     /**
@@ -125,7 +125,7 @@ class subscription extends \core\persistent {
      */
     public static function delete_by_client($clientid) {
         global $DB;
-        return $DB->delete_records(self::TABLE, array('clientid' => $clientid));
+        return $DB->delete_records(self::TABLE, ['clientid' => $clientid]);
     }
 
     /**
@@ -136,7 +136,7 @@ class subscription extends \core\persistent {
      */
     public static function delete_by_tier($tierid) {
         global $DB;
-        return $DB->delete_records(self::TABLE, array('tierid' => $tierid));
+        return $DB->delete_records(self::TABLE, ['tierid' => $tierid]);
     }
 
     /**

@@ -25,7 +25,6 @@ namespace mod_scormremote;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class client_domain extends \core\persistent {
-
     /** Table name for this model. */
     const TABLE = 'scormremote_client_domains';
 
@@ -35,16 +34,16 @@ class client_domain extends \core\persistent {
      * @return array
      */
     protected static function define_properties() {
-        return array(
-            'clientid' => array(
+        return [
+            'clientid' => [
                 'description' => 'The client id to which this configuration is linked.',
-                'type' => PARAM_INT
-            ),
-            'domain' => array(
+                'type' => PARAM_INT,
+            ],
+            'domain' => [
                 'description' => 'The domain associated with the client.',
                 'type' => PARAM_RAW,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -83,7 +82,7 @@ class client_domain extends \core\persistent {
      */
     public static function delete_by_client($clientid) {
         global $DB;
-        return $DB->delete_records(self::TABLE, array('clientid' => $clientid));
+        return $DB->delete_records(self::TABLE, ['clientid' => $clientid]);
     }
 
     /**

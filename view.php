@@ -23,8 +23,8 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/lib.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
@@ -34,11 +34,11 @@ $s = optional_param('s', 0, PARAM_INT);
 
 if ($id) {
     $cm = get_coursemodule_from_id('scormremote', $id, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $scormremote = $DB->get_record('scormremote', array('id' => $cm->instance), '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+    $scormremote = $DB->get_record('scormremote', ['id' => $cm->instance], '*', MUST_EXIST);
 } else {
-    $scormremote = $DB->get_record('scormremote', array('id' => $s), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $scormremote->course), '*', MUST_EXIST);
+    $scormremote = $DB->get_record('scormremote', ['id' => $s], '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $scormremote->course], '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('scormremote', $scormremote->id, $course->id, false, MUST_EXIST);
 }
 
@@ -46,7 +46,7 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-$PAGE->set_url('/mod/scormremote/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/scormremote/view.php', ['id' => $cm->id]);
 $PAGE->set_title(format_string($scormremote->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);

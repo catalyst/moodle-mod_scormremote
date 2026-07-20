@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-
 namespace mod_scormremote\form;
 
 /**
@@ -26,12 +25,11 @@ namespace mod_scormremote\form;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tier extends \core\form\persistent {
-
     /** @var string persistent class name. */
     protected static $persistentclass = 'mod_scormremote\\tier';
 
     /** @var array Fields to remove from the persistent validation. */
-    protected static $foreignfields = array('courses');
+    protected static $foreignfields = ['courses'];
 
     /**
      * Define the form - called by parent constructor
@@ -50,18 +48,22 @@ class tier extends \core\form\persistent {
         $mform->addRule('seats', get_string('required'), 'required', null, 'server');
         $mform->setDefault('seats', 0);
 
-        $mform->addElement('textarea', 'description', get_string('manage_tierdescription', 'mod_scormremote'),
-             'wrap="virtual" rows="5" cols="50"');
+        $mform->addElement(
+            'textarea',
+            'description',
+            get_string('manage_tierdescription', 'mod_scormremote'),
+            'wrap="virtual" rows="5" cols="50"'
+        );
 
         $courserecords = get_courses('all', $sort = 'c.shortname ASC', 'c.id, c.shortname');
-        $courses = array();
+        $courses = [];
         foreach ($courserecords as $course) {
             $courses[(int)$course->id] = $course->shortname;
         }
-        $options = array(
+        $options = [
             'multiple' => true,
             'noselectionstring' => get_string('none'),
-        );
+        ];
         $mform->addElement('autocomplete', 'courses', get_string('courses'), $courses, $options);
         $mform->setDefault('courses', $this->_customdata['courses']);
 

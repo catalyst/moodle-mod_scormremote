@@ -23,15 +23,15 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use \mod_scormremote\client;
-use \mod_scormremote\utils;
+use mod_scormremote\client;
+use mod_scormremote\utils;
 
 // No login check is expected here because this is accessed from external LMS and
 // all required checks are performed before updating completion info.
 // @codingStandardsIgnoreLine
 require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/lib.php');
-require_once($CFG->dirroot.'/lib/completionlib.php');
+require_once(__DIR__ . '/lib.php');
+require_once($CFG->dirroot . '/lib/completionlib.php');
 
 $contextid = required_param('contextid', PARAM_INT);
 $origin    = required_param('lms_origin', PARAM_URL);
@@ -45,7 +45,7 @@ if (!$client) {
 
 $context = \context::instance_by_id($contextid);
 $cm = get_coursemodule_from_id('scormremote', $context->instanceid, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
 
 $sub = $client->get_subscription_by_courseid($course->id);
 if (!$sub) {

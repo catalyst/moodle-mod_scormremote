@@ -24,8 +24,8 @@
  */
 
 require_once("../../config.php");
-require_once($CFG->libdir.'/tablelib.php');
-require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->libdir . '/tablelib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 $baseurl = '/mod/scormremote/wrapper.php';
 
@@ -37,8 +37,8 @@ $delete   = optional_param('delete', '', PARAM_ALPHANUM); // Confirmation hash.
 
 // Instances.
 $cm     = get_coursemodule_from_id('scormremote', $cmid, 0, false, MUST_EXIST);
-$course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-$scormremote   = $DB->get_record('scormremote', array('id' => $cm->instance), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+$scormremote   = $DB->get_record('scormremote', ['id' => $cm->instance], '*', MUST_EXIST);
 $contextmodule = context_module::instance($cm->id);
 
 // Authenticate & Authorize.
@@ -46,7 +46,7 @@ require_login($course, false, $cm);
 require_capability('mod/scormremote:downloadwrapper', $contextmodule);
 
 $PAGE->set_url(new moodle_url($baseurl, ['cmid' => $cmid]));
-$PAGE->set_title("$course->shortname: ".format_string($scormremote->name));
+$PAGE->set_title("$course->shortname: " . format_string($scormremote->name));
 $PAGE->set_heading($course->fullname);
 $PAGE->navbar->add(get_string('wrapper', 'mod_scormremote'), new moodle_url($baseurl, ['cmid' => $cmid]));
 
@@ -80,7 +80,6 @@ if ($data = $form->get_data()) {
         // Add the client name and .zip extension.
         preg_match('/(.*?)(\.zip)*?$/', $filename, $matches);
         $filename = $matches[1] . ' - for ' . $client->get('name') . '.zip';
-
     }
 
 

@@ -54,7 +54,7 @@ class packagefile {
         // Save from draft to real file.
         $options = [
             'subdirs' => 0,
-            'maxfiles' => 1
+            'maxfiles' => 1,
         ];
         file_save_draft_area_files($scormremote->packagefile, $context->id, $component, $filearea, 0, $options);
 
@@ -136,7 +136,8 @@ class packagefile {
         $context = \mod_scormremote\utils::get_context($scormremote);
         $manifest = simplexml_load_string(\mod_scormremote\utils::get_scormremote_imsmanifest($scormremote));
         $zip = new \zip_archive();
-        $filepath = make_request_directory() . '/' . $filename;;
+        $filepath = make_request_directory() . '/' . $filename;
+        ;
         $zip->open($filepath);
 
         // From this instance's manifest, we replacing all files by index files. Each resource (SCO) will have it's own index file
@@ -154,7 +155,7 @@ class packagefile {
             $datasource = \moodle_url::make_pluginfile_url(
                 $context->id,
                 'mod_scormremote',
-                'remote',                     // THIS is pointing towards the third layer.
+                'remote', // THIS is pointing towards the third layer.
                 0,
                 $pathbase,
                 $resource->attributes()->href // The original file path.

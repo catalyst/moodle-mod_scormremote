@@ -47,7 +47,6 @@ class provider implements
 
     // This plugin may provide access to and deletion of user data.
     \core_privacy\local\request\plugin\provider {
-
     /**
      * Get the list of contexts that contain user information for the specified user.
      *
@@ -112,7 +111,7 @@ class provider implements
         $context = $userlist->get_context();
 
         $params = [
-            'contextid' => $context->id
+            'contextid' => $context->id,
         ];
 
         // Include users that have a role assigned to them.

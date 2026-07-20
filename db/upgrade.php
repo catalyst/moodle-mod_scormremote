@@ -72,7 +72,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022090101) {
-
         // Define index unique_domain (unique), and field domain to be dropped form scormremote_clients.
         $table = new xmldb_table('scormremote_clients');
         $index = new xmldb_index('unique_domain', XMLDB_INDEX_UNIQUE, ['domain']);
@@ -110,7 +109,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022090103) {
-
         // Define table scormremote_tiers to be created.
         $table = new xmldb_table('scormremote_tiers');
 
@@ -136,7 +134,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2022090200) {
-
         // Define table scormremote_subscriptions to be created.
         $table = new xmldb_table('scormremote_subscriptions');
 
@@ -191,7 +188,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2023032900) {
-
         $table = new xmldb_table('scormremote_clients');
 
         // Define field primarydomain to be added to scormremote_clients.
@@ -243,7 +239,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024092500) {
-
         // Define field pathtoken to be added to scormremote.
         $table = new xmldb_table('scormremote');
         $field = new xmldb_field('pathtoken', XMLDB_TYPE_CHAR, '40', null, null, null, null, 'sha1hash');
@@ -258,7 +253,6 @@ function xmldb_scormremote_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024092701) {
-
         $table = new xmldb_table('scormremote_clients');
 
         // Define field expiry to be added to scormremote_clients.
