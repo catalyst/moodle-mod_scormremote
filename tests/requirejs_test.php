@@ -24,7 +24,7 @@ namespace mod_scormremote;
  * @copyright   2024 Catalyst IT
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class requirejs_test extends \advanced_testcase {
+final class requirejs_test extends \advanced_testcase {
     /** @var array Build files that should never exist. */
     const INVALID_BUILD_FILES = [
         'layer2.min.js',
@@ -50,7 +50,6 @@ class requirejs_test extends \advanced_testcase {
                 $this->assertFileNotExists($path);
                 $this->assertFileNotExists($path . '.map');
             }
-
         }
     }
 }

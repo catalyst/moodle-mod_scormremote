@@ -47,16 +47,25 @@ $settings = null;
 $options = get_default_enrol_roles(context_system::instance());
 $student = get_archetype_roles('student');
 $student = reset($student);
-$general->add(new admin_setting_configselect('mod_scormremote/roleid',
-    get_string('defaultrole', 'role'), '', $student->id ?? null, $options));
+$general->add(new admin_setting_configselect(
+    'mod_scormremote/roleid',
+    get_string('defaultrole', 'role'),
+    '',
+    $student->id ?? null,
+    $options
+));
 
 $validationoptions = [
     'referrer' => get_string('settings:validationtype:referrer', 'scormremote'),
     'referrerandclient' => get_string('settings:validationtype:referrerandclient', 'scormremote'),
 ];
-$general->add(new admin_setting_configselect('mod_scormremote/validationtype',
+$general->add(new admin_setting_configselect(
+    'mod_scormremote/validationtype',
     get_string('settings:validationtype', 'scormremote'),
-    get_string('settings:validationtype:desc', 'scormremote'), 'referrer', $validationoptions));
+    get_string('settings:validationtype:desc', 'scormremote'),
+    'referrer',
+    $validationoptions
+));
 
 // Log levels that are aligned with scormagain.
 $loglevels = [
@@ -67,10 +76,17 @@ $loglevels = [
     5 => get_string('settings:lognone', 'mod_scormremote'),
 ];
 
-$general->add(new admin_setting_configselect('mod_scormremote/debugloglevel',
+$general->add(new admin_setting_configselect(
+    'mod_scormremote/debugloglevel',
     get_string('settings:debugloglevel', 'mod_scormremote'),
-    get_string('settings:debuglogleveldescription', 'mod_scormremote'), 4, $loglevels));
+    get_string('settings:debuglogleveldescription', 'mod_scormremote'),
+    4,
+    $loglevels
+));
 
-$general->add(new admin_setting_configcheckbox('mod_scormremote/protectmanifest',
+$general->add(new admin_setting_configcheckbox(
+    'mod_scormremote/protectmanifest',
     get_string('settings:protectmanifest', 'scormremote'),
-    get_string('settings:protectmanifest:desc', 'scormremote'), 0));
+    get_string('settings:protectmanifest:desc', 'scormremote'),
+    0
+));

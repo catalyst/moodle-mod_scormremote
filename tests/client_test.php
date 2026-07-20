@@ -25,7 +25,7 @@ namespace mod_scormremote;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \mod_scormremote\client
  */
-class client_test extends \advanced_testcase {
+final class client_test extends \advanced_testcase {
     /**
      * Testing the validation of the client object.
      *
@@ -38,7 +38,7 @@ class client_test extends \advanced_testcase {
      *
      * @return void
      */
-    public function test_validation_of_client(string $clientname, string $clientdomain, bool $ok) {
+    public function test_validation_of_client(string $clientname, string $clientdomain, bool $ok): void {
         // Skipping this test.
         // TODO: issue 24.
 
@@ -69,34 +69,34 @@ class client_test extends \advanced_testcase {
      *
      * @return array[]
      */
-    public function client_validation_provider(): array {
+    public static function client_validation_provider(): array {
         return [
-            'single char domain' => ['clientname' => 'Foo', 'clientdomain' => 'a',                       'ok' => true],
-            'single num domain'  => ['clientname' => 'Foo', 'clientdomain' => '0',                       'ok' => true],
-            'a.b domain'         => ['clientname' => 'Foo', 'clientdomain' => 'a.b',                     'ok' => true],
-            'localhost domain'   => ['clientname' => 'Foo', 'clientdomain' => 'localhost',               'ok' => true],
-            'google domain'      => ['clientname' => 'Foo', 'clientdomain' => 'google.com',              'ok' => true],
-            'muliple secions'    => ['clientname' => 'Foo', 'clientdomain' => 'news.google.co.uk',       'ok' => true],
+            'single char domain' => ['clientname' => 'Foo', 'clientdomain' => 'a', 'ok' => true],
+            'single num domain'  => ['clientname' => 'Foo', 'clientdomain' => '0', 'ok' => true],
+            'a.b domain'         => ['clientname' => 'Foo', 'clientdomain' => 'a.b', 'ok' => true],
+            'localhost domain'   => ['clientname' => 'Foo', 'clientdomain' => 'localhost', 'ok' => true],
+            'google domain'      => ['clientname' => 'Foo', 'clientdomain' => 'google.com', 'ok' => true],
+            'muliple secions'    => ['clientname' => 'Foo', 'clientdomain' => 'news.google.co.uk', 'ok' => true],
             'randomly generated' => ['clientname' => 'Foo', 'clientdomain' => 'xn--fsqu00a.xn--0zwm56d', 'ok' => true],
-            'space in middle'    => ['clientname' => 'Foo', 'clientdomain' => 'goo gle.com',             'ok' => false],
-            'section len 0'      => ['clientname' => 'Foo', 'clientdomain' => 'google..com',             'ok' => false],
-            'trailing space'     => ['clientname' => 'Foo', 'clientdomain' => 'google.com ',             'ok' => false],
-            'subdomain ending -' => ['clientname' => 'Foo', 'clientdomain' => 'google-.com',             'ok' => false],
-            'starting with .'    => ['clientname' => 'Foo', 'clientdomain' => '.google.com',             'ok' => false],
-            'javascript'         => ['clientname' => 'Foo', 'clientdomain' => '<script',                 'ok' => false],
-            'javascript 2'       => ['clientname' => 'Foo', 'clientdomain' => 'alert(',                  'ok' => false],
-            'domain .'           => ['clientname' => 'Foo', 'clientdomain' => '.',                       'ok' => false],
-            'domain ..'          => ['clientname' => 'Foo', 'clientdomain' => '..',                      'ok' => false],
-            'space'              => ['clientname' => 'Foo', 'clientdomain' => ' ',                       'ok' => false],
-            'dash'               => ['clientname' => 'Foo', 'clientdomain' => '-',                       'ok' => false],
-            'empty'              => ['clientname' => 'Foo', 'clientdomain' => '',                        'ok' => false],
-            'short client name'  => ['clientname' => 'f',   'clientdomain' => 'google.com',              'ok' => false],
-            'empty client name'  => ['clientname' => '',    'clientdomain' => 'google.com',              'ok' => false],
+            'space in middle'    => ['clientname' => 'Foo', 'clientdomain' => 'goo gle.com', 'ok' => false],
+            'section len 0'      => ['clientname' => 'Foo', 'clientdomain' => 'google..com', 'ok' => false],
+            'trailing space'     => ['clientname' => 'Foo', 'clientdomain' => 'google.com ', 'ok' => false],
+            'subdomain ending -' => ['clientname' => 'Foo', 'clientdomain' => 'google-.com', 'ok' => false],
+            'starting with .'    => ['clientname' => 'Foo', 'clientdomain' => '.google.com', 'ok' => false],
+            'javascript'         => ['clientname' => 'Foo', 'clientdomain' => '<script', 'ok' => false],
+            'javascript 2'       => ['clientname' => 'Foo', 'clientdomain' => 'alert(', 'ok' => false],
+            'domain .'           => ['clientname' => 'Foo', 'clientdomain' => '.', 'ok' => false],
+            'domain ..'          => ['clientname' => 'Foo', 'clientdomain' => '..', 'ok' => false],
+            'space'              => ['clientname' => 'Foo', 'clientdomain' => ' ', 'ok' => false],
+            'dash'               => ['clientname' => 'Foo', 'clientdomain' => '-', 'ok' => false],
+            'empty'              => ['clientname' => 'Foo', 'clientdomain' => '', 'ok' => false],
+            'short client name'  => ['clientname' => 'f', 'clientdomain' => 'google.com', 'ok' => false],
+            'empty client name'  => ['clientname' => '', 'clientdomain' => 'google.com', 'ok' => false],
             'long client name'   => [
                 'clientname'   =>
                     'the length is 101 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
                 'clientdomain' => 'google.com',
-                'ok'           => false
+                'ok'           => false,
             ],
         ];
     }

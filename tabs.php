@@ -37,10 +37,10 @@ if (!isset($cm)) {
 
 $contextmodule = context_module::instance($cm->id);
 
-$tabs = array();
-$row = array();
-$inactive = array();
-$activated = array();
+$tabs = [];
+$row = [];
+$inactive = [];
+$activated = [];
 
 $row[] = new tabobject('info', "$CFG->wwwroot/mod/scormremote/view.php?id=$cm->id", get_string('info'));
 

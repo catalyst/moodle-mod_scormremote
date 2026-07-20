@@ -32,7 +32,6 @@ require_once($CFG->dirroot . '/mod/scormremote/backup/moodle2/backup_scormremote
  * Provides the steps to perform one complete backup of the SCORMREMOTE instance
  */
 class backup_scormremote_activity_task extends backup_activity_task {
-
     /**
      * No specific settings for this activity
      */
@@ -57,11 +56,11 @@ class backup_scormremote_activity_task extends backup_activity_task {
         $base = preg_quote($CFG->wwwroot, "/");
 
         // Link to the list of scormremotes.
-        $search = "/(".$base."\/mod\/scormremote\/index.php\?id\=)([0-9]+)/";
+        $search = "/(" . $base . "\/mod\/scormremote\/index.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@SCORMREMOTEINDEX*$2@$', $content);
 
         // Link to scormremote view by moduleid.
-        $search = "/(".$base."\/mod\/scormremote\/view.php\?id\=)([0-9]+)/";
+        $search = "/(" . $base . "\/mod\/scormremote\/view.php\?id\=)([0-9]+)/";
         $content = preg_replace($search, '$@SCORMREMOTEVIEWBYID*$2@$', $content);
 
         return $content;

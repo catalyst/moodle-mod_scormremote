@@ -27,11 +27,11 @@
 // and this page only displays error information.
 // @codingStandardsIgnoreLine
 require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/lib.php');
+require_once(__DIR__ . '/lib.php');
 
 $errorstring = optional_param('error', null, PARAM_RAW_TRIMMED);
 $originstring = optional_param('origin', null, PARAM_RAW_TRIMMED);
-$PAGE->set_url('/mod/scormremote/error.php', array('error' => $errorstring, 'origin' => $originstring));
+$PAGE->set_url('/mod/scormremote/error.php', ['error' => $errorstring, 'origin' => $originstring]);
 $PAGE->set_context(context_system::instance());
 
 switch ($errorstring) {

@@ -29,14 +29,14 @@
  */
 
 require_once('../../config.php');
-require_once($CFG->libdir.'/adminlib.php');
+require_once($CFG->libdir . '/adminlib.php');
 
-use \mod_scormremote\client;
-use \mod_scormremote\client_domain;
-use \mod_scormremote\form\client as client_form;
+use mod_scormremote\client;
+use mod_scormremote\client_domain;
+use mod_scormremote\form\client as client_form;
 use mod_scormremote\subscription;
 use mod_scormremote\tier;
-use \mod_scormremote\utils;
+use mod_scormremote\utils;
 
 $baseurl = '/mod/scormremote/clients.php';
 
@@ -85,7 +85,7 @@ if ($editing) {
         $customdata['domains'] = $domains;
 
         $tiers = tier::get_records_by_clientid((int)$client->get('id'));
-        $customdata['tiers'] = array_map(function($tier) {
+        $customdata['tiers'] = array_map(function ($tier) {
             return (int) $tier->get('id');
         }, $tiers);
     }
@@ -103,8 +103,13 @@ if ($editing) {
             $domains = $data->domains;
             $tiers = $data->tiers;
             // We need to remove domain, tiers and mform settings before creating the client.
-            unset($data->domains, $data->tiers, $data->mform_isexpanded_id_clientdetails,
-                $data->mform_isexpanded_id_alloweddomains, $data->mform_isexpanded_id_subscriptions);
+            unset(
+                $data->domains,
+                $data->tiers,
+                $data->mform_isexpanded_id_clientdetails,
+                $data->mform_isexpanded_id_alloweddomains,
+                $data->mform_isexpanded_id_subscriptions
+            );
 
             if (empty($data->id)) {
                 // Create a new record.
@@ -122,14 +127,14 @@ if ($editing) {
 
             // Add the unique domains.
             foreach (array_unique($domains) as $domain) {
-                $data = (object) array('clientid' => $client->get('id'), 'domain' => $domain);
+                $data = (object) ['clientid' => $client->get('id'), 'domain' => $domain];
                 $domain = new client_domain(0, $data);
                 $domain->create();
             }
 
             // Add the subscriptions.
             foreach (array_unique($tiers) as $tier) {
-                $data = (object) array('clientid' => $client->get('id'), 'tierid' => $tier);
+                $data = (object) ['clientid' => $client->get('id'), 'tierid' => $tier];
                 $sub = new subscription(0, $data);
                 $sub->create();
             }
@@ -187,7 +192,7 @@ if (!$editing && !$deleting) {
             array_unshift($domains, $client->get('primarydomain'));
         }
 
-        $subs = array();
+        $subs = [];
         foreach (subscription::get_records_by_clientid($client->get('id')) as $sub) {
             $tier = new tier($sub->get('tierid'));
             $subs[] = "{$tier->get('name')} ( {$sub->get_participant_count()} / {$tier->get('seats')} )";
@@ -211,12 +216,10 @@ if ($editing && $id == null && $client == null) {
     // Creating.
     echo $OUTPUT->heading(get_string('manage_clientcreateheader', 'mod_scormremote'), 2);
     $form->display();
-
 } else if ($editing && $id && $client) {
     // Updating.
     echo $OUTPUT->heading(get_string('manage_clientupdateheader', 'mod_scormremote', $client->get('name')), 2);
     $form->display();
-
 } else if ($deleting && $id && $client) {
     // Deleting.
     // This is showing a confimation box, no header here.
@@ -226,7 +229,6 @@ if ($editing && $id == null && $client == null) {
     $confirmurl = new moodle_url($baseurl, ['id' => $id, 'deleting' => 1, 'delete' => md5($client->get('name'))]);
     $confirmbtn = new single_button($confirmurl, get_string('delete'), 'post');
     echo $OUTPUT->confirm($message, $confirmbtn, new moodle_url($baseurl));
-
 } else {
     // Reading.
     echo $OUTPUT->heading(get_string('manage_clients', 'mod_scormremote'), 2);
@@ -234,7 +236,6 @@ if ($editing && $id == null && $client == null) {
     $createnewurl = new moodle_url($baseurl, ['editingon' => 1]);
     echo html_writer::table($table);
     echo $OUTPUT->single_button($createnewurl, get_string('manage_clientadd', 'mod_scormremote'));
-
 }
 echo $OUTPUT->box_end();
 echo $OUTPUT->footer();

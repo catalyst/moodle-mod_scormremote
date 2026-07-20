@@ -34,21 +34,21 @@ class client extends \core\persistent {
      * @return array
      */
     protected static function define_properties() {
-        return array(
-            'name' => array(
+        return [
+            'name' => [
                 'type' => PARAM_TEXT,
                 'description' => 'The name of the client.',
-            ),
-            'expiry' => array(
+            ],
+            'expiry' => [
                 'type' => PARAM_INT,
                 'description' => 'The expiry date of the client.',
                 'default' => 0,
-            ),
-            'primarydomain' => array(
+            ],
+            'primarydomain' => [
                 'type' => PARAM_TEXT,
                 'description' => 'The primary domain of the client.',
-            ),
-        );
+            ],
+        ];
     }
 
     /**

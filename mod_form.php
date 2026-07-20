@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
-require_once($CFG->dirroot.'/mod/scorm/lib.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/mod/scorm/lib.php');
 
 /**
  * Module instance settings form.
@@ -37,7 +37,6 @@ require_once($CFG->dirroot.'/mod/scorm/lib.php');
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mod_scormremote_mod_form extends moodleform_mod {
-
     /**
      * Defines forms elements
      */
@@ -67,8 +66,8 @@ class mod_scormremote_mod_form extends moodleform_mod {
         $mform->setExpanded('packagehdr', true);
 
         // New local package upload.
-        $filemanageroptions = array();
-        $filemanageroptions['accepted_types'] = array('.zip', '.xml');
+        $filemanageroptions = [];
+        $filemanageroptions['accepted_types'] = ['.zip', '.xml'];
         $filemanageroptions['maxbytes'] = 0;
         $filemanageroptions['maxfiles'] = 1;
         $filemanageroptions['subdirs'] = 0;
@@ -96,7 +95,7 @@ class mod_scormremote_mod_form extends moodleform_mod {
             if (!empty($defaultvalues['options'])) {
                 $options = explode(',', $defaultvalues['options']);
                 foreach ($options as $option) {
-                    list($element, $value) = explode('=', $option);
+                    [$element, $value] = explode('=', $option);
                     $element = trim($element);
                     $defaultvalues[$element] = trim($value);
                 }
@@ -107,16 +106,22 @@ class mod_scormremote_mod_form extends moodleform_mod {
         $coursescorm = current($scorms);
 
         $draftitemid = file_get_submitted_draft_itemid('packagefile');
-        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_scormremote', 'package', 0,
-            array('subdirs' => 0, 'maxfiles' => 1));
+        file_prepare_draft_area(
+            $draftitemid,
+            $this->context->id,
+            'mod_scormremote',
+            'package',
+            0,
+            ['subdirs' => 0, 'maxfiles' => 1]
+        );
         $defaultvalues['packagefile'] = $draftitemid;
 
         if (($COURSE->format == 'singleactivity') && ((count($scorms) == 0) || ($defaultvalues['instance'] == $coursescorm->id))) {
             $defaultvalues['redirect'] = 'yes';
-            $defaultvalues['redirecturl'] = '../course/view.php?id='.$defaultvalues['course'];
+            $defaultvalues['redirecturl'] = '../course/view.php?id=' . $defaultvalues['course'];
         } else {
             $defaultvalues['redirect'] = 'no';
-            $defaultvalues['redirecturl'] = '../mod/scormremote/view.php?id='.$defaultvalues['coursemodule'];
+            $defaultvalues['redirecturl'] = '../mod/scormremote/view.php?id=' . $defaultvalues['coursemodule'];
         }
         if (isset($defaultvalues['instance'])) {
             $defaultvalues['datadir'] = $defaultvalues['instance'];
@@ -136,12 +141,17 @@ class mod_scormremote_mod_form extends moodleform_mod {
 
         if (empty($data['packagefile'])) {
             $errors['packagefile'] = get_string('required');
-
         } else {
             $draftitemid = file_get_submitted_draft_itemid('packagefile');
 
-            file_prepare_draft_area($draftitemid, $this->context->id, 'mod_scormremote', 'packagefilecheck', null,
-                array('subdirs' => 0, 'maxfiles' => 1));
+            file_prepare_draft_area(
+                $draftitemid,
+                $this->context->id,
+                'mod_scormremote',
+                'packagefilecheck',
+                null,
+                ['subdirs' => 0, 'maxfiles' => 1]
+            );
 
             // Get file from users draft area.
             $usercontext = context_user::instance($USER->id);

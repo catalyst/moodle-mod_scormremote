@@ -40,7 +40,6 @@ namespace mod_scormremote\event;
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class remote_viewed extends \core\event\base {
-
     /**
      * Init method.
      */
@@ -75,9 +74,9 @@ class remote_viewed extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        $params = array(
+        $params = [
             'id' => $this->contextinstanceid,
-        );
+        ];
         return new \moodle_url('/mod/scormremote/view.php', $params);
     }
 }

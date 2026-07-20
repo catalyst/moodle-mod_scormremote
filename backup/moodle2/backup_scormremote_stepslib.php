@@ -32,7 +32,6 @@
  * Define the complete scormremote structure for backup, with file and id annotations
  */
 class backup_scormremote_activity_structure_step extends backup_activity_structure_step {
-
     /**
      * Structure step to backup one scorm remote activity
      */
@@ -40,11 +39,11 @@ class backup_scormremote_activity_structure_step extends backup_activity_structu
 
         // Define each element separated.
 
-        $scormremote = new backup_nested_element('scormremote', array('id'), array(
-            'name', 'reference', 'sha1hash', 'intro', 'introformat', 'timecreated', 'timemodified'));
+        $scormremote = new backup_nested_element('scormremote', ['id'], [
+            'name', 'reference', 'sha1hash', 'intro', 'introformat', 'timecreated', 'timemodified']);
 
         // Define sources.
-        $scormremote->set_source_table('scormremote', array('id' => backup::VAR_ACTIVITYID));
+        $scormremote->set_source_table('scormremote', ['id' => backup::VAR_ACTIVITYID]);
 
         // Define file annotations.
         $scormremote->annotate_files('mod_scormremote', 'intro', null); // This file area hasn't itemid

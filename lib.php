@@ -62,7 +62,7 @@ function scormremote_add_instance($scormremote, $mform = null) {
     $scormremote->id = $DB->insert_record('scormremote', $scormremote);
 
     // Update course module record - from now on this instance properly exists and all function may be used.
-    $DB->set_field('course_modules', 'instance', $scormremote->id, array('id' => $scormremote->coursemodule));
+    $DB->set_field('course_modules', 'instance', $scormremote->id, ['id' => $scormremote->coursemodule]);
 
     // Store the package and verify.
     if (!empty($scormremote->packagefile)) {
@@ -128,12 +128,12 @@ function scormremote_delete_instance($id) {
     $fs->delete_area_files($context->id, 'mod_scormremote', 'content');
     unset($fs);
 
-    $exists = $DB->get_record('scormremote', array('id' => $id));
+    $exists = $DB->get_record('scormremote', ['id' => $id]);
     if (!$exists) {
         return false;
     }
 
-    $DB->delete_records('scormremote', array('id' => $id));
+    $DB->delete_records('scormremote', ['id' => $id]);
 
     return true;
 }
@@ -152,7 +152,7 @@ function scormremote_delete_instance($id) {
  * @param array $options additional options affecting the file serving
  * @return bool false if file not found, does not return if found - just send the file
  */
-function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
     global $CFG, $DB, $OUTPUT, $PAGE, $USER;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -174,7 +174,6 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         // Get client by origin.
         $client = client::get_record_by_domain($origin, $clientid);
         if (!$client) {
-
             // Create event: client cannot be found.
             $expectedclient = $clientid ? client::get_clientname_by_id($clientid) : $clientid;
             $reasonname = $clientid ? 'event_unknownpair' : 'event_unknownorigin';
@@ -190,7 +189,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'courseid' => $course->id,
                     'clientname' => $expectedclient,
                   ]),
-                ]
+                ],
             ]);
             $event->trigger();
 
@@ -213,7 +212,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'fullname' => $fullname,
                     'courseid' => $course->id,
                   ]),
-                ]
+                ],
             ]);
             $event->trigger();
 
@@ -242,7 +241,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'clientname' => $client->get('name'),
                     'courseid' => $course->id,
                   ]),
-                ]
+                ],
             ]);
             $event->trigger();
 
@@ -260,7 +259,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'clientname' => $client->get('name'),
                     'courseid' => $course->id,
                   ]),
-                ]
+                ],
             ])->trigger();
             $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=unauthorized&origin=" . $origin;
             header('Content-Type: text/javascript');
@@ -272,7 +271,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         if (!$user || !$sub->contains_user($user->id)) {
             // If user or sub doesn't exist create, only when seats are higher then participant count.
             $tier = new tier($sub->get('tierid'));
-            if ( $sub->get_participant_count() >= (int) $tier->get('seats') ) {
+            if ($sub->get_participant_count() >= (int) $tier->get('seats')) {
                 // Create event: seat allocation limit reached.
                 $event = \mod_scormremote\event\remote_view_error::create([
                     'context' => $context,
@@ -286,7 +285,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                         'seatlimit' => $tier->get('seats'),
                         'origin' => $origin,
                       ]),
-                    ]
+                    ],
                 ]);
                 $event->trigger();
                 $errorurl = $CFG->wwwroot . "/mod/scormremote/error.php?error=sublimitreached&origin=" . $origin;
@@ -310,7 +309,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                     'seatcount' => $sub->get_participant_count() + 1,
                     'seatlimit' => $tier->get('seats'),
                   ]),
-                ]
+                ],
             ]);
             $event->trigger();
         }
@@ -329,7 +328,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                             'fullname' => $fullname,
                             'courseid' => $course->id,
                         ]),
-                    ]
+                    ],
                 ])->trigger();
 
                 $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=nomanualenrolmentinstance';
@@ -352,7 +351,7 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                         'cmid'     => $cm->id,
                         'fullname' => $fullname,
                     ]),
-                ]
+                ],
             ])->trigger();
             $errorurl = $CFG->wwwroot . '/mod/scormremote/error.php?error=unauthorized';
             exit($OUTPUT->render_from_template('mod_scormremote/init', ['datasource' => $errorurl]));
@@ -375,17 +374,23 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
                 'fullname' => $fullname,
                 'courseid' => $course->id,
               ]),
-            ]
+            ],
         ]);
         $event->trigger();
 
         // Send layer3.
         if (in_array('layer3.js', $args)) {
             $lifetime = 60; // 1 Minute.
-            send_file(__DIR__.'/amd/src/layer3.js', 'layer3.js?contextid='.$context->id, $lifetime,
-                0, false, false, 'text/javascript');
+            send_file(
+                __DIR__ . '/amd/src/layer3.js',
+                'layer3.js?contextid=' . $context->id,
+                $lifetime,
+                0,
+                false,
+                false,
+                'text/javascript'
+            );
         }
-
     } else if ($filearea === 'content') {
         // Prevent direct access to imsmanifest.xml files when additional security settings are enabled.
         $protectmanifest = get_config('mod_scormremote', 'protectmanifest');
@@ -398,7 +403,6 @@ function scormremote_pluginfile($course, $cm, $context, $filearea, $args, $force
         $relativepath = implode('/', $args);
         $fullpath = "/$context->id/mod_scormremote/content/0/$relativepath";
         $options['immutable'] = true; // Add immutable option, $relativepath changes on file update.
-
     } else if ($filearea === 'remote') {
         // From the manifest we get the data-source taget by identifier.
         $datasource = \moodle_url::make_pluginfile_url(

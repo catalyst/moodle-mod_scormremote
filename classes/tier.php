@@ -34,20 +34,20 @@ class tier extends \core\persistent {
      * @return array
      */
     protected static function define_properties() {
-        return array(
-            'name' => array(
+        return [
+            'name' => [
                 'type' => PARAM_TEXT,
                 'description' => 'The name of this tier.',
-            ),
-            'seats' => array(
+            ],
+            'seats' => [
                 'type' => PARAM_INT,
-                'description' => 'The amount of allocatable seats.'
-            ),
-            'description' => array(
+                'description' => 'The amount of allocatable seats.',
+            ],
+            'description' => [
                 'type' => PARAM_TEXT,
-                'description' => 'A description for this tier.'
-            ),
-        );
+                'description' => 'A description for this tier.',
+            ],
+        ];
     }
 
     /**
