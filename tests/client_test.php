@@ -69,7 +69,7 @@ class client_test extends \advanced_testcase {
      *
      * @return array[]
      */
-    public function client_validation_provider(): array {
+    public static function client_validation_provider(): array {
         return [
             'single char domain' => ['clientname' => 'Foo', 'clientdomain' => 'a',                       'ok' => true],
             'single num domain'  => ['clientname' => 'Foo', 'clientdomain' => '0',                       'ok' => true],
