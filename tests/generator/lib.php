@@ -31,7 +31,7 @@ class mod_scormremote_generator extends testing_module_generator {
      * @return stdClass
      * @throws coding_exception
      */
-    public function create_instance($record = null, array $options = null) {
+    public function create_instance($record = null, ?array $options = null) {
         global $CFG;
         require_once($CFG->dirroot . '/lib/resourcelib.php');
         return parent::create_instance($record, (array)$options);
